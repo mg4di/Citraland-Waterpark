@@ -8,15 +8,15 @@ const toastContainer = document.getElementById('toast-container');
 // Bookings data
 let bookings = [
   {id:'BH-7K4P9X',name:'Dimas Pratama',email:'dimas@email.com',ticket:'Dewasa × 1',date:'28 Des 2024',status:'confirmed',amount:'Rp52.500'},
-  {id:'BH-8A2M1Q',name:'Rina Pratiwi',email:'rina@email.com',ticket:'Keluarga × 1',date:'29 Des 2024',status:'pending',amount:'Rp152.500'},
+  {id:'BH-8A2M1Q',name:'Rina Pratiwi',email:'rina@email.com',ticket:'Keluarga × 1',date:'29 Des 2024',status:'confirmed',amount:'Rp152.500'},
   {id:'BH-5D8L3C',name:'Andi Saputra',email:'andi@email.com',ticket:'Dewasa × 2',date:'30 Des 2024',status:'completed',amount:'Rp102.500'},
   {id:'BH-9P6R2V',name:'Maya Lestari',email:'maya@email.com',ticket:'Anak × 2',date:'31 Des 2024',status:'cancelled',amount:'Rp72.500'},
   {id:'BH-3T7N5K',name:'Fajar Nugraha',email:'fajar@email.com',ticket:'Keluarga × 2',date:'02 Jan 2025',status:'confirmed',amount:'Rp302.500'},
   {id:'BH-4W8J2H',name:'Siti Nurhaliza',email:'siti@email.com',ticket:'Dewasa × 3',date:'03 Jan 2025',status:'confirmed',amount:'Rp157.500'},
-  {id:'BH-6Q1R9M',name:'Budi Santoso',email:'budi@email.com',ticket:'Anak × 1',date:'04 Jan 2025',status:'pending',amount:'Rp35.000'},
+  {id:'BH-6Q1R9M',name:'Budi Santoso',email:'budi@email.com',ticket:'Anak × 1',date:'04 Jan 2025',status:'confirmed',amount:'Rp35.000'},
   {id:'BH-2F5G7K',name:'Linda Wijaya',email:'linda@email.com',ticket:'Dewasa × 1',date:'05 Jan 2025',status:'completed',amount:'Rp52.500'},
   {id:'BH-8N3P6T',name:'Agus Hermawan',email:'agus@email.com',ticket:'Keluarga × 1',date:'06 Jan 2025',status:'confirmed',amount:'Rp152.500'},
-  {id:'BH-1X4V8B',name:'Dewi Anggraini',email:'dewi@email.com',ticket:'Dewasa × 2',date:'07 Jan 2025',status:'pending',amount:'Rp105.000'},
+  {id:'BH-1X4V8B',name:'Dewi Anggraini',email:'dewi@email.com',ticket:'Dewasa × 2',date:'07 Jan 2025',status:'confirmed',amount:'Rp105.000'},
 ];
 let bkFilter='all', bkSearch='', bkPage=1; const bkPerPage=5;
 
@@ -168,22 +168,20 @@ document.addEventListener('keydown',e=>{
 });
 
 // ===================== BOOKINGS PAGE =====================
-const statusCfg={confirmed:{label:'Confirmed',bg:'bg-emerald-50',text:'text-emerald-600'},pending:{label:'Pending',bg:'bg-amber-50',text:'text-amber-600'},completed:{label:'Completed',bg:'bg-slate-100',text:'text-slate-600'},cancelled:{label:'Cancelled',bg:'bg-rose-50',text:'text-rose-600'}};
+const statusCfg={confirmed:{label:'Confirmed',bg:'bg-emerald-50',text:'text-emerald-600'},completed:{label:'Completed',bg:'bg-slate-100',text:'text-slate-600'},cancelled:{label:'Cancelled',bg:'bg-rose-50',text:'text-rose-600'}};
 
 function getFilteredBookings(){return bookings.filter(b=>{const ms=bkFilter==='all'||b.status===bkFilter;const mq=!bkSearch||b.id.toLowerCase().includes(bkSearch)||b.name.toLowerCase().includes(bkSearch)||b.email.toLowerCase().includes(bkSearch);return ms&&mq})}
 
 function renderBookings(){
   const filtered=getFilteredBookings();
   const total=bookings.length;
-  const counts={all:total,confirmed:0,pending:0,completed:0,cancelled:0};
+  const counts={all:total,confirmed:0,completed:0,cancelled:0};
   bookings.forEach(b=>counts[b.status]++);
   document.getElementById('bk-c-all').textContent=counts.all;
   document.getElementById('bk-c-conf').textContent=counts.confirmed;
-  document.getElementById('bk-c-pend').textContent=counts.pending;
   document.getElementById('bk-c-comp').textContent=counts.completed;
   document.getElementById('bk-c-canc').textContent=counts.cancelled;
   document.getElementById('bk-stat-total').textContent=counts.all;
-  document.getElementById('bk-stat-pending').textContent=counts.pending;
   document.getElementById('bk-stat-confirmed').textContent=counts.confirmed;
   document.getElementById('bk-stat-cancelled').textContent=counts.cancelled;
 
@@ -202,9 +200,9 @@ function renderBookings(){
 
   pageData.forEach(b=>{
     const sc=statusCfg[b.status];
-    let actions='';
-    if(b.status==='pending') actions=`<button onclick="approveBk('${b.id}')" class="rounded-lg p-2 text-emerald-500 hover:bg-emerald-50"><iconify-icon icon="lucide:check"></iconify-icon></button><button onclick="rejectBk('${b.id}')" class="rounded-lg p-2 text-rose-400 hover:bg-rose-50"><iconify-icon icon="lucide:x"></iconify-icon></button>`;
-    else actions=`<button class="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" onclick="confirmDeleteBk('${b.id}')"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
+    const actions=b.status==='cancelled'
+      ? '<span class="px-2 text-xs font-semibold text-slate-400">Riwayat</span>'
+      : `<button class="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" onclick="confirmDeleteBk('${b.id}')"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
     const tr=document.createElement('tr');
     tr.className='table-row hover:bg-slate-50';
     tr.innerHTML=`<td class="px-6 py-5 font-bold text-ocean">${b.id}</td><td class="px-4 py-5"><p class="font-semibold text-slate-700">${b.name}</p><p class="mt-1 text-xs text-slate-400">${b.email}</p></td><td class="px-4 py-5 text-slate-500">${b.ticket}</td><td class="px-4 py-5 text-slate-500">${b.date}</td><td class="px-4 py-5"><span class="rounded-full ${sc.bg} px-3 py-1.5 text-xs font-bold ${sc.text}">${sc.label}</span></td><td class="px-4 py-5 text-right font-bold text-slate-800">${b.amount}</td><td class="px-6 py-5"><div class="flex justify-center gap-1">${actions}</div></td>`;
@@ -222,9 +220,16 @@ function renderBookings(){
   }
 }
 
-window.approveBk=function(id){const b=bookings.find(x=>x.id===id);if(b){b.status='confirmed';renderBookings();showToast(`Booking ${id} disetujui!`)}};
-window.rejectBk=function(id){const b=bookings.find(x=>x.id===id);if(b){b.status='cancelled';renderBookings();showToast(`Booking ${id} ditolak`,'error')}};
-window.confirmDeleteBk=function(id){deleteTarget={type:'booking',id};document.getElementById('delete-message').innerHTML=`Booking <b>${id}</b> akan dihapus permanen.`;document.getElementById('delete-modal').classList.add('show')};
+window.confirmDeleteBk=function(id){
+  const booking=bookings.find(item=>item.id===id);
+  if(booking?.status==='cancelled'){
+    showToast('Booking Cancelled disimpan sebagai riwayat dan tidak dapat dihapus.','info');
+    return;
+  }
+  deleteTarget={type:'booking',id};
+  document.getElementById('delete-message').innerHTML=`Booking <b>${id}</b> akan dihapus permanen.`;
+  document.getElementById('delete-modal').classList.add('show');
+};
 
 document.querySelectorAll('.bk-filter').forEach(btn=>{btn.addEventListener('click',()=>{bkFilter=btn.dataset.status;bkPage=1;document.querySelectorAll('.bk-filter').forEach(x=>{x.className='bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean'});btn.className='bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white';renderBookings()})});
 document.getElementById('bk-search').addEventListener('input',e=>{bkSearch=e.target.value.toLowerCase();bkPage=1;renderBookings()});
@@ -463,7 +468,16 @@ document.getElementById('delete-cancel-btn').addEventListener('click',()=>{docum
 document.getElementById('delete-modal').addEventListener('click',e=>{if(e.target.id==='delete-modal'){document.getElementById('delete-modal').classList.remove('show');deleteTarget=null}});
 document.getElementById('delete-confirm-btn').addEventListener('click',()=>{
   if(!deleteTarget)return;
-  if(deleteTarget.type==='booking'){const b=bookings.find(x=>x.id===deleteTarget.id);bookings=bookings.filter(x=>x.id!==deleteTarget.id);renderBookings();showToast(`Booking ${deleteTarget.id} dihapus`,'error')}
+  if(deleteTarget.type==='booking'){
+    const booking=bookings.find(item=>item.id===deleteTarget.id);
+    if(booking?.status==='cancelled'){
+      showToast('Booking Cancelled disimpan sebagai riwayat dan tidak dapat dihapus.','info');
+    }else{
+      bookings=bookings.filter(item=>item.id!==deleteTarget.id);
+      renderBookings();
+      showToast(`Booking ${deleteTarget.id} dihapus`,'error');
+    }
+  }
   else if(deleteTarget.type==='facility'){const f=facilities.find(x=>x.id===deleteTarget.id);facilities=facilities.filter(x=>x.id!==deleteTarget.id);renderFacilities();showToast(`"${f?.name}" dihapus`,'error')}
   else if(deleteTarget.type==='promo'){const p=promotions.find(x=>x.id===deleteTarget.id);promotions=promotions.filter(x=>x.id!==deleteTarget.id);renderPromotions();showToast(`"${p?.code}" dihapus`,'error')}
   else if(deleteTarget.type==='gallery'){const g=galleryItems.find(x=>x.id===deleteTarget.id);galleryItems=galleryItems.filter(x=>x.id!==deleteTarget.id);renderGallery();showToast(`"${g?.title}" dihapus`,'error')}
