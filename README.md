@@ -1,20 +1,52 @@
-# Bluehaven frontend
+# Citraland Waterpark Denpasar
 
-This is a Vue 3, Vue Router, and Vite frontend:
+Frontend website dan demo pemesanan tiket untuk Citraland Waterpark Denpasar. Aplikasi dibuat dengan Vue 3, Vue Router, Vite, dan Tailwind CSS.
 
-- `/` — the public resort site and ticket-booking demo.
-- `/admin` — the admin demo login page; click **Masuk ke Admin** to continue without credentials.
-- `/admin/dashboard` — the admin dashboard demo (requires entering through the admin login page).
+## Menjalankan aplikasi
 
-Run `npm install`, then `npm run dev`. Both routes are served by the single `index.html` application entry. Run `npm run build` to create the production build in `dist/`.
+Pastikan Node.js dan npm sudah terpasang, lalu jalankan:
 
-The page data and interactions remain frontend-only and are not connected to a backend.
+```sh
+npm install
+npm run dev
+```
 
-## Frontend structure
+Vite akan menampilkan alamat lokal untuk membuka aplikasi. Perintah lain yang tersedia:
 
-- `src/components/user/` contains focused home sections: facilities, ticket pricing, and the gallery carousel.
-- `src/components/admin/` contains the admin shell components, including its sidebar and header.
-- `src/UserPage.vue` and `src/AdminPage.vue` compose the page-level layouts.
-- `src/legacy/` contains existing DOM-driven interactions that have not yet been migrated to Vue state.
+```sh
+npm run build
+npm run preview
+```
 
-New UI sections should be implemented as focused Vue single-file components and composed by their page. Keep page-specific state and interactions close to the component that owns them; migrate legacy behavior incrementally so existing booking and admin flows remain intact.
+`npm run build` membuat versi produksi di folder `dist/`. `npm run preview` menjalankan pratinjau build tersebut.
+
+## Halaman
+
+- `/` — halaman pengunjung berisi informasi waterpark, fasilitas, galeri, ulasan, harga tiket, dan alur pemesanan.
+- `/admin` — halaman masuk demo admin.
+- `/admin/dashboard` — dashboard demo admin. Akses melalui halaman masuk admin.
+
+Rute yang tidak dikenal akan diarahkan ke halaman utama. Kedua area menggunakan satu entri aplikasi melalui `index.html`.
+
+## Tiket dan tanggal kunjungan
+
+Tersedia dua jenis tiket:
+
+- **Weekdays:** Rp35.000 per orang, untuk kunjungan Selasa–Jumat.
+- **Weekend:** Rp50.000 per orang, untuk kunjungan Sabtu–Minggu.
+
+Hari Senin libur dan tidak dapat dipilih. Anak dengan tinggi badan di bawah 85 cm dapat masuk gratis. Pemesanan merupakan simulasi frontend dan belum memproses pembayaran sungguhan.
+
+## Struktur proyek
+
+- `src/main.js` — inisialisasi Vue dan konfigurasi rute.
+- `src/UserPage.vue` — komposisi halaman pengunjung.
+- `src/AdminLogin.vue` dan `src/AdminPage.vue` — halaman masuk dan dashboard demo admin.
+- `src/components/user/` — komponen antarmuka pengunjung, seperti fasilitas, galeri, harga tiket, pilihan tiket, dan footer.
+- `src/components/admin/` — komponen kerangka antarmuka admin.
+- `src/legacy/` — interaksi DOM lama untuk alur pemesanan dan dashboard yang belum dimigrasikan ke state Vue.
+- `src/styles.css` — gaya global dan animasi.
+
+## Batasan demo
+
+Aplikasi ini hanya frontend dan belum terhubung ke backend. Data pemesanan, pembayaran, dan dashboard admin bukan data transaksi produksi.
