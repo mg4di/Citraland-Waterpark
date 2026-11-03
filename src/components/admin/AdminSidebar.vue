@@ -3,7 +3,7 @@
     <div class="flex h-20 items-center border-b border-slate-100 px-5">
       <a href="#dashboard" class="brand-link flex items-center gap-3">
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ocean text-white shadow-sm"><iconify-icon icon="lucide:waves" class="text-xl"></iconify-icon></span>
-        <span class="brand-label font-display text-sm font-extrabold tracking-tight text-slate-900">BLUEHAVEN<span class="text-aqua">.</span><small class="mt-0.5 block text-[10px] font-semibold uppercase tracking-[.18em] text-slate-400">Admin portal</small></span>
+        <span class="brand-label font-display text-sm font-extrabold tracking-tight text-slate-900">CITRALAND<span class="text-aqua">.</span><small class="mt-0.5 block text-[10px] font-semibold uppercase tracking-[.18em] text-slate-400">Waterpark admin</small></span>
       </a>
     </div>
     <nav class="flex-1 space-y-1 px-3 py-6 overflow-y-auto">

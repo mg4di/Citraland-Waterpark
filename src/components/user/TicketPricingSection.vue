@@ -3,23 +3,17 @@ const window = globalThis.window
 
 const tickets = [
   {
-    name: 'Tiket Anak',
+    name: 'Weekdays',
     price: '35',
-    age: 'Usia 3–12 tahun',
-    features: ['Akses kolam anak & playground', 'Berlaku 1 hari'],
+    age: 'Selasa–Jumat',
+    features: ['Rp35.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
   },
   {
-    name: 'Tiket Dewasa',
+    name: 'Weekend',
     price: '50',
-    age: 'Usia 13 tahun ke atas',
-    features: ['Akses seluruh area kolam', 'Gratis 1 minuman segar'],
+    age: 'Sabtu–Minggu',
+    features: ['Rp50.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
     featured: true,
-  },
-  {
-    name: 'Tiket Keluarga',
-    price: '150',
-    age: '2 dewasa + 2 anak',
-    features: ['Akses penuh untuk 4 orang', 'Hemat hingga 20%'],
   },
 ]
 </script>
@@ -31,10 +25,10 @@ const tickets = [
       <div class="scroll-reveal text-center">
         <p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Pilih tiketmu</p>
         <h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Liburan seru dimulai di sini</h2>
-        <p class="mx-auto mt-4 max-w-xl text-slate-500 leading-7">Pesan online lebih praktis, tanpa antre, dan langsung dapatkan e-ticket di email.</p>
+        <p class="mx-auto mt-4 max-w-xl text-slate-500 leading-7">Pilih harga sesuai hari kunjungan. Anak dengan tinggi badan di bawah 85 cm dapat masuk gratis.</p>
       </div>
 
-      <div class="mt-12 grid gap-6 lg:grid-cols-3">
+      <div class="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
         <article
           v-for="(ticket, index) in tickets"
           :key="ticket.name"

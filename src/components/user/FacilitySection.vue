@@ -3,30 +3,30 @@ const facilities = [
   {
     icon: 'lucide:waves',
     iconColor: 'text-ocean',
-    cardColor: 'bg-lagoon',
-    title: 'Kolam Utama',
-    description: 'Air jernih dengan area dewasa dan kedalaman yang nyaman.',
+    cardColor: 'bg-slate-50',
+    title: 'Kolam Ombak',
+    description: 'Rasakan suasana bermain air dengan ombak buatan.',
   },
   {
-    icon: 'lucide:castle',
+    icon: 'lucide:ship',
     iconColor: 'text-blue-500',
     cardColor: 'bg-slate-50',
-    title: 'Area Bermain Anak',
-    description: 'Wahana air aman dan menyenangkan untuk si kecil.',
+    title: 'Area Bajak Laut',
+    description: 'Area bermain air bertema bajak laut untuk serunya liburan keluarga.',
   },
   {
-    icon: 'lucide:utensils',
+    icon: 'lucide:move-horizontal',
     iconColor: 'text-orange-500',
     cardColor: 'bg-slate-50',
-    title: 'Restoran',
-    description: 'Hidangan lezat dan minuman segar untuk mengisi energi.',
+    title: 'Kolam Arus',
+    description: 'Santai menyusuri kolam arus dan menikmati suasana waterpark.',
   },
   {
-    icon: 'lucide:car-front',
+    icon: 'lucide:life-buoy',
     iconColor: 'text-emerald-500',
     cardColor: 'bg-slate-50',
-    title: 'Area Parkir',
-    description: 'Parkir luas, aman, dan mudah diakses dari pintu utama.',
+    title: 'Wahana Seluncur',
+    description: 'Pilihan seluncuran air untuk menambah keseruan bermain.',
   },
 ]
 </script>
@@ -34,8 +34,8 @@ const facilities = [
 <template>
   <section id="fasilitas" class="mx-auto max-w-7xl px-6 py-24 lg:px-10">
     <div class="scroll-reveal flex flex-col justify-between gap-5 md:flex-row md:items-end">
-      <div><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Semua untuk keseruanmu</p><h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Fasilitas yang bikin betah</h2></div>
-      <p class="max-w-md text-slate-500 leading-7">Dirancang untuk menghadirkan pengalaman liburan yang nyaman, aman, dan seru untuk seluruh keluarga.</p>
+      <div><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Wahana Citraland Waterpark</p><h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Serunya bermain air di Bali</h2></div>
+      <p class="max-w-md text-slate-500 leading-7">Nikmati wahana air bertema bajak laut dan pilihan kolam untuk bersenang-senang bersama keluarga di Denpasar.</p>
     </div>
     <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <article

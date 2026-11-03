@@ -7,16 +7,16 @@ const toastContainer = document.getElementById('toast-container');
 
 // Bookings data
 let bookings = [
-  {id:'BH-7K4P9X',name:'Dimas Pratama',email:'dimas@email.com',ticket:'Dewasa × 1',date:'28 Des 2024',status:'confirmed',amount:'Rp52.500'},
-  {id:'BH-8A2M1Q',name:'Rina Pratiwi',email:'rina@email.com',ticket:'Keluarga × 1',date:'29 Des 2024',status:'confirmed',amount:'Rp152.500'},
-  {id:'BH-5D8L3C',name:'Andi Saputra',email:'andi@email.com',ticket:'Dewasa × 2',date:'30 Des 2024',status:'completed',amount:'Rp102.500'},
-  {id:'BH-9P6R2V',name:'Maya Lestari',email:'maya@email.com',ticket:'Anak × 2',date:'31 Des 2024',status:'cancelled',amount:'Rp72.500'},
-  {id:'BH-3T7N5K',name:'Fajar Nugraha',email:'fajar@email.com',ticket:'Keluarga × 2',date:'02 Jan 2025',status:'confirmed',amount:'Rp302.500'},
-  {id:'BH-4W8J2H',name:'Siti Nurhaliza',email:'siti@email.com',ticket:'Dewasa × 3',date:'03 Jan 2025',status:'confirmed',amount:'Rp157.500'},
-  {id:'BH-6Q1R9M',name:'Budi Santoso',email:'budi@email.com',ticket:'Anak × 1',date:'04 Jan 2025',status:'confirmed',amount:'Rp35.000'},
-  {id:'BH-2F5G7K',name:'Linda Wijaya',email:'linda@email.com',ticket:'Dewasa × 1',date:'05 Jan 2025',status:'completed',amount:'Rp52.500'},
-  {id:'BH-8N3P6T',name:'Agus Hermawan',email:'agus@email.com',ticket:'Keluarga × 1',date:'06 Jan 2025',status:'confirmed',amount:'Rp152.500'},
-  {id:'BH-1X4V8B',name:'Dewi Anggraini',email:'dewi@email.com',ticket:'Dewasa × 2',date:'07 Jan 2025',status:'confirmed',amount:'Rp105.000'},
+  {id:'BH-7K4P9X',name:'Dimas Pratama',email:'dimas@email.com',ticket:'Weekend × 1',date:'28 Des 2024',status:'confirmed',amount:'Rp50.000'},
+  {id:'BH-8A2M1Q',name:'Rina Pratiwi',email:'rina@email.com',ticket:'Weekend × 2',date:'29 Des 2024',status:'confirmed',amount:'Rp100.000'},
+  {id:'BH-5D8L3C',name:'Andi Saputra',email:'andi@email.com',ticket:'Weekdays × 2',date:'31 Des 2024',status:'completed',amount:'Rp70.000'},
+  {id:'BH-9P6R2V',name:'Maya Lestari',email:'maya@email.com',ticket:'Weekdays × 2',date:'31 Des 2024',status:'cancelled',amount:'Rp70.000'},
+  {id:'BH-3T7N5K',name:'Fajar Nugraha',email:'fajar@email.com',ticket:'Weekdays × 2',date:'02 Jan 2025',status:'confirmed',amount:'Rp70.000'},
+  {id:'BH-4W8J2H',name:'Siti Nurhaliza',email:'siti@email.com',ticket:'Weekdays × 3',date:'03 Jan 2025',status:'confirmed',amount:'Rp105.000'},
+  {id:'BH-6Q1R9M',name:'Budi Santoso',email:'budi@email.com',ticket:'Weekend × 1',date:'04 Jan 2025',status:'confirmed',amount:'Rp50.000'},
+  {id:'BH-2F5G7K',name:'Linda Wijaya',email:'linda@email.com',ticket:'Weekend × 1',date:'05 Jan 2025',status:'completed',amount:'Rp50.000'},
+  {id:'BH-8N3P6T',name:'Agus Hermawan',email:'agus@email.com',ticket:'Weekdays × 1',date:'07 Jan 2025',status:'confirmed',amount:'Rp35.000'},
+  {id:'BH-1X4V8B',name:'Dewi Anggraini',email:'dewi@email.com',ticket:'Weekdays × 2',date:'07 Jan 2025',status:'confirmed',amount:'Rp70.000'},
 ];
 let bkFilter='all', bkSearch='', bkPage=1; const bkPerPage=5;
 
@@ -38,35 +38,33 @@ let usrSearch='', usrStatusFilter='all', usrSelected=new Set(), editingUserIdx=n
 
 // Facilities data
 let facilities = [
-  {id:1,name:'Kolam Utama',desc:'Air jernih dengan area dewasa.',icon:'lucide:waves',status:'Active'},
-  {id:2,name:'Area Bermain Anak',desc:'Wahana air aman untuk si kecil.',icon:'lucide:castle',status:'Active'},
-  {id:3,name:'Restoran',desc:'Hidangan lezat dan minuman segar.',icon:'lucide:utensils',status:'Inactive'},
-  {id:4,name:'Gazebo VIP',desc:'Tempat istirahat eksklusif.',icon:'lucide:tent',status:'Active'},
-  {id:5,name:'Musholla',desc:'Tempat ibadah bersih dan nyaman.',icon:'lucide:heart',status:'Active'},
+  {id:1,name:'Kolam Ombak',desc:'Rasakan suasana bermain air dengan ombak buatan.',icon:'lucide:waves',status:'Active'},
+  {id:2,name:'Area Bajak Laut',desc:'Area bermain air bertema bajak laut untuk keluarga.',icon:'lucide:ship',status:'Active'},
+  {id:3,name:'Kolam Arus',desc:'Kolam arus untuk bersantai dan bermain air.',icon:'lucide:move-horizontal',status:'Active'},
+  {id:4,name:'Wahana Seluncur',desc:'Pilihan seluncuran air untuk menambah keseruan.',icon:'lucide:life-buoy',status:'Active'},
 ];
-let editingFacId=null, nextFacId=6;
+let editingFacId=null, nextFacId=5;
 
 // Promotions data
 let promotions = [
-  {id:1,code:'BLUEHAVEN10',discount:'10% off',period:'01–31 Des 2024',active:true},
+  {id:1,code:'CITRALAND10',discount:'10% off',period:'01–31 Des 2024',active:true},
   {id:2,code:'FAMILY20',discount:'20% off',period:'15–25 Des 2024',active:true},
 ];
 let nextPromoId=3;
 
 // Gallery data
 let galleryItems = [
-  {id:1,title:'Kolam utama',order:1,status:'Published',url:'https://images.unsplash.com/photo-1654756306479-c0bc0011f7a4?auto=format&fit=crop&w=800&q=80',color:'#00BCD4'},
-  {id:2,title:'Family splash',order:2,status:'Published',url:'https://images.unsplash.com/photo-1706843540922-5682f3ad5b98?auto=format&fit=crop&w=800&q=80',color:'#0097A7'},
-  {id:3,title:'Wahana seluncur',order:3,status:'Draft',url:'https://images.unsplash.com/photo-1701361650313-9b20b1d76820?auto=format&fit=crop&w=800&q=80',color:'#26C6DA'},
-  {id:4,title:'Bermain bersama',order:4,status:'Published',url:'https://images.unsplash.com/photo-1706843540931-64db8ea7abad?auto=format&fit=crop&w=800&q=80',color:'#00838F'},
+  {id:1,title:'Kolam bajak laut',order:1,status:'Published',url:'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sc6iYceeZF306CAScPqQZGGRo1-3Q8HBrSb32GOFWPtA9dQTfymZ0OrYndGYARdgsYRnjSV1KCjSOtSnI4Z17mycHGyE4zxkSpfbz6Y3wFnLnp-KrW3IoZWSkjR0vROGGnPiaaPA=w1200-h800-k-no',color:'#00BCD4'},
+  {id:2,title:'Seluncuran anak',order:2,status:'Published',url:'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9QMdguxEu0WftzZVqJbPufprKkEzTdEPrGscjaHSvkaja_IcIx4_1iIx1GjSSVKR42-CPeNpGc_Q1CYZST8tmsOdK8PLSS5_MLw88liSj8oICFS9MRV4hByt7-VWynl9XXEbYCq9g=w1200-h1200-k-no',color:'#0097A7'},
+  {id:3,title:'Pintu masuk bajak laut',order:3,status:'Published',url:'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Tn5GEWcUGMO_8pjjyZBAr_CyH6XyUhHSF2Ff6ZFPJir8ifmlkd9xBb1RQafJhOigAoNre2Kn7MLMlz9zj3XqwpoQALtwCDYn4cD8qsqnTkjGKu973xARlyslm5tmAMr5yp_AY=w1200-h1600-k-no',color:'#26C6DA'},
+  {id:4,title:'Dekorasi bajak laut',order:4,status:'Published',url:'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9ReyG69OKZQcbE29PNRlHs6xK6uQuyqIwPoYFkWWJf6fM805NmjUv5e7U0wl5ZvjdJQv3BumMqwUVAxqYJj7Tfxf78eRZICXEupfLxw8qhGo2Ym4LWFdtoB4X53KaFsEPU2zeiF=w1200-h1600-k-no',color:'#00838F'},
 ];
 let nextGalleryId=5;
 
 // Pricing data
 let pricing = [
-  {id:1,name:'Tiket Anak',sub:'Usia 3–12 tahun',icon:'lucide:accessibility',price:35000,desc:'Akses kolam anak & playground.',featured:false},
-  {id:2,name:'Tiket Dewasa',sub:'13 tahun ke atas',icon:'lucide:user-round',price:50000,desc:'Akses seluruh area kolam & gratis minuman.',featured:true},
-  {id:3,name:'Tiket Keluarga',sub:'2 dewasa + 2 anak',icon:'lucide:users-round',price:150000,desc:'Paket hemat untuk 2 dewasa dan 2 anak.',featured:false},
+  {id:1,name:'Weekdays',sub:'Selasa–Jumat',icon:'lucide:calendar-days',price:35000,desc:'Rp35.000 per orang. Anak di bawah 85 cm gratis.',featured:false},
+  {id:2,name:'Weekend',sub:'Sabtu–Minggu',icon:'lucide:calendar-heart',price:50000,desc:'Rp50.000 per orang. Anak di bawah 85 cm gratis.',featured:true},
 ];
 
 let deleteTarget=null;

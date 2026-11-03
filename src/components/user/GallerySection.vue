@@ -3,29 +3,24 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const gallery = [
   {
-    src: 'https://images.unsplash.com/photo-1654756306479-c0bc0011f7a4?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Pemandangan kolam renang dikelilingi pohon palem',
-    caption: 'Pemandangan kolam Bluehaven',
+    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sc6iYceeZF306CAScPqQZGGRo1-3Q8HBrSb32GOFWPtA9dQTfymZ0OrYndGYARdgsYRnjSV1KCjSOtSnI4Z17mycHGyE4zxkSpfbz6Y3wFnLnp-KrW3IoZWSkjR0vROGGnPiaaPA=w1200-h800-k-no',
+    alt: 'Kolam bermain dan kapal bajak laut di Citraland Waterpark, foto Google Maps',
+    caption: 'Kolam bermain bertema bajak laut',
   },
   {
-    src: 'https://images.unsplash.com/photo-1706843540922-5682f3ad5b98?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Anak bermain air di wahana seluncur',
-    caption: 'Serunya bermain di wahana air',
+    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9QMdguxEu0WftzZVqJbPufprKkEzTdEPrGscjaHSvkaja_IcIx4_1iIx1GjSSVKR42-CPeNpGc_Q1CYZST8tmsOdK8PLSS5_MLw88liSj8oICFS9MRV4hByt7-VWynl9XXEbYCq9g=w1200-h1200-k-no',
+    alt: 'Seluncuran merah dan area bermain anak di Citraland Waterpark, foto Google Maps',
+    caption: 'Area seluncuran air anak',
   },
   {
-    src: 'https://images.unsplash.com/photo-1701361650313-9b20b1d76820?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Wahana seluncur air yang berakhir di kolam',
-    caption: 'Wahana seluncur yang seru',
+    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Tn5GEWcUGMO_8pjjyZBAr_CyH6XyUhHSF2Ff6ZFPJir8ifmlkd9xBb1RQafJhOigAoNre2Kn7MLMlz9zj3XqwpoQALtwCDYn4cD8qsqnTkjGKu973xARlyslm5tmAMr5yp_AY=w1200-h1600-k-no',
+    alt: 'Pintu masuk bertema bajak laut Citraland Waterpark Denpasar, foto Google Maps',
+    caption: 'Pintu masuk Citraland Waterpark',
   },
   {
-    src: 'https://images.unsplash.com/photo-1706843540931-64db8ea7abad?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Ibu dan anak bermain bersama di atas pelampung kolam',
-    caption: 'Momen bermain bersama keluarga',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1592484806287-7bc9c8af5405?auto=format&fit=crop&w=1600&q=85',
-    alt: 'Dua anak bermain di kolam renang',
-    caption: 'Bermain air bersama teman',
+    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9ReyG69OKZQcbE29PNRlHs6xK6uQuyqIwPoYFkWWJf6fM805NmjUv5e7U0wl5ZvjdJQv3BumMqwUVAxqYJj7Tfxf78eRZICXEupfLxw8qhGo2Ym4LWFdtoB4X53KaFsEPU2zeiF=w1200-h1600-k-no',
+    alt: 'Dekorasi patung bajak laut di Citraland Waterpark, foto Google Maps',
+    caption: 'Dekorasi bajak laut di area waterpark',
   },
 ]
 
@@ -86,15 +81,24 @@ onBeforeUnmount(() => {
 <template>
   <section id="galeri" class="mx-auto max-w-7xl px-6 py-24 lg:px-10">
     <div class="scroll-reveal flex items-end justify-between">
-      <div><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Cerita di Bluehaven</p><h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Momen yang tak terlupakan</h2></div>
+      <div><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Galeri Citraland Waterpark</p><h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">Suasana di Denpasar</h2></div>
     </div>
+    <p class="mt-3 text-xs text-slate-400">
+      Foto dari Google Maps.
+      <a
+        href="https://goo.gl/maps/SkPFYkq98TpqHFzL9"
+        target="_blank"
+        rel="noreferrer"
+        class="font-semibold text-ocean underline underline-offset-2"
+      >Lihat sumber foto</a>
+    </p>
     <div class="mt-10">
       <div
         id="gallery-track"
         ref="track"
         class="gallery-track flex h-[300px] snap-x snap-mandatory gap-4 overflow-x-auto rounded-3xl scroll-smooth sm:h-[420px] lg:h-[500px]"
         role="region"
-        aria-label="Galeri foto Bluehaven"
+        aria-label="Galeri foto Citraland Waterpark"
         tabindex="0"
         @keydown="onKeydown"
       >

@@ -25,9 +25,9 @@ function enterAdmin() {
             <a href="/" class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-cyan-100 transition hover:bg-white/25">
               <iconify-icon icon="lucide:waves" class="text-3xl"></iconify-icon>
             </a>
-            <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">Bluehaven Admin Portal</p>
-            <h1 class="mt-4 max-w-sm font-display text-4xl font-extrabold leading-tight tracking-tight">Kelola pengalaman Bluehaven.</h1>
-            <p class="mt-6 max-w-sm leading-7 text-white/75">Pantau aktivitas, kelola pemesanan, dan atur informasi resort dari satu dashboard.</p>
+            <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">Citraland Waterpark Admin</p>
+            <h1 class="mt-4 max-w-sm font-display text-4xl font-extrabold leading-tight tracking-tight">Kelola Citraland Waterpark.</h1>
+            <p class="mt-6 max-w-sm leading-7 text-white/75">Pantau aktivitas, kelola pemesanan, dan atur informasi waterpark dari satu dashboard.</p>
           </div>
           <div class="relative z-10 mt-14 space-y-4 animate-slide-in-left delay-300">
             <div class="feature-card rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
@@ -39,7 +39,7 @@ function enterAdmin() {
             <div class="feature-card rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
               <div class="flex items-start gap-4">
                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-200/20 text-cyan-100"><iconify-icon icon="lucide:chart-no-axes-combined" class="text-xl"></iconify-icon></span>
-                <div><p class="font-bold">Pantau performa</p><p class="mt-1 text-sm leading-6 text-white/65">Akses ringkasan dan laporan Bluehaven.</p></div>
+                <div><p class="font-bold">Pantau performa</p><p class="mt-1 text-sm leading-6 text-white/65">Akses ringkasan dan laporan waterpark.</p></div>
               </div>
             </div>
           </div>

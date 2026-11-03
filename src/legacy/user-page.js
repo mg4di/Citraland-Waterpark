@@ -2,9 +2,9 @@ export function initializeUserPage() {
 
     // ===== APP STATE =====
     const appState = {
-      quantities: { child: 0, adult: 0, family: 0 },
-      prices: { child: 35000, adult: 50000, family: 150000 },
-      names: { child: 'Tiket Anak', adult: 'Tiket Dewasa', family: 'Tiket Keluarga' },
+      quantities: { weekday: 0, weekend: 0 },
+      prices: { weekday: 35000, weekend: 50000 },
+      names: { weekday: 'Tiket Weekdays', weekend: 'Tiket Weekend' },
       promoApplied: false,
       booking: { name: '', email: '', phone: '', date: '' },
       currentPage: 'home'
@@ -33,7 +33,10 @@ export function initializeUserPage() {
 
         // Page-specific init
         if (page === 'confirmation') setTimeout(createConfetti, 400);
-        if (page === 'booking-details') updateBookingSummary();
+        if (page === 'booking-details') {
+          initBookingCalendar();
+          updateBookingSummary();
+        }
         if (page === 'payment') updatePaymentSummary();
         if (page === 'confirmation') updateConfirmationDetails();
         if (page === 'home') initScrollReveal();
@@ -84,6 +87,11 @@ export function initializeUserPage() {
     // ===== QUANTITY CONTROLS (Select Ticket Page) =====
     function updateQty(type, delta) {
       const max = 10;
+      const otherType = type === 'weekday' ? 'weekend' : 'weekday';
+      if (delta > 0 && appState.quantities[otherType] > 0) {
+        showToast('Pilih satu jenis tiket sesuai tanggal kunjungan.', 'error');
+        return;
+      }
       appState.quantities[type] = Math.max(0, Math.min(max, appState.quantities[type] + delta));
       document.getElementById(type + '-qty').value = appState.quantities[type];
       updateSummaryBar();
@@ -93,8 +101,8 @@ export function initializeUserPage() {
     function formatRupiah(n) { return 'Rp' + n.toLocaleString('id-ID'); }
 
     function updateSummaryBar() {
-      const total = appState.quantities.child + appState.quantities.adult + appState.quantities.family;
-      const price = (appState.quantities.child * appState.prices.child) + (appState.quantities.adult * appState.prices.adult) + (appState.quantities.family * appState.prices.family);
+      const total = appState.quantities.weekday + appState.quantities.weekend;
+      const price = (appState.quantities.weekday * appState.prices.weekday) + (appState.quantities.weekend * appState.prices.weekend);
       const bar = document.getElementById('summaryBar');
       document.getElementById('summaryCount').textContent = total + ' tiket';
       document.getElementById('summaryPrice').textContent = formatRupiah(price);
@@ -102,6 +110,9 @@ export function initializeUserPage() {
     }
 
     function goToBooking(type) {
+      const otherType = type === 'weekday' ? 'weekend' : 'weekday';
+      appState.quantities[otherType] = 0;
+      document.getElementById(otherType + '-qty').value = 0;
       if (appState.quantities[type] === 0) {
         appState.quantities[type] = 1;
         document.getElementById(type + '-qty').value = 1;
@@ -111,18 +122,134 @@ export function initializeUserPage() {
     }
 
     function goToBookingFromSummary() {
-      const total = appState.quantities.child + appState.quantities.adult + appState.quantities.family;
+      const total = appState.quantities.weekday + appState.quantities.weekend;
       if (total === 0) { showToast('Pilih minimal 1 tiket','error'); return; }
       navigateTo('booking-details');
     }
 
     // ===== BOOKING DETAILS =====
+    let displayedCalendarMonth = new Date();
+
+    function formatDateValue(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getSelectedTicketType() {
+      return Object.keys(appState.quantities).find(type => appState.quantities[type] > 0);
+    }
+
+    function isDateAvailableForTicket(date, type) {
+      const day = date.getDay();
+      if (day === 1) return false;
+      return type === 'weekday' ? day >= 2 && day <= 5 : day === 0 || day === 6;
+    }
+
+    function renderBookingCalendar() {
+      const calendarDays = document.getElementById('bf-calendar-days');
+      const monthLabel = document.getElementById('bf-calendar-month');
+      const previousButton = document.getElementById('bf-calendar-prev');
+      const dateInput = document.getElementById('bf-date');
+      if (!calendarDays || !monthLabel || !dateInput) return;
+
+      const selectedType = getSelectedTicketType();
+      const firstOfMonth = new Date(displayedCalendarMonth.getFullYear(), displayedCalendarMonth.getMonth(), 1);
+      const daysInMonth = new Date(displayedCalendarMonth.getFullYear(), displayedCalendarMonth.getMonth() + 1, 0).getDate();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      monthLabel.textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(firstOfMonth);
+      if (previousButton) {
+        previousButton.disabled = firstOfMonth.getFullYear() === today.getFullYear()
+          && firstOfMonth.getMonth() === today.getMonth();
+      }
+
+      calendarDays.replaceChildren();
+      for (let blank = 0; blank < firstOfMonth.getDay(); blank += 1) {
+        const spacer = document.createElement('span');
+        spacer.setAttribute('aria-hidden', 'true');
+        calendarDays.appendChild(spacer);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const date = new Date(firstOfMonth.getFullYear(), firstOfMonth.getMonth(), day);
+        const dateValue = formatDateValue(date);
+        const isSelected = dateValue === dateInput.value;
+        const isAllowed = Boolean(selectedType && date >= today && isDateAvailableForTicket(date, selectedType));
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = String(day);
+        button.dataset.date = dateValue;
+        button.disabled = !isAllowed;
+        button.setAttribute('aria-label', formatDateID(dateValue));
+        if (isSelected) button.setAttribute('aria-pressed', 'true');
+        button.className = isSelected
+          ? 'mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-ocean text-sm font-bold text-white'
+          : isAllowed
+            ? 'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-ocean focus-visible:outline focus-visible:outline-2 focus-visible:outline-ocean'
+            : 'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm text-slate-300 disabled:cursor-not-allowed';
+        calendarDays.appendChild(button);
+      }
+    }
+
+    function initBookingCalendar() {
+      const dateInput = document.getElementById('bf-date');
+      const calendarDays = document.getElementById('bf-calendar-days');
+      const monthLabel = document.getElementById('bf-calendar-month');
+      const dateLabel = document.getElementById('bf-date-label');
+      const previousButton = document.getElementById('bf-calendar-prev');
+      const nextButton = document.getElementById('bf-calendar-next');
+      if (!dateInput || !calendarDays || !monthLabel || !dateLabel || !previousButton || !nextButton) return;
+
+      if (!calendarDays.dataset.initialized) {
+        calendarDays.addEventListener('click', event => {
+          const button = event.target.closest('button[data-date]');
+          if (!button || button.disabled) return;
+          dateInput.value = button.dataset.date;
+          dateLabel.textContent = formatDateID(dateInput.value);
+          dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+          renderBookingCalendar();
+        });
+        previousButton.addEventListener('click', () => {
+          const today = new Date();
+          const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const previousMonth = new Date(displayedCalendarMonth.getFullYear(), displayedCalendarMonth.getMonth() - 1, 1);
+          if (previousMonth >= currentMonth) {
+            displayedCalendarMonth = previousMonth;
+            renderBookingCalendar();
+          }
+        });
+        nextButton.addEventListener('click', () => {
+          displayedCalendarMonth = new Date(displayedCalendarMonth.getFullYear(), displayedCalendarMonth.getMonth() + 1, 1);
+          renderBookingCalendar();
+        });
+        calendarDays.dataset.initialized = 'true';
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedType = getSelectedTicketType();
+      let selectedDate = dateInput.value ? new Date(`${dateInput.value}T00:00:00`) : null;
+      if (!selectedDate || !selectedType || selectedDate < today || !isDateAvailableForTicket(selectedDate, selectedType)) {
+        selectedDate = new Date(today);
+        selectedDate.setDate(selectedDate.getDate() + 7);
+        while (selectedType && !isDateAvailableForTicket(selectedDate, selectedType)) {
+          selectedDate.setDate(selectedDate.getDate() + 1);
+        }
+      }
+
+      dateInput.min = formatDateValue(today);
+      dateInput.value = selectedType ? formatDateValue(selectedDate) : '';
+      dateLabel.textContent = dateInput.value ? formatDateID(dateInput.value) : 'Pilih tiket terlebih dahulu';
+      displayedCalendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+      renderBookingCalendar();
+    }
+
     function initBookingPage() {
       // Set default date
       const dateInput = document.getElementById('bf-date');
-      const d = new Date(); d.setDate(d.getDate() + 7);
-      dateInput.value = d.toISOString().split('T')[0];
-      dateInput.min = new Date().toISOString().split('T')[0];
+      initBookingCalendar();
       dateInput.addEventListener('change', updateBookingSummary);
       updateBookingSummary();
 
@@ -135,7 +262,6 @@ export function initializeUserPage() {
           navigateTo('select-ticket');
           return;
         }
-
         const name = document.getElementById('bf-name');
         const email = document.getElementById('bf-email');
         const phone = document.getElementById('bf-phone');
@@ -187,7 +313,7 @@ export function initializeUserPage() {
 
     function getOrderTotals() {
       const subtotal = getSelectedTickets().reduce((total, ticket) => total + ticket.subtotal, 0);
-      const serviceFee = 2500;
+      const serviceFee = 0;
       const discount = appState.promoApplied ? Math.min(10000, subtotal + serviceFee) : 0;
       return { subtotal, serviceFee, discount, total: subtotal + serviceFee - discount };
     }
@@ -338,7 +464,7 @@ export function initializeUserPage() {
 
     function applyPromo() {
       const code = document.getElementById('promo-input').value.trim().toUpperCase();
-      if (['BLUEHAVEN','DISKON10','HEMAT'].includes(code)) {
+      if (['CITRALAND10','CITRALAND','DISKON10','HEMAT'].includes(code)) {
         appState.promoApplied = true;
         document.getElementById('promo-success').classList.remove('hidden');
         document.getElementById('promo-success').classList.add('flex','promo-success');
@@ -459,7 +585,7 @@ export function initializeUserPage() {
         document.getElementById('login-btn-icon').classList.add('hidden');
         document.getElementById('login-btn-spinner').classList.remove('hidden');
         setTimeout(() => {
-          document.getElementById('login-btn-text').textContent = 'Masuk ke Bluehaven';
+          document.getElementById('login-btn-text').textContent = 'Masuk ke Citraland Waterpark';
           document.getElementById('login-btn-icon').classList.remove('hidden');
           document.getElementById('login-btn-spinner').classList.add('hidden');
           showToast('Berhasil masuk! Selamat datang.','success');
