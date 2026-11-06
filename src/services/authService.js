@@ -44,7 +44,16 @@ export const authService = {
         email: normalizedEmail,
         password,
       })
-      if (error) return { success: false, error: 'Email atau password salah' }
+      if (error) {
+        logError(isAdmin ? 'Admin authentication' : 'User authentication', error)
+        if (error.code === 'email_not_confirmed' || error.message?.toLowerCase().includes('email not confirmed')) {
+          return {
+            success: false,
+            error: 'Email akun belum dikonfirmasi. Konfirmasi email di Supabase Auth sebelum masuk.',
+          }
+        }
+        return { success: false, error: 'Email atau password salah. Pastikan akun dibuat di proyek Supabase yang sama dengan aplikasi.' }
+      }
       if (!data.user || !data.session) {
         return { success: false, error: 'Gagal masuk. Silakan coba lagi.' }
       }
@@ -55,10 +64,22 @@ export const authService = {
           .select('admin_id, role')
           .eq('email', normalizedEmail)
           .maybeSingle()
-        if (adminError || !admin) {
+        if (adminError) {
+          logError('Verify admin role after login', adminError)
           const { error: signOutError } = await supabase.auth.signOut()
           if (signOutError) logError('Admin login cleanup', signOutError)
-          return { success: false, error: 'Email atau password salah' }
+          return {
+            success: false,
+            error: 'Login berhasil, tetapi akses admin gagal diverifikasi. Periksa migrasi dan kebijakan RLS tabel admin_users.',
+          }
+        }
+        if (!admin) {
+          const { error: signOutError } = await supabase.auth.signOut()
+          if (signOutError) logError('Admin login cleanup', signOutError)
+          return {
+            success: false,
+            error: 'Email dan password benar, tetapi email ini belum terdaftar sebagai admin di public.admin_users.',
+          }
         }
         return { success: true, user: data.user, session: data.session, admin }
       }
@@ -95,6 +116,28 @@ export const authService = {
       return { success: true, user: data.user }
     } catch (error) {
       return failure(error, 'Get user')
+    }
+  },
+
+  async getAdminProfile() {
+    try {
+      const supabase = getSupabaseClient()
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) return failure(authError, 'Get admin profile user')
+      if (!authData.user?.email) {
+        return { success: false, error: 'Sesi admin tidak ditemukan.' }
+      }
+
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('full_name, role')
+        .eq('email', authData.user.email.toLowerCase())
+        .maybeSingle()
+      if (error) return failure(error, 'Get admin profile')
+      if (!data) return { success: false, error: 'Profil admin tidak ditemukan.' }
+      return { success: true, admin: data }
+    } catch (error) {
+      return failure(error, 'Get admin profile')
     }
   },
 

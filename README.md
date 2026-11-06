@@ -124,6 +124,7 @@ File foto default website menggunakan path lokal. Foto tambahan yang diunggah le
 - Jalankan `npm run build` untuk memvalidasi bundle produksi.
 - Error konfigurasi environment mencantumkan variabel `VITE_*` yang belum diisi.
 - Jika akses admin ditolak, pastikan akun Auth sudah dibuat, email sama dengan baris pada `public.admin_users`, serta migrasi dan kebijakan RLS sudah diterapkan.
+- Jika login admin menampilkan kegagalan verifikasi akses, terapkan migrasi terbaru dengan `npx supabase db push --remote`; kebijakan RLS admin menggunakan fungsi di schema `private` untuk menghindari rekursi saat membaca `admin_users`.
 - Jika data konten tidak muncul, periksa bahwa migrasi dan seed telah dijalankan serta status konten aktif/published.
 - Jika pembayaran gagal, periksa deployment Edge Functions, secret Midtrans, client key frontend, dan kecocokan environment Sandbox/Production. Respons `401 Unauthorized` dari API transaksi Midtrans biasanya berarti server key tidak cocok atau berasal dari environment yang berbeda.
 - Pengujian end-to-end pembayaran memerlukan proyek Supabase dan kredensial Midtrans yang aktif; tidak dapat diselesaikan hanya dengan build frontend.

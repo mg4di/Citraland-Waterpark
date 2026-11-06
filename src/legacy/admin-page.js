@@ -141,10 +141,14 @@ document.getElementById('admin-logout-btn')?.addEventListener('click',async ()=>
   await onLogout();
 });
 
-authService.getUser().then((result)=>{
-  if(!result.success||!result.user)return;
-  const user=result.user;
-  const name=user.user_metadata?.full_name||user.email||'Administrator';
+Promise.all([authService.getUser(), authService.getAdminProfile()]).then(([userResult, profileResult])=>{
+  if(!userResult.success||!userResult.user)return;
+  const user=userResult.user;
+  if(!profileResult.success){
+    showToast(profileResult.error,'error');
+    return;
+  }
+  const name=profileResult.admin.full_name||user.user_metadata?.full_name||user.email||'Administrator';
   document.getElementById('admin-display-name').textContent=name;
   document.getElementById('admin-dropdown-name').textContent=name;
   document.getElementById('admin-dropdown-email').textContent=user.email||'';

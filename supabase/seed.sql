@@ -48,11 +48,11 @@ WHERE NOT EXISTS (
   WHERE existing.image_url = images.image_url
 );
 
--- Create an Auth user in Supabase first, then grant admin access by email.
--- Do not put an admin password in a SQL seed file.
--- INSERT INTO public.admin_users (email, full_name, role)
--- VALUES ('admin@example.com', 'Waterpark Admin', 'super_admin')
--- ON CONFLICT (email) DO NOTHING;
+INSERT INTO public.admin_users (email, full_name, role)
+VALUES ('email-akun-anda@example.com', 'Nama Admin', 'super_admin')
+ON CONFLICT (email) DO UPDATE
+SET full_name = EXCLUDED.full_name,
+    role = EXCLUDED.role;
 
 -- Create sample bookings through the application or a trusted service-role
 -- workflow so the booking validation trigger and payment flow remain in effect.

@@ -89,18 +89,49 @@ CREATE TABLE IF NOT EXISTS public.gallery_images (
   storage_path text
 );
 
-CREATE OR REPLACE FUNCTION public.is_admin()
+CREATE SCHEMA IF NOT EXISTS private;
+REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated;
+GRANT USAGE ON SCHEMA private TO authenticated;
+
+CREATE OR REPLACE FUNCTION private.is_admin()
 RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public, pg_temp
+SET search_path = ''
 AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.admin_users
-    WHERE lower(email) = lower(auth.jwt() ->> 'email')
-  );
+  SELECT auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.admin_users
+      WHERE lower(email) = lower((SELECT auth.jwt() ->> 'email'))
+    );
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT private.is_admin();
+$$;
+
+CREATE OR REPLACE FUNCTION private.is_super_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT auth.uid() IS NOT NULL
+    AND EXISTS (
+      SELECT 1
+      FROM public.admin_users
+      WHERE lower(email) = lower((SELECT auth.jwt() ->> 'email'))
+        AND role = 'super_admin'
+    );
 $$;
 
 CREATE OR REPLACE FUNCTION public.set_updated_at()
@@ -352,7 +383,12 @@ GRANT EXECUTE ON FUNCTION public.apply_midtrans_notification(text, text, text, t
   TO service_role;
 REVOKE ALL ON FUNCTION public.admin_booking_statistics(date, date) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_booking_statistics(date, date) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated;
+REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
+REVOKE ALL ON FUNCTION private.is_admin() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION private.is_admin() TO authenticated;
+REVOKE ALL ON FUNCTION private.is_super_admin() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION private.is_super_admin() TO authenticated;
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
@@ -384,19 +420,8 @@ CREATE POLICY "Admins can view admin_users" ON public.admin_users
     lower(email) = lower(auth.jwt() ->> 'email') OR public.is_admin()
   );
 CREATE POLICY "Super admins can manage admins" ON public.admin_users
-  FOR ALL TO authenticated USING (
-    EXISTS (
-      SELECT 1 FROM public.admin_users AS admin
-      WHERE lower(admin.email) = lower(auth.jwt() ->> 'email')
-        AND admin.role = 'super_admin'
-    )
-  ) WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.admin_users AS admin
-      WHERE lower(admin.email) = lower(auth.jwt() ->> 'email')
-        AND admin.role = 'super_admin'
-    )
-  );
+  FOR ALL TO authenticated USING (private.is_super_admin())
+  WITH CHECK (private.is_super_admin());
 
 DROP POLICY IF EXISTS "Users can view own bookings" ON public.bookings;
 DROP POLICY IF EXISTS "Users can create own bookings" ON public.bookings;
