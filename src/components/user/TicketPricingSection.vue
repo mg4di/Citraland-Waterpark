@@ -1,21 +1,52 @@
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ticketPricingService } from '../../services/ticketPricingService.js'
+import { realtimeManager } from '../../services/realtimeService.js'
+
 const window = globalThis.window
 
-const tickets = [
+const tickets = ref([
   {
     name: 'Weekdays',
-    price: '35',
+    price: 35000,
     age: 'Selasa–Jumat',
     features: ['Rp35.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
   },
   {
     name: 'Weekend',
-    price: '50',
+    price: 50000,
     age: 'Sabtu–Minggu',
     features: ['Rp50.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
     featured: true,
   },
-]
+])
+
+function updatePricing(pricing) {
+  for (const ticket of pricing) {
+    const current = tickets.value.find((item) =>
+      item.name.toLowerCase().includes(ticket.ticket_type),
+    )
+    if (!current) continue
+    current.price = Number(ticket.price)
+    current.age = ticket.days_description
+    current.features[0] = `Rp${current.price.toLocaleString('id-ID')} per orang`
+    window.setTicketPrice?.(ticket.ticket_type, current.price, `Tiket ${current.name}`)
+  }
+}
+
+let unsubscribe
+onMounted(async () => {
+  const result = await ticketPricingService.getActivePricing()
+  if (result.success) updatePricing(result.pricing)
+  else window.showToast?.(result.error, 'error')
+  unsubscribe = realtimeManager.subscribeToTicketPricing(async () => {
+    const refreshed = await ticketPricingService.getActivePricing()
+    if (refreshed.success) updatePricing(refreshed.pricing)
+    else window.showToast?.(refreshed.error, 'error')
+  }, 'ticket_pricing_display')
+})
+
+onBeforeUnmount(() => unsubscribe?.())
 </script>
 
 <template>
@@ -41,7 +72,7 @@ const tickets = [
           <span v-if="ticket.featured" class="absolute right-6 top-6 animate-pulse rounded-full bg-cyan-200 px-3 py-1 text-xs font-bold text-ocean">Terpopuler</span>
           <p class="font-semibold" :class="ticket.featured ? 'text-cyan-100' : 'text-slate-500'">{{ ticket.name }}</p>
           <p class="mt-4 font-display text-4xl font-extrabold">
-            Rp{{ ticket.price }}<span class="text-lg font-semibold" :class="ticket.featured ? 'text-cyan-200' : 'text-slate-400'">.000</span>
+            Rp{{ ticket.price.toLocaleString('id-ID') }}
           </p>
           <p class="mt-2 text-sm" :class="ticket.featured ? 'text-cyan-100' : 'text-slate-500'">{{ ticket.age }}</p>
           <div class="my-7 h-px" :class="ticket.featured ? 'bg-white/20' : 'bg-slate-100'"></div>

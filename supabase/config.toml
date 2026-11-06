@@ -1,0 +1,8 @@
+[functions.midtrans-create-transaction]
+verify_jwt = true
+
+[functions.midtrans-payment-callback]
+verify_jwt = false
+
+[functions.booking-status]
+verify_jwt = true

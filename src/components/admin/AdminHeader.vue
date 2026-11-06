@@ -21,11 +21,11 @@
       </div>
       <div class="h-8 w-px bg-slate-200"></div>
       <div class="relative">
-        <button id="profile-menu-button" type="button" class="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-slate-50"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-ocean text-sm font-bold text-white">AR</span><span class="hidden text-left sm:block"><span class="block text-sm font-bold text-slate-800">Alya Rahma</span><span class="block text-xs text-slate-400">Administrator</span></span><iconify-icon icon="lucide:chevron-down" class="hidden text-slate-400 sm:block"></iconify-icon></button>
+        <button id="profile-menu-button" type="button" class="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-slate-50"><span id="admin-avatar" class="flex h-9 w-9 items-center justify-center rounded-full bg-ocean text-sm font-bold text-white">AD</span><span class="hidden text-left sm:block"><span id="admin-display-name" class="block text-sm font-bold text-slate-800">Administrator</span><span class="block text-xs text-slate-400">Administrator</span></span><iconify-icon icon="lucide:chevron-down" class="hidden text-slate-400 sm:block"></iconify-icon></button>
         <div id="profile-dropdown" class="profile-dropdown absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-          <div class="border-b border-slate-100 px-4 py-4"><p class="text-sm font-bold text-slate-800">Alya Rahma</p><p class="text-xs text-slate-400">alya@bluehaven.id</p></div>
+          <div class="border-b border-slate-100 px-4 py-4"><p id="admin-dropdown-name" class="text-sm font-bold text-slate-800">Administrator</p><p id="admin-dropdown-email" class="text-xs text-slate-400"></p></div>
           <div class="p-2"><a id="profile-settings-link" href="#settings" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"><iconify-icon icon="lucide:user"></iconify-icon> Profil Saya</a></div>
-          <div class="border-t border-slate-100 p-2"><a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50"><iconify-icon icon="lucide:log-out"></iconify-icon> Keluar</a></div>
+          <div class="border-t border-slate-100 p-2"><button id="admin-logout-btn" type="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50"><iconify-icon icon="lucide:log-out"></iconify-icon> Keluar</button></div>
         </div>
       </div>
     </div>

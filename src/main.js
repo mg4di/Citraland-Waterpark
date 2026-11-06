@@ -4,7 +4,7 @@ import App from './App.vue'
 import AdminPage from './AdminPage.vue'
 import AdminLogin from './AdminLogin.vue'
 import UserPage from './UserPage.vue'
-import { hasAdminDemoAccess } from './admin-session.js'
+import { authService } from './services/authService.js'
 import './styles.css'
 
 const router = createRouter({
@@ -18,9 +18,9 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
-  if (to.meta.requiresAdminDemoAccess && !hasAdminDemoAccess()) {
-    return { name: 'admin-login' }
+router.beforeEach(async (to) => {
+  if (to.meta.requiresAdminDemoAccess && !await authService.isAdmin()) {
+    return { name: 'admin-login', query: { expired: '1' } }
   }
 })
 

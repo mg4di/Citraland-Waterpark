@@ -1,5 +1,11 @@
 <script setup>
-const facilities = [
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { facilitiesService } from '../../services/facilitiesService.js'
+import { realtimeManager } from '../../services/realtimeService.js'
+
+const window = globalThis.window
+
+const facilities = ref([
   {
     icon: 'lucide:waves',
     iconColor: 'text-ocean',
@@ -28,7 +34,31 @@ const facilities = [
     title: 'Wahana Seluncur',
     description: 'Pilihan seluncuran air untuk menambah keseruan bermain.',
   },
-]
+])
+
+function updateFacilities(data) {
+  facilities.value = data.map((facility) => ({
+    icon: facility.icon,
+    iconColor: 'text-ocean',
+    cardColor: 'bg-slate-50',
+    title: facility.facility_name,
+    description: facility.description,
+  }))
+}
+
+let unsubscribe
+onMounted(async () => {
+  const result = await facilitiesService.getActiveFacilities()
+  if (result.success) updateFacilities(result.facilities)
+  else window.showToast?.(result.error, 'error')
+  unsubscribe = realtimeManager.subscribeToFacilities(async () => {
+    const refreshed = await facilitiesService.getActiveFacilities()
+    if (refreshed.success) updateFacilities(refreshed.facilities)
+    else window.showToast?.(refreshed.error, 'error')
+  })
+})
+
+onBeforeUnmount(() => unsubscribe?.())
 </script>
 
 <template>

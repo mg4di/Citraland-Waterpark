@@ -1,3 +1,10 @@
+import { authService } from '../services/authService.js'
+import { bookingService } from '../services/bookingService.js'
+import { paymentService } from '../services/paymentService.js'
+import { promotionService } from '../services/promotionService.js'
+import { ticketPricingService } from '../services/ticketPricingService.js'
+import { validateBookingForm } from '../utils/validation.js'
+
 export function initializeUserPage() {
 
     // ===== APP STATE =====
@@ -5,14 +12,102 @@ export function initializeUserPage() {
       quantities: { weekday: 0, weekend: 0 },
       prices: { weekday: 35000, weekend: 50000 },
       names: { weekday: 'Tiket Weekdays', weekend: 'Tiket Weekend' },
-      promoApplied: false,
+      promo: null,
       booking: { name: '', email: '', phone: '', date: '' },
-      currentPage: 'home'
+      bookingCode: '',
+      snapToken: '',
+      paymentStatus: 'pending',
+      paymentType: '',
+      currentPage: '',
+      pendingPage: null,
+      isSnapOpen: false,
+      isVerifyingPayment: false
     };
+    const bookingPages = new Set(['select-ticket', 'booking-details', 'payment', 'confirmation']);
+    let currentUser = null;
+    const profileMenus = [
+      {
+        key: 'desktop',
+        container: 'nav-profile',
+        trigger: 'nav-profile-trigger',
+        dropdown: 'nav-profile-dropdown',
+        name: 'nav-profile-name',
+        dropdownName: 'nav-profile-dropdown-name',
+        email: 'nav-profile-email',
+      },
+      {
+        key: 'mobile',
+        container: 'mobile-nav-profile',
+        trigger: 'mobile-nav-profile-trigger',
+        dropdown: 'mobile-nav-profile-dropdown',
+        name: 'mobile-nav-profile-name',
+        email: 'mobile-nav-profile-email',
+      },
+      {
+        key: 'select-ticket',
+        container: 'select-ticket-profile',
+        trigger: 'select-ticket-profile-trigger',
+        dropdown: 'select-ticket-profile-dropdown',
+        name: 'select-ticket-profile-name',
+        dropdownName: 'select-ticket-profile-dropdown-name',
+        email: 'select-ticket-profile-email',
+      },
+      {
+        key: 'booking-details',
+        container: 'booking-details-profile',
+        trigger: 'booking-details-profile-trigger',
+        dropdown: 'booking-details-profile-dropdown',
+        name: 'booking-details-profile-name',
+        dropdownName: 'booking-details-profile-dropdown-name',
+        email: 'booking-details-profile-email',
+      },
+    ];
+
+    function updateNavbarAuth(user) {
+      const loginLinks = [
+        document.getElementById('nav-login'),
+        document.getElementById('mobile-nav-login'),
+        document.getElementById('select-ticket-login'),
+        document.getElementById('booking-details-login'),
+      ];
+      const displayName = user?.user_metadata?.full_name?.trim() || user?.email?.split('@')[0] || 'Profil';
+      for (const link of loginLinks) {
+        if (link) link.style.display = user ? 'none' : '';
+      }
+      for (const menu of profileMenus) {
+        const container = document.getElementById(menu.container);
+        if (container) container.style.display = user ? '' : 'none';
+        const name = document.getElementById(menu.name);
+        if (name) name.textContent = displayName;
+        const dropdownName = menu.dropdownName && document.getElementById(menu.dropdownName);
+        if (dropdownName) dropdownName.textContent = displayName;
+        const email = document.getElementById(menu.email);
+        if (email) email.textContent = user?.email ?? '';
+      }
+      closeProfileMenus();
+    }
+
+    function setProfileMenuOpen(type, isOpen) {
+      const menu = profileMenus.find((item) => item.key === type);
+      if (!menu) return;
+      document.getElementById(menu.dropdown)?.classList.toggle('hidden', !isOpen);
+      document.getElementById(menu.trigger)?.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    function closeProfileMenus() {
+      for (const menu of profileMenus) setProfileMenuOpen(menu.key, false);
+    }
+
+    function toggleProfileMenu(type) {
+      const menu = profileMenus.find((item) => item.key === type);
+      if (!menu) return;
+      const isOpen = document.getElementById(menu.dropdown)?.classList.contains('hidden');
+      closeProfileMenus();
+      setProfileMenuOpen(type, Boolean(isOpen));
+    }
 
     // ===== NAVIGATION =====
-    function navigateTo(page) {
-      const pages = ['home','login','register','select-ticket','booking-details','payment','confirmation'];
+    function renderPage(page) {
       const currentEl = document.getElementById('page-' + appState.currentPage);
       const targetEl = document.getElementById('page-' + page);
       if (!targetEl || page === appState.currentPage) return;
@@ -34,6 +129,15 @@ export function initializeUserPage() {
         // Page-specific init
         if (page === 'confirmation') setTimeout(createConfetti, 400);
         if (page === 'booking-details') {
+          const nameInput = document.getElementById('bf-name');
+          const emailInput = document.getElementById('bf-email');
+          if (currentUser?.user_metadata?.full_name && !nameInput.value) {
+            nameInput.value = currentUser.user_metadata.full_name;
+          }
+          if (currentUser?.email) {
+            emailInput.value = currentUser.email;
+            emailInput.readOnly = true;
+          }
           initBookingCalendar();
           updateBookingSummary();
         }
@@ -48,11 +152,74 @@ export function initializeUserPage() {
       history.pushState(null, '', '#' + page);
     }
 
+    async function navigateTo(page) {
+      if (page === 'confirmation' && appState.paymentStatus !== 'paid') {
+        showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        page = appState.bookingCode && appState.snapToken ? 'payment' : 'booking-details';
+      }
+      if (page === 'payment' && (!appState.snapToken || !appState.bookingCode)) {
+        showToast('Mulai pemesanan terlebih dahulu sebelum membuka pembayaran.', 'info');
+        page = 'booking-details';
+      }
+      if (bookingPages.has(page)) {
+        const result = await authService.getUser();
+        if (!result.success) {
+          currentUser = null;
+          appState.pendingPage = page;
+          showToast('Sesi tidak dapat diverifikasi. Silakan masuk kembali untuk melanjutkan.', 'error');
+          renderPage('login');
+          return;
+        }
+        currentUser = result.user;
+        if (!currentUser) {
+          appState.pendingPage = page;
+          showToast('Silakan masuk atau daftar terlebih dahulu untuk memesan tiket.', 'info');
+          renderPage('login');
+          return;
+        }
+      } else if (page === 'home' && !currentUser) {
+        appState.pendingPage = null;
+      }
+
+      renderPage(page);
+    }
+
     // Handle browser back/forward
     window.addEventListener('popstate', () => {
       const hash = location.hash.replace('#','') || 'home';
       navigateTo(hash);
     });
+
+    authService.onAuthStateChange((user) => {
+      currentUser = user;
+      updateNavbarAuth(user);
+      if (!user && bookingPages.has(appState.currentPage)) {
+        appState.pendingPage = appState.currentPage;
+        renderPage('login');
+      }
+    });
+
+    updateNavbarAuth(null);
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest(profileMenus.map((menu) => `#${menu.container}`).join(', '))) {
+        closeProfileMenus();
+      }
+    });
+
+    async function logoutUser() {
+      const result = await authService.logout();
+      if (!result.success) {
+        showToast(result.error, 'error');
+        return;
+      }
+
+      currentUser = null;
+      appState.pendingPage = null;
+      updateNavbarAuth(null);
+      toggleMobileMenu(false);
+      showToast('Anda berhasil keluar.', 'success');
+      navigateTo('home');
+    }
 
     // ===== MOBILE MENU =====
     function toggleMobileMenu(open) {
@@ -247,15 +414,33 @@ export function initializeUserPage() {
     }
 
     function initBookingPage() {
-      // Set default date
+      const form = document.getElementById('booking-form');
+      const promoPanel = document.getElementById('promo-input')?.closest('.rounded-2xl.bg-slate-50.p-5');
+      const actionRow = form?.querySelector('button[type="submit"]')?.parentElement;
+      if (form && promoPanel && promoPanel.parentElement !== form && actionRow) {
+        form.insertBefore(promoPanel, actionRow);
+      }
+
       const dateInput = document.getElementById('bf-date');
       initBookingCalendar();
       dateInput.addEventListener('change', updateBookingSummary);
       updateBookingSummary();
 
-      // Form submit
-      document.getElementById('booking-form').addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const authResult = await authService.getUser();
+        if (!authResult.success) {
+          showToast(authResult.error, 'error');
+          return;
+        }
+        currentUser = authResult.user;
+        if (!currentUser?.email) {
+          appState.pendingPage = 'booking-details';
+          showToast('Silakan masuk dengan akun email untuk memesan tiket.', 'info');
+          navigateTo('login');
+          return;
+        }
+
         const ticketCount = Object.values(appState.quantities).reduce((total, quantity) => total + quantity, 0);
         if (ticketCount === 0) {
           showToast('Pilih tiket terlebih dahulu','error');
@@ -265,31 +450,102 @@ export function initializeUserPage() {
         const name = document.getElementById('bf-name');
         const email = document.getElementById('bf-email');
         const phone = document.getElementById('bf-phone');
-        let valid = true;
-        if (!name.value.trim()) { name.classList.add('error'); document.getElementById('bf-name-error').classList.remove('hidden'); valid = false; }
-        else { name.classList.remove('error'); document.getElementById('bf-name-error').classList.add('hidden'); }
-        if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { email.classList.add('error'); valid = false; } else { email.classList.remove('error'); }
-        if (!phone.value.trim() || phone.value.trim().length < 10) { phone.classList.add('error'); valid = false; } else { phone.classList.remove('error'); }
-
-        if (!valid) { showToast('Lengkapi semua data yang wajib diisi','error'); return; }
+        const formData = {
+          userName: name.value.trim(),
+          userEmail: currentUser.email,
+          userPhone: phone.value.trim(),
+          visitDate: dateInput.value,
+        };
+        const validation = validateBookingForm(formData);
+        for (const [field, input] of Object.entries({
+          userName: name,
+          userEmail: email,
+          userPhone: phone,
+          visitDate: dateInput,
+        })) input.classList.toggle('error', Boolean(validation.errors[field]));
+        if (!validation.valid) {
+          showToast(Object.values(validation.errors)[0], 'error');
+          return;
+        }
+        const ticketType = getSelectedTicketType();
+        const dateValidation = bookingService.validateVisitDate(formData.visitDate, ticketType);
+        if (!dateValidation.valid) {
+          showToast(dateValidation.error, 'error');
+          return;
+        }
 
         appState.booking = {
-          name: name.value.trim(),
-          email: email.value.trim(),
-          phone: phone.value.trim(),
-          date: document.getElementById('bf-date').value
+          name: formData.userName,
+          email: formData.userEmail.toLowerCase(),
+          phone: formData.userPhone,
+          date: formData.visitDate,
         };
 
         const btnText = document.getElementById('bf-btn-text');
         const btnIcon = document.getElementById('bf-btn-icon');
         const btnSpinner = document.getElementById('bf-btn-spinner');
-        btnText.textContent = 'Memproses...'; btnIcon.classList.add('hidden'); btnSpinner.classList.remove('hidden');
-        setTimeout(() => {
-          btnText.textContent = 'Lanjut ke Pembayaran'; btnIcon.classList.remove('hidden'); btnSpinner.classList.add('hidden');
-          navigateTo('payment');
-        }, 1500);
-      });
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        btnText.textContent = 'Memproses...';
+        btnIcon.classList.add('hidden');
+        btnSpinner.classList.remove('hidden');
 
+        const ticketTypes = {
+          [ticketType]: {
+            qty: appState.quantities[ticketType],
+            price: appState.prices[ticketType],
+          },
+        };
+        const result = await paymentService.createTransaction({
+          ...formData,
+          ticketTypes,
+          totalAmount: getOrderTotals().total,
+          promoCode: appState.promo?.promotion.promo_code,
+        });
+        if (result.success) {
+          appState.bookingCode = result.booking_code;
+          appState.snapToken = result.snap_token;
+          appState.paymentStatus = 'pending';
+          updatePaymentSummary();
+          navigateTo('payment');
+        } else {
+          showToast(result.error, 'error');
+        }
+        submitButton.disabled = false;
+        btnText.textContent = 'Lanjut ke Pembayaran';
+        btnIcon.classList.remove('hidden');
+        btnSpinner.classList.add('hidden');
+      });
+    }
+
+    async function checkPaymentStatus() {
+      if (!appState.bookingCode || !appState.booking.email) {
+        showToast('Data booking tidak ditemukan. Silakan ulangi pemesanan.', 'error');
+        navigateTo('booking-details');
+        return;
+      }
+      if (appState.isVerifyingPayment) return;
+
+      appState.isVerifyingPayment = true;
+      setPaymentButtonBusy(true, 'Memeriksa status...');
+      try {
+        const result = await paymentService.getBookingStatus(appState.bookingCode, appState.booking.email);
+        if (result.success && result.payment_status === 'paid') {
+          appState.paymentStatus = 'paid';
+          updateConfirmationDetails();
+          navigateTo('confirmation');
+        } else if (result.success && result.payment_status !== 'pending') {
+          appState.paymentStatus = result.payment_status;
+          showToast('Pembayaran belum berhasil. Silakan coba kembali.', 'error');
+        } else if (result.success) {
+          showToast('Pembayaran masih menunggu konfirmasi dari Midtrans.', 'info');
+        } else {
+          showToast(result.error || 'Gagal memeriksa status pembayaran.', 'error');
+        }
+      } finally {
+        appState.isVerifyingPayment = false;
+        setPaymentButtonBusy(false);
+      }
     }
 
     function formatDateID(dateStr) {
@@ -314,7 +570,7 @@ export function initializeUserPage() {
     function getOrderTotals() {
       const subtotal = getSelectedTickets().reduce((total, ticket) => total + ticket.subtotal, 0);
       const serviceFee = 0;
-      const discount = appState.promoApplied ? Math.min(10000, subtotal + serviceFee) : 0;
+      const discount = appState.promo ? Math.min(appState.promo.discountAmount, subtotal + serviceFee) : 0;
       return { subtotal, serviceFee, discount, total: subtotal + serviceFee - discount };
     }
 
@@ -360,32 +616,6 @@ export function initializeUserPage() {
     // ===== PAYMENT PAGE =====
     function initPaymentPage() {
       updatePaymentSummary();
-      // Payment method selection
-      const options = document.querySelectorAll('#payment-methods .payment-option');
-      const cardDetails = document.getElementById('card-details');
-      options.forEach(opt => {
-        opt.addEventListener('click', () => {
-          options.forEach(o => { o.classList.remove('selected','border-2','border-ocean','bg-lagoon'); o.classList.add('border','border-slate-200','bg-white'); });
-          opt.classList.add('selected','border-2','border-ocean','bg-lagoon');
-          opt.classList.remove('border','border-slate-200','bg-white');
-          opt.querySelector('input').checked = true;
-          if (opt.dataset.method === 'credit-card') cardDetails.classList.add('open');
-          else cardDetails.classList.remove('open');
-        });
-      });
-
-      // Card number formatting
-      document.getElementById('card-number')?.addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\s/g,'').replace(/\D/g,'');
-        let f = ''; for (let i=0;i<v.length;i++) { if(i>0&&i%4===0) f+=' '; f+=v[i]; } e.target.value = f;
-      });
-      document.getElementById('card-expiry')?.addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g,'');
-        if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2,4);
-        e.target.value = v;
-      });
-      document.getElementById('card-cvv')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g,''); });
-
       // Countdown
       let secs = 24*3600 - 15;
       const cdEl = document.getElementById('countdown');
@@ -409,6 +639,8 @@ export function initializeUserPage() {
       if (customerName) customerName.textContent = appState.booking.name || 'Nama pemesan';
       const customerEmail = document.getElementById('pay-customer-email');
       if (customerEmail) customerEmail.textContent = appState.booking.email || 'Email pemesan';
+      const bookingCode = document.getElementById('pay-booking-code');
+      if (bookingCode) bookingCode.textContent = appState.bookingCode || 'Kode booking';
       const serviceFeeElement = document.getElementById('pay-service-fee');
       if (serviceFeeElement) serviceFeeElement.textContent = formatRupiah(serviceFee);
       const discountRow = document.getElementById('discount-row');
@@ -430,12 +662,15 @@ export function initializeUserPage() {
       const customerEmail = document.getElementById('confirm-email');
       const customerPhone = document.getElementById('confirm-phone');
       const qrTicketTypes = document.getElementById('confirm-qr-types');
-      const paymentMethod = document.querySelector('#payment-methods .payment-option.selected');
-      const paymentMethodNames = {
-        'credit-card': 'Kartu kredit / debit',
-        ewallet: 'E-wallet',
-        'bank-transfer': 'Transfer bank',
-        installment: 'Cicilan tanpa kartu'
+      const paymentTypeNames = {
+        bank_transfer: 'Transfer bank',
+        credit_card: 'Kartu kredit',
+        gopay: 'GoPay',
+        shopeepay: 'ShopeePay',
+        qris: 'QRIS',
+        cstore: 'Gerai retail',
+        echannel: 'Pembayaran elektronik',
+        akulaku: 'Akulaku',
       };
       if (customerName) customerName.textContent = appState.booking.name || 'Nama pengunjung';
       if (ticketTypes) ticketTypes.textContent = tickets.length
@@ -457,37 +692,136 @@ export function initializeUserPage() {
         if (discountAmount) discountAmount.textContent = '-' + formatRupiah(discount);
       }
       const paymentMethodElement = document.getElementById('confirm-payment-method');
-      if (paymentMethodElement) paymentMethodElement.textContent = paymentMethodNames[paymentMethod?.dataset.method] || 'Belum dipilih';
+      if (paymentMethodElement) {
+        paymentMethodElement.textContent = paymentTypeNames[appState.paymentType] || appState.paymentType || 'Midtrans';
+      }
       const totalElement = document.getElementById('confirm-total');
       if (totalElement) totalElement.textContent = formatRupiah(total);
+      const bookingCodeElement = document.getElementById('confirm-code');
+      if (bookingCodeElement && appState.bookingCode) bookingCodeElement.textContent = appState.bookingCode;
     }
 
-    function applyPromo() {
-      const code = document.getElementById('promo-input').value.trim().toUpperCase();
-      if (['CITRALAND10','CITRALAND','DISKON10','HEMAT'].includes(code)) {
-        appState.promoApplied = true;
-        document.getElementById('promo-success').classList.remove('hidden');
-        document.getElementById('promo-success').classList.add('flex','promo-success');
-        document.getElementById('discount-row').classList.remove('hidden');
-        document.getElementById('promo-btn').textContent = '✓';
-        document.getElementById('promo-input').disabled = true;
-        updatePaymentSummary();
-        showToast('Kode promo berhasil diterapkan!','success');
-      } else { showToast('Kode promo tidak valid','error'); }
+    async function applyPromo() {
+      const input = document.getElementById('promo-input');
+      const code = input.value.trim().toUpperCase();
+      const subtotal = getSelectedTickets().reduce((total, ticket) => total + ticket.subtotal, 0);
+      if (!code) {
+        showToast('Masukkan kode promo.', 'error');
+        return;
+      }
+      const result = await promotionService.validatePromoCode(code, subtotal);
+      if (!result.success) {
+        appState.promo = null;
+        showToast(result.error, 'error');
+        return;
+      }
+      appState.promo = {
+        promotion: result.promotion,
+        discountAmount: result.discountAmount,
+      };
+      const success = document.getElementById('promo-success');
+      success.classList.remove('hidden');
+      success.classList.add('flex', 'promo-success');
+      success.querySelector('span').textContent = `Kode promo berhasil diterapkan! Diskon ${formatRupiah(result.discountAmount)}`;
+      document.getElementById('discount-row')?.classList.remove('hidden');
+      document.getElementById('promo-btn').textContent = '✓';
+      input.disabled = true;
+      updateBookingSummary();
+      updatePaymentSummary();
+      showToast('Kode promo berhasil diterapkan!', 'success');
+    }
+
+    function setPaymentButtonBusy(busy, label = 'Bayar Sekarang') {
+      const button = document.getElementById('pay-btn');
+      const text = document.getElementById('pay-btn-text');
+      const icon = document.getElementById('pay-btn-icon');
+      const spinner = document.getElementById('pay-btn-spinner');
+      if (button) button.disabled = busy;
+      if (text) text.textContent = busy ? label : 'Bayar Sekarang';
+      icon?.classList.toggle('hidden', busy);
+      spinner?.classList.toggle('hidden', !busy);
+    }
+
+    async function verifyPaymentStatus(paymentResult) {
+      if (appState.isVerifyingPayment) return;
+      if (!appState.bookingCode || !appState.booking.email) {
+        showToast('Data booking tidak ditemukan. Silakan ulangi pemesanan.', 'error');
+        navigateTo('booking-details');
+        return;
+      }
+
+      appState.isVerifyingPayment = true;
+      appState.isSnapOpen = false;
+      setPaymentButtonBusy(true, 'Memverifikasi pembayaran...');
+      showToast('Memverifikasi pembayaran...', 'info');
+      try {
+        const result = await paymentService.pollBookingStatus(
+          appState.bookingCode,
+          appState.booking.email,
+          { maxAttempts: 10, intervalMs: 1500 },
+        );
+        if (result.success && result.payment_status === 'paid') {
+          appState.paymentStatus = 'paid';
+          appState.paymentType = paymentResult?.payment_type || appState.paymentType;
+          updateConfirmationDetails();
+          navigateTo('confirmation');
+          return;
+        }
+        if (result.success && result.payment_status !== 'pending') {
+          appState.paymentStatus = result.payment_status;
+          showToast('Pembayaran belum berhasil. Silakan periksa status dan coba kembali.', 'error');
+          return;
+        }
+        showToast(
+          result.success
+            ? 'Status pembayaran masih diproses. Anda dapat menekan "Sudah membayar? Periksa status" untuk mengecek kembali.'
+            : result.error || 'Status pembayaran belum dapat diverifikasi. Coba periksa kembali.',
+          'info',
+        );
+      } finally {
+        appState.isVerifyingPayment = false;
+        setPaymentButtonBusy(false);
+      }
     }
 
     function processPayment() {
-      updatePaymentSummary();
-      const btnText = document.getElementById('pay-btn-text');
-      const btnIcon = document.getElementById('pay-btn-icon');
-      const btnSpinner = document.getElementById('pay-btn-spinner');
-      btnText.textContent = 'Memproses pembayaran...'; btnIcon.classList.add('hidden'); btnSpinner.classList.remove('hidden');
-      setTimeout(() => {
-        btnText.textContent = 'Pembayaran berhasil!'; btnSpinner.classList.add('hidden'); btnIcon.classList.remove('hidden');
-        btnIcon.setAttribute('icon','lucide:check-circle');
-        showToast('Pembayaran berhasil! Mengalihkan...','success');
-        setTimeout(() => navigateTo('confirmation'), 1500);
-      }, 2500);
+      if (!appState.snapToken || !appState.bookingCode) {
+        showToast('Isi data booking terlebih dahulu untuk memulai pembayaran.', 'error');
+        navigateTo('booking-details');
+        return;
+      }
+      if (appState.isSnapOpen || appState.isVerifyingPayment) return;
+
+      appState.isSnapOpen = true;
+      setPaymentButtonBusy(true, 'Membuka pembayaran...');
+      paymentService.displaySnapPopup(appState.snapToken, {
+        onSuccess: (result) => {
+          verifyPaymentStatus(result).catch((error) => {
+            console.error('Payment status verification failed:', error);
+            showToast('Gagal memverifikasi pembayaran. Silakan periksa status kembali.', 'error');
+          });
+        },
+        onPending: () => {
+          appState.isSnapOpen = false;
+          setPaymentButtonBusy(false);
+          showToast('Pembayaran menunggu penyelesaian. Selesaikan proses di Midtrans.', 'info');
+        },
+        onError: () => {
+          appState.isSnapOpen = false;
+          setPaymentButtonBusy(false);
+          showToast('Pembayaran gagal. Silakan coba kembali.', 'error');
+        },
+        onClose: () => {
+          appState.isSnapOpen = false;
+          setPaymentButtonBusy(false);
+          showToast('Booking tersimpan dan menunggu pembayaran.', 'info');
+        },
+      }).catch((error) => {
+        appState.isSnapOpen = false;
+        setPaymentButtonBusy(false);
+        console.error('Midtrans Snap popup failed:', error);
+        showToast(error instanceof Error ? error.message : 'Pembayaran gagal diinisialisasi. Silakan coba lagi.', 'error');
+      });
     }
 
     // ===== CONFIRMATION =====
@@ -568,36 +902,48 @@ export function initializeUserPage() {
     });
 
     // ===== KEYBOARD =====
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') toggleMobileMenu(false); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        toggleMobileMenu(false);
+        closeProfileMenus();
+      }
+    });
 
     // ===== LOGIN FORM =====
     function initLoginForm() {
       const form = document.getElementById('login-form');
       if (!form) return;
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email');
         const pass = document.getElementById('login-password');
         if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) { email.classList.add('error'); showToast('Masukkan email yang valid','error'); return; }
-        if (!pass.value || pass.value.length < 6) { pass.classList.add('error'); showToast('Kata sandi minimal 6 karakter','error'); return; }
+        if (!pass.value || pass.value.length < 8) { pass.classList.add('error'); showToast('Kata sandi minimal 8 karakter','error'); return; }
         email.classList.remove('error'); pass.classList.remove('error');
         document.getElementById('login-btn-text').textContent = 'Memproses...';
         document.getElementById('login-btn-icon').classList.add('hidden');
         document.getElementById('login-btn-spinner').classList.remove('hidden');
-        setTimeout(() => {
-          document.getElementById('login-btn-text').textContent = 'Masuk ke Citraland Waterpark';
-          document.getElementById('login-btn-icon').classList.remove('hidden');
-          document.getElementById('login-btn-spinner').classList.add('hidden');
-          showToast('Berhasil masuk! Selamat datang.','success');
-          setTimeout(() => navigateTo('home'), 1500);
-        }, 2000);
+        const result = await authService.login(email.value, pass.value);
+        document.getElementById('login-btn-text').textContent = 'Masuk ke Citraland Waterpark';
+        document.getElementById('login-btn-icon').classList.remove('hidden');
+        document.getElementById('login-btn-spinner').classList.add('hidden');
+        if (!result.success) {
+          showToast(result.error, 'error');
+          return;
+        }
+        currentUser = result.user;
+        updateNavbarAuth(currentUser);
+        const destination = appState.pendingPage || 'home';
+        appState.pendingPage = null;
+        showToast('Berhasil masuk! Selamat datang.', 'success');
+        navigateTo(destination);
       });
     }
 
     function initRegisterForm() {
       const form = document.getElementById('register-form');
       if (!form) return;
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const name = document.getElementById('register-name');
         const email = document.getElementById('register-email');
@@ -610,7 +956,22 @@ export function initializeUserPage() {
         if (password.value.length < 8) { password.classList.add('error'); showToast('Kata sandi minimal 8 karakter','error'); return; }
         if (password.value !== confirmPassword.value) { confirmPassword.classList.add('error'); showToast('Konfirmasi kata sandi tidak cocok','error'); return; }
 
-        showToast('Data valid. Layanan pendaftaran akun belum terhubung.','info');
+        const result = await authService.register(email.value, password.value, name.value);
+        if (!result.success) {
+          showToast(result.error, 'error');
+          return;
+        }
+        if (result.session) {
+          currentUser = result.user;
+          updateNavbarAuth(currentUser);
+          const destination = appState.pendingPage || 'home';
+          appState.pendingPage = null;
+          showToast('Akun berhasil dibuat. Selamat datang!', 'success');
+          navigateTo(destination);
+        } else {
+          showToast('Akun berhasil dibuat. Periksa email untuk verifikasi, lalu masuk.', 'success');
+          navigateTo('login');
+        }
       });
     }
 
@@ -619,30 +980,50 @@ export function initializeUserPage() {
       // Show initial page
       const hash = location.hash.replace('#','') || 'home';
       const initialPage = ['home','login','register','select-ticket','booking-details','payment','confirmation'].includes(hash) ? hash : 'home';
-      const el = document.getElementById('page-' + initialPage);
-      el.style.display = 'block';
-      el.classList.add('active','fade-in');
-      appState.currentPage = initialPage;
 
       initLoginForm();
       initRegisterForm();
       initBookingPage();
       initPaymentPage();
       initScrollReveal();
-      initBubbles(initialPage);
       setTimeout(animateCounters, 500);
+      navigateTo(initialPage);
     })()
 
   if (typeof window !== 'undefined') {
     window.navigateTo = navigateTo;
     window.toggleMobileMenu = toggleMobileMenu;
+    window.toggleProfileMenu = toggleProfileMenu;
+    window.logoutUser = logoutUser;
     window.showToast = showToast;
     window.togglePassword = togglePassword;
     window.updateQty = updateQty;
+    window.setTicketPrice = (type, price, name) => {
+      if (!Object.hasOwn(appState.prices, type) || !Number.isFinite(price) || price < 0) return;
+      appState.prices[type] = price;
+      if (name) appState.names[type] = name;
+      updateSummaryBar();
+      updateBookingSummary();
+    };
     window.goToBooking = goToBooking;
     window.goToBookingFromSummary = goToBookingFromSummary;
     window.applyPromo = applyPromo;
     window.processPayment = processPayment;
+    window.checkPaymentStatus = checkPaymentStatus;
     window.copyBookingCode = copyBookingCode;
   }
+
+  ticketPricingService.getActivePricing().then((result) => {
+    if (!result.success) {
+      showToast(result.error, 'error');
+      return;
+    }
+    result.pricing.forEach((ticket) => {
+      window.setTicketPrice(
+        ticket.ticket_type,
+        Number(ticket.price),
+        `Tiket ${ticket.ticket_type === 'weekday' ? 'Weekdays' : 'Weekend'}`,
+      );
+    });
+  })
 }

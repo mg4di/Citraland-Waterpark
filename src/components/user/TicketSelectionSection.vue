@@ -1,22 +1,51 @@
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ticketPricingService } from '../../services/ticketPricingService.js'
+import { realtimeManager } from '../../services/realtimeService.js'
+
 const window = globalThis.window
 
-const tickets = [
+const tickets = ref([
   {
     type: 'weekday',
     name: 'Weekdays',
     days: 'Selasa–Jumat',
-    price: '35',
+    price: 35000,
     featured: false,
   },
   {
     type: 'weekend',
     name: 'Weekend',
     days: 'Sabtu–Minggu',
-    price: '50',
+    price: 50000,
     featured: true,
   },
-]
+])
+
+function updatePricing(pricing) {
+  for (const ticket of pricing) {
+    const current = tickets.value.find((item) => item.type === ticket.ticket_type)
+    if (!current) continue
+    current.name = ticket.ticket_type === 'weekday' ? 'Weekdays' : 'Weekend'
+    current.days = ticket.days_description
+    current.price = Number(ticket.price)
+    window.setTicketPrice?.(ticket.ticket_type, current.price, `Tiket ${current.name}`)
+  }
+}
+
+let unsubscribe
+onMounted(async () => {
+  const result = await ticketPricingService.getActivePricing()
+  if (result.success) updatePricing(result.pricing)
+  else window.showToast?.(result.error, 'error')
+  unsubscribe = realtimeManager.subscribeToTicketPricing(async () => {
+    const refreshed = await ticketPricingService.getActivePricing()
+    if (refreshed.success) updatePricing(refreshed.pricing)
+    else window.showToast?.(refreshed.error, 'error')
+  }, 'ticket_selection_pricing')
+})
+
+onBeforeUnmount(() => unsubscribe?.())
 </script>
 
 <template>
@@ -45,7 +74,7 @@ const tickets = [
         {{ ticket.days }}
       </p>
       <p class="mt-6 font-display text-4xl font-extrabold">
-        Rp{{ ticket.price }}<span
+        Rp{{ ticket.price.toLocaleString('id-ID') }}<span
           class="text-lg font-semibold"
           :class="ticket.featured ? 'text-cyan-200' : 'text-slate-400'"
         >.000</span>

@@ -1,11 +1,17 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { initializeAdminPage } from './legacy/admin-page.js'
 import AdminHeader from './components/admin/AdminHeader.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
 
 const window = globalThis.window
-onMounted(initializeAdminPage)
+const router = useRouter()
+let cleanup
+onMounted(() => {
+  cleanup = initializeAdminPage(() => router.push({ name: 'admin-login' }))
+})
+onBeforeUnmount(() => cleanup?.())
 </script>
 
 <template>
@@ -60,9 +66,10 @@ onMounted(initializeAdminPage)
           <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div class="flex flex-wrap gap-2" id="bk-status-filters">
               <button data-status="all" class="bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white">All <span class="ml-1 text-cyan-100" id="bk-c-all">156</span></button>
-              <button data-status="confirmed" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean">Confirmed <span class="ml-1 text-slate-400" id="bk-c-conf">97</span></button>
-              <button data-status="completed" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100">Completed <span class="ml-1 text-slate-400" id="bk-c-comp">20</span></button>
-              <button data-status="cancelled" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600">Cancelled <span class="ml-1 text-slate-400" id="bk-c-canc">8</span></button>
+              <button data-status="paid" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean">Paid <span class="ml-1 text-slate-400" id="bk-c-conf">0</span></button>
+              <button data-status="pending" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100">Pending <span class="ml-1 text-slate-400" id="bk-c-comp">0</span></button>
+              <button data-status="failed" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600">Failed <span class="ml-1 text-slate-400" id="bk-c-failed">0</span></button>
+              <button data-status="cancelled" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600">Cancelled <span class="ml-1 text-slate-400" id="bk-c-canc">0</span></button>
             </div>
             <div class="relative"><iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bk-search" type="search" placeholder="Cari guest atau booking ID..." class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50 sm:w-64"></div>
           </div>
@@ -130,14 +137,14 @@ onMounted(initializeAdminPage)
         <!-- Promotions Tab -->
         <section id="ctab-promotions" class="tab-panel mt-6">
           <div class="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 class="font-display text-xl font-bold text-slate-900">Create Promotion</h2><p class="mt-1 text-sm text-slate-500">Buat kode promo baru.</p><div class="mt-6 space-y-4"><label class="block text-sm font-bold text-slate-700">Discount code<input id="promo-code" value="CITRALAND10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Type<select id="promo-type" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"><option>Percentage (%)</option><option>Nominal (Rp)</option></select></label><label class="block text-sm font-bold text-slate-700">Amount<input id="promo-amount" value="10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label></div><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Start date<input id="promo-start" type="date" value="2024-12-01" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label><label class="block text-sm font-bold text-slate-700">End date<input id="promo-end" type="date" value="2024-12-31" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label></div><button id="publish-promo-btn" class="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-ocean font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:megaphone"></iconify-icon> Publish promotion</button></div></div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 class="font-display text-xl font-bold text-slate-900">Create Promotion</h2><p class="mt-1 text-sm text-slate-500">Buat kode promo baru.</p><div class="mt-6 space-y-4"><label class="block text-sm font-bold text-slate-700">Discount code<input id="promo-code" placeholder="Contoh: CITRALAND10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Type<select id="promo-type" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"><option>Percentage (%)</option><option>Nominal (Rp)</option></select></label><label class="block text-sm font-bold text-slate-700">Amount<input id="promo-amount" type="number" min="0" placeholder="10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label></div><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Start date<input id="promo-start" type="date" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label><label class="block text-sm font-bold text-slate-700">End date<input id="promo-end" type="date" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label></div><button id="publish-promo-btn" class="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-ocean font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:megaphone"></iconify-icon> Publish promotion</button></div></div>
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Active Promotions</h2><p class="mt-1 text-sm text-slate-500">Promo yang sedang berjalan.</p></div><span id="promo-active-count" class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">2 Active</span></div><div id="promo-list" class="mt-6 space-y-3"></div></div>
           </div>
         </section>
         <!-- Gallery Tab -->
         <section id="ctab-gallery" class="tab-panel mt-6">
           <div class="flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Gallery</h2><p class="mt-1 text-sm text-slate-500">Kelola foto galeri website.</p></div><span id="gallery-count-badge" class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">4 Published</span></div>
-          <div id="drop-zone" class="drop-zone mt-6 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-cyan-200 bg-lagoon/60 p-8 text-center hover:border-aqua"><span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ocean shadow-sm"><iconify-icon icon="lucide:cloud-upload" class="text-2xl"></iconify-icon></span><h3 class="mt-4 font-display font-bold">Drag & drop images here</h3><p class="mt-1 text-sm text-slate-500">atau klik untuk memilih file · JPG, PNG maks 5MB</p><input id="gallery-file-input" type="file" accept="image/*" multiple class="hidden"><button id="choose-gallery-btn" type="button" class="mt-4 rounded-xl border border-aqua px-4 py-2 text-sm font-bold text-ocean hover:bg-aqua hover:text-white">Choose files</button></div>
+          <div id="drop-zone" class="drop-zone mt-6 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-cyan-200 bg-lagoon/60 p-8 text-center hover:border-aqua"><span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ocean shadow-sm"><iconify-icon icon="lucide:cloud-upload" class="text-2xl"></iconify-icon></span><h3 class="mt-4 font-display font-bold">Drag & drop images here</h3><p class="mt-1 text-sm text-slate-500">atau klik untuk memilih file · JPG, PNG, WebP maks 5MB</p><input id="gallery-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden"><button id="choose-gallery-btn" type="button" class="mt-4 rounded-xl border border-aqua px-4 py-2 text-sm font-bold text-ocean hover:bg-aqua hover:text-white">Choose files</button></div>
           <div id="gallery-grid" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"></div>
         </section>
       </div>

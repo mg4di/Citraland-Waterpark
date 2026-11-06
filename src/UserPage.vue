@@ -6,6 +6,7 @@ import GallerySection from './components/user/GallerySection.vue'
 import TicketPricingSection from './components/user/TicketPricingSection.vue'
 import TicketSelectionSection from './components/user/TicketSelectionSection.vue'
 import UserFooter from './components/user/UserFooter.vue'
+import { waterparkHeroImage } from './data/waterparkImages.js'
 
 const window = globalThis.window
 
@@ -36,9 +37,27 @@ onMounted(initializeUserPage)
             <a href="#tentang" class="nav-link transition hover:text-cyan-200">Tentang</a>
           </nav>
           <div class="flex items-center gap-3">
-            <a href="#" @click.prevent="window.navigateTo('login')" class="hidden sm:flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+            <div class="hidden items-center gap-3 sm:flex">
+              <a id="nav-login" href="#" @click.prevent="window.navigateTo('login')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
               <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk
-            </a>
+              </a>
+              <div id="nav-profile" class="relative" style="display: none">
+                <button id="nav-profile-trigger" type="button" aria-expanded="false" aria-haspopup="true" @click.stop="window.toggleProfileMenu('desktop')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+                  <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon>
+                  <span id="nav-profile-name">Profil</span>
+                  <iconify-icon icon="lucide:chevron-down" class="text-sm"></iconify-icon>
+                </button>
+                <div id="nav-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-xl" @click.stop>
+                  <div class="border-b border-slate-100 px-3 py-2">
+                    <p id="nav-profile-dropdown-name" class="truncate text-sm font-bold"></p>
+                    <p id="nav-profile-email" class="truncate text-xs text-slate-500"></p>
+                  </div>
+                  <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
+                    <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
+                  </button>
+                </div>
+              </div>
+            </div>
             <button @click.prevent="window.toggleMobileMenu(true)" class="flex h-11 w-11 items-center justify-center rounded-xl text-white lg:hidden transition hover:bg-white/10" aria-label="Menu">
               <iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon>
             </button>
@@ -48,7 +67,7 @@ onMounted(initializeUserPage)
 
       <!-- Hero -->
       <section class="relative flex min-h-screen items-center overflow-hidden bg-slate-900">
-        <img src="https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RTwDKfu4ebc45u_oIoyhZ9TlfSifONGGqrfpVwnN3jem-GwRid7MHO6EbPvfZlLmiiB2PaBl-wEjoPrNM645htwVYdtXFg8_LVO-pvlU5XXXvLcGirZni8Fyde9rvJ3BQLdXsmwQ=s1360-w1360-h1020-rw" alt="Citraland Waterpark Denpasar, foto Google Maps" class="hero-bg-img absolute inset-0 h-full w-full object-cover">
+        <img :src="waterparkHeroImage.src" :alt="waterparkHeroImage.alt" fetchpriority="high" decoding="async" class="hero-bg-img absolute inset-0 h-full w-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/40 to-slate-900/10"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-slate-950/30"></div>
         <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-cyan-400/10 rounded-full blur-3xl animate-float"></div>
@@ -62,7 +81,7 @@ onMounted(initializeUserPage)
             <h1 class="font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-white md:text-7xl animate-fade-in-up delay-100">Citraland <span class="text-cyan-300">Waterpark</span></h1>
             <p class="mt-7 max-w-lg text-lg leading-8 text-white/80 animate-fade-in-up delay-200">Nikmati wahana air bertema bajak laut, kolam ombak, dan keseruan bersama keluarga di Bali.</p>
             <div class="mt-9 flex flex-wrap items-center gap-4 animate-fade-in-up delay-300">
-              <a href="#" @click.prevent="window.navigateTo('select-ticket')" class="btn-primary inline-flex min-h-14 items-center gap-3 rounded-full bg-aqua px-7 text-sm font-bold text-white shadow-xl shadow-cyan-900/30 transition-all hover:bg-ocean hover:shadow-2xl">Pesan Tiket Sekarang <iconify-icon icon="lucide:arrow-up-right" class="text-lg"></iconify-icon></a>
+              <a href="#harga" class="btn-primary inline-flex min-h-14 items-center gap-3 rounded-full bg-aqua px-7 text-sm font-bold text-white shadow-xl shadow-cyan-900/30 transition-all hover:bg-ocean hover:shadow-2xl">Pesan Tiket Sekarang <iconify-icon icon="lucide:arrow-up-right" class="text-lg"></iconify-icon></a>
               <a href="#galeri" class="inline-flex min-h-14 items-center gap-2 rounded-full border border-white/40 px-6 text-sm font-semibold text-white transition-all hover:bg-white/15"><iconify-icon icon="lucide:play-circle" class="text-xl"></iconify-icon> Lihat suasana</a>
             </div>
           </div>
@@ -244,7 +263,43 @@ onMounted(initializeUserPage)
         <div class="absolute -bottom-56 -left-24 h-[470px] w-[470px] rounded-full border-[28px] border-cyan-200/10 animate-pulse-ring" style="animation-delay:1.5s"></div>
         <div class="absolute right-[12%] top-[20%] h-24 w-24 rounded-full bg-cyan-200/10 blur-2xl animate-float"></div>
         <div id="bubbles-ticket" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-        <header class="absolute top-0 left-0 right-0 z-30"><div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10"><a href="#" @click.prevent="window.navigateTo('home')" class="flex items-center gap-3 text-white group"><span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span><span class="font-display text-lg font-extrabold tracking-tight">CITRALAND<span class="text-cyan-200">.</span></span></a><nav class="hidden items-center gap-8 text-sm font-medium text-white/90 lg:flex"><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Home</a><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Fasilitas</a><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Harga</a></nav><div class="flex items-center gap-3"><a href="#" @click.prevent="window.navigateTo('login')" class="hidden sm:flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean"><iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk</a><button @click.prevent="window.toggleMobileMenu(true)" class="flex h-11 w-11 items-center justify-center rounded-xl text-white lg:hidden"><iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon></button></div></div></header>
+        <header class="absolute top-0 left-0 right-0 z-30">
+          <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
+            <a href="#" @click.prevent="window.navigateTo('home')" class="flex items-center gap-3 text-white group">
+              <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span>
+              <span class="font-display text-lg font-extrabold tracking-tight">CITRALAND<span class="text-cyan-200">.</span></span>
+            </a>
+            <nav class="hidden items-center gap-8 text-sm font-medium text-white/90 lg:flex">
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Home</a>
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Fasilitas</a>
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Harga</a>
+            </nav>
+            <div class="flex items-center gap-3">
+              <a id="select-ticket-login" href="#" @click.prevent="window.navigateTo('login')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+                <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk
+              </a>
+              <div id="select-ticket-profile" class="relative" style="display: none">
+                <button id="select-ticket-profile-trigger" type="button" aria-expanded="false" aria-haspopup="true" @click.stop="window.toggleProfileMenu('select-ticket')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+                  <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon>
+                  <span id="select-ticket-profile-name">Profil</span>
+                  <iconify-icon icon="lucide:chevron-down" class="text-sm"></iconify-icon>
+                </button>
+                <div id="select-ticket-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-xl" @click.stop>
+                  <div class="border-b border-slate-100 px-3 py-2">
+                    <p id="select-ticket-profile-dropdown-name" class="truncate text-sm font-bold"></p>
+                    <p id="select-ticket-profile-email" class="truncate text-xs text-slate-500"></p>
+                  </div>
+                  <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
+                    <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
+                  </button>
+                </div>
+              </div>
+              <button @click.prevent="window.toggleMobileMenu(true)" class="flex h-11 w-11 items-center justify-center rounded-xl text-white lg:hidden">
+                <iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon>
+              </button>
+            </div>
+          </div>
+        </header>
         <div class="mx-auto max-w-7xl px-6 pb-20 pt-32 lg:px-10"><div class="max-w-3xl"><p class="text-sm font-bold uppercase tracking-[.22em] text-cyan-200 animate-fade-in-up">Citraland Waterpark Denpasar</p><h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-white md:text-6xl animate-fade-in-up delay-100">Pilih tiket untuk kunjunganmu</h1><p class="mt-5 max-w-xl text-lg leading-8 text-cyan-50 animate-fade-in-up delay-200">Pilih jenis tiket sesuai hari kunjungan: Weekdays Selasa–Jumat, Weekend Sabtu–Minggu. Senin libur. Anak di bawah 85 cm gratis.</p></div></div>
         <div class="wave-divider-lagoon"></div>
       </div>
@@ -266,7 +321,40 @@ onMounted(initializeUserPage)
         <div class="absolute -right-24 -top-32 h-96 w-96 rounded-full border-[36px] border-white/10 animate-pulse-ring"></div>
         <div class="absolute -bottom-48 left-1/4 h-96 w-96 rounded-full border-[28px] border-cyan-200/10 animate-pulse-ring" style="animation-delay:1.5s"></div>
         <div id="bubbles-booking" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-        <header class="absolute top-0 left-0 right-0 z-30"><div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10"><a href="#" @click.prevent="window.navigateTo('home')" class="flex items-center gap-3 text-white group"><span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span><span class="font-display text-lg font-extrabold tracking-tight">CITRALAND<span class="text-cyan-200">.</span></span></a><nav class="hidden items-center gap-8 text-sm font-medium text-white/90 lg:flex"><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Home</a><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Fasilitas</a><a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Harga</a></nav><a href="#" @click.prevent="window.navigateTo('login')" class="hidden sm:flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean"><iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk</a></div></header>
+        <header class="absolute top-0 left-0 right-0 z-30">
+          <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
+            <a href="#" @click.prevent="window.navigateTo('home')" class="flex items-center gap-3 text-white group">
+              <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span>
+              <span class="font-display text-lg font-extrabold tracking-tight">CITRALAND<span class="text-cyan-200">.</span></span>
+            </a>
+            <nav class="hidden items-center gap-8 text-sm font-medium text-white/90 lg:flex">
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Home</a>
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Fasilitas</a>
+              <a href="#" @click.prevent="window.navigateTo('home')" class="nav-link transition hover:text-cyan-200">Harga</a>
+            </nav>
+            <div class="flex items-center gap-3">
+              <a id="booking-details-login" href="#" @click.prevent="window.navigateTo('login')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+                <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk
+              </a>
+              <div id="booking-details-profile" class="relative" style="display: none">
+                <button id="booking-details-profile-trigger" type="button" aria-expanded="false" aria-haspopup="true" @click.stop="window.toggleProfileMenu('booking-details')" class="flex min-h-11 items-center gap-2 rounded-full border border-white/50 px-4 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean">
+                  <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon>
+                  <span id="booking-details-profile-name">Profil</span>
+                  <iconify-icon icon="lucide:chevron-down" class="text-sm"></iconify-icon>
+                </button>
+                <div id="booking-details-profile-dropdown" class="hidden absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-800 shadow-xl" @click.stop>
+                  <div class="border-b border-slate-100 px-3 py-2">
+                    <p id="booking-details-profile-dropdown-name" class="truncate text-sm font-bold"></p>
+                    <p id="booking-details-profile-email" class="truncate text-xs text-slate-500"></p>
+                  </div>
+                  <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
+                    <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
         <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-32 lg:px-10"><div class="flex items-center gap-3 text-sm text-cyan-100 animate-fade-in-up"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/15"><iconify-icon icon="lucide:ticket-check"></iconify-icon></span> Lengkapi pemesananmu</div><h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-white md:text-5xl animate-fade-in-up delay-100">Detail Pemesanan</h1><p class="mt-3 max-w-xl text-white/70 animate-fade-in-up delay-200">Isi data pengunjung dengan benar agar e-ticket dapat kami kirimkan tanpa kendala.</p></div>
         <div class="wave-divider-slate"></div>
       </div>
@@ -277,7 +365,7 @@ onMounted(initializeUserPage)
             <div class="flex items-start justify-between gap-5 border-b border-slate-100 pb-7"><div><p class="text-sm font-bold uppercase tracking-[.2em] text-ocean">Data pengunjung</p><h2 class="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900">Siapa yang akan berkunjung?</h2><p class="mt-2 text-sm text-slate-500">Masukkan data pemesan utama untuk keperluan konfirmasi tiket.</p></div><span class="hidden h-12 w-12 items-center justify-center rounded-2xl bg-lagoon text-ocean sm:flex"><iconify-icon icon="lucide:user-round" class="text-xl"></iconify-icon></span></div>
             <div class="mt-8 grid gap-6 md:grid-cols-2">
               <div class="md:col-span-2"><label class="mb-2 block text-sm font-bold text-slate-700">Nama lengkap <span class="text-rose-500">*</span></label><div class="relative"><iconify-icon icon="lucide:user" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bf-name" type="text" placeholder="Contoh: Rina Pratiwi" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"></div><p id="bf-name-error" class="mt-2 text-xs font-medium text-rose-600 hidden">Nama lengkap wajib diisi.</p></div>
-              <div><label class="mb-2 block text-sm font-bold text-slate-700">Alamat email <span class="text-rose-500">*</span></label><div class="relative"><iconify-icon icon="lucide:mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bf-email" type="email" placeholder="nama@email.com" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"></div><p class="mt-2 text-xs text-slate-400">E-ticket akan dikirim ke email ini.</p></div>
+              <div><label class="mb-2 block text-sm font-bold text-slate-700">Email akun <span class="text-rose-500">*</span></label><div class="relative"><iconify-icon icon="lucide:mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bf-email" type="email" placeholder="nama@email.com" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"></div><p class="mt-2 text-xs text-slate-400">E-ticket dikirim ke email akun yang sedang masuk.</p></div>
               <div><label class="mb-2 block text-sm font-bold text-slate-700">Nomor telepon <span class="text-rose-500">*</span></label><div class="relative"><iconify-icon icon="lucide:phone" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bf-phone" type="tel" placeholder="08xx-xxxx-xxxx" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"></div></div>
               <div class="md:col-span-2">
                 <label class="mb-2 block text-sm font-bold text-slate-700">Tanggal kunjungan <span class="text-rose-500">*</span></label>
@@ -317,21 +405,16 @@ onMounted(initializeUserPage)
         <div class="scroll-reveal mb-10 text-center" style="transition-delay:.1s"><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Langkah 3 dari 4</p><h1 class="mt-3 font-display text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl">Selesaikan pembayaran</h1><p class="mx-auto mt-4 max-w-xl text-slate-500">Pilih metode pembayaran yang paling nyaman. Tiket akan dikirim setelah pembayaran berhasil dikonfirmasi.</p></div>
         <div class="grid gap-7 lg:grid-cols-[1.2fr_.8fr]">
           <section class="scroll-reveal rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8" style="transition-delay:.2s">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-6"><div><h2 class="font-display text-xl font-bold text-slate-900">Metode pembayaran</h2><p class="mt-1 text-sm text-slate-500">Semua transaksi dilindungi dan dienkripsi.</p></div><span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-lagoon text-ocean"><iconify-icon icon="lucide:shield-check" class="text-xl"></iconify-icon></span></div>
-            <div class="mt-6 space-y-3" id="payment-methods">
-              <label class="payment-option selected flex cursor-pointer items-center justify-between rounded-2xl border-2 border-ocean bg-lagoon p-4" data-method="credit-card"><span class="flex items-center gap-4"><input type="radio" name="payment" value="credit-card" checked class="radio-custom h-5 w-5"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-ocean"><iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon></span><span><span class="block font-bold text-slate-900">Kartu kredit / debit</span><span class="mt-1 block text-xs text-slate-500">Visa, Mastercard, JCB</span></span></span><span class="hidden sm:flex gap-1"><iconify-icon icon="logos:visa" class="text-2xl"></iconify-icon><iconify-icon icon="logos:mastercard" class="text-2xl"></iconify-icon></span></label>
-              <label class="payment-option flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4" data-method="ewallet"><input type="radio" name="payment" value="ewallet" class="radio-custom h-5 w-5"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"><iconify-icon icon="lucide:wallet-cards" class="text-xl"></iconify-icon></span><span><span class="block font-bold text-slate-900">E-wallet</span><span class="mt-1 block text-xs text-slate-500">GCash, GoPay, OVO, DANA</span></span></label>
-              <label class="payment-option flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4" data-method="bank-transfer"><input type="radio" name="payment" value="bank-transfer" class="radio-custom h-5 w-5"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><iconify-icon icon="lucide:landmark" class="text-xl"></iconify-icon></span><span><span class="block font-bold text-slate-900">Transfer bank</span><span class="mt-1 block text-xs text-slate-500">BCA, Mandiri, BNI, BRI</span></span></label>
-              <label class="payment-option flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4" data-method="installment"><input type="radio" name="payment" value="installment" class="radio-custom h-5 w-5"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><iconify-icon icon="lucide:calendar-clock" class="text-xl"></iconify-icon></span><span><span class="block font-bold text-slate-900">Cicilan tanpa kartu</span><span class="mt-1 block text-xs text-slate-500">Atome, Kredivo, dan Akulaku</span></span></label>
-            </div>
-            <div id="card-details" class="card-details open mt-8 border-t border-slate-100 pt-7"><h3 class="font-display text-lg font-bold text-slate-900">Detail kartu</h3><div class="mt-5 grid gap-5"><div><label class="block text-sm font-semibold text-slate-700">Nomor kartu</label><input id="card-number" type="text" placeholder="1234 5678 9012 3456" maxlength="19" class="input-field mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none placeholder:text-slate-400"></div><div class="grid gap-5 sm:grid-cols-2"><div><label class="block text-sm font-semibold text-slate-700">Tanggal kedaluwarsa</label><input id="card-expiry" type="text" placeholder="MM / YY" maxlength="7" class="input-field mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none placeholder:text-slate-400"></div><div><label class="block text-sm font-semibold text-slate-700">CVV / CVC</label><div class="relative"><input id="card-cvv" type="text" placeholder="123" maxlength="4" class="input-field mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 pr-11 text-sm outline-none placeholder:text-slate-400"><iconify-icon icon="lucide:circle-help" class="absolute right-4 top-5 text-slate-400"></iconify-icon></div></div></div></div></div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-6"><div><h2 class="font-display text-xl font-bold text-slate-900">Pembayaran melalui Midtrans</h2><p class="mt-1 text-sm text-slate-500">Pilih metode pembayaran dengan aman di jendela Midtrans.</p></div><span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-lagoon text-ocean"><iconify-icon icon="lucide:shield-check" class="text-xl"></iconify-icon></span></div>
+            <div class="mt-6 rounded-2xl border border-cyan-100 bg-lagoon p-5"><div class="flex items-start gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-ocean"><iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon></span><div><p class="font-bold text-slate-900">Metode pembayaran tersedia di Snap</p><p class="mt-1 text-sm leading-6 text-slate-600">Klik "Bayar Sekarang" untuk membuka popup Midtrans. Detail kartu dan pembayaran hanya dimasukkan di halaman aman Midtrans.</p></div></div></div>
             <div class="mt-8 rounded-2xl bg-slate-50 p-5"><div class="flex items-center justify-between gap-4"><div><p class="font-bold text-slate-900">Punya kode promo?</p><p class="mt-1 text-sm text-slate-500">Masukkan kode untuk mendapatkan potongan harga.</p></div><div class="flex gap-2"><input id="promo-input" type="text" placeholder="CITRALAND" class="h-11 w-32 rounded-xl border border-slate-200 bg-white px-3 text-xs uppercase outline-none focus:border-ocean sm:w-40"><button id="promo-btn" @click.prevent="window.applyPromo()" class="h-11 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition hover:bg-ocean">Pakai</button></div></div><div id="promo-success" class="mt-3 hidden items-center gap-2 text-sm text-emerald-600"><iconify-icon icon="lucide:check-circle" class="text-lg"></iconify-icon><span>Kode promo berhasil diterapkan! Diskon Rp10.000</span></div></div>
           </section>
-          <aside class="scroll-reveal summary-card h-fit rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8 lg:sticky lg:top-8" style="transition-delay:.3s"><div class="flex items-center justify-between"><h2 class="font-display text-xl font-bold text-slate-900">Ringkasan pesanan</h2><span class="rounded-full bg-lagoon px-3 py-1 text-xs font-bold text-ocean">BH-240821</span></div><div class="mt-6 rounded-2xl bg-lagoon p-5"><div class="flex items-start justify-between gap-4"><div><p class="font-bold text-slate-900">Citraland Waterpark Denpasar</p><p class="mt-2 flex items-center gap-2 text-sm text-slate-500"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon><span id="pay-date">Pilih tanggal kunjungan</span></p><p class="mt-3 text-sm font-semibold text-slate-700" id="pay-customer-name">Nama pemesan</p><p class="text-xs text-slate-500" id="pay-customer-email">Email pemesan</p></div><iconify-icon icon="lucide:waves" class="text-2xl text-ocean animate-float"></iconify-icon></div></div>
+          <aside class="scroll-reveal summary-card h-fit rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8 lg:sticky lg:top-8" style="transition-delay:.3s"><div class="flex items-center justify-between"><h2 class="font-display text-xl font-bold text-slate-900">Ringkasan pesanan</h2><span id="pay-booking-code" class="rounded-full bg-lagoon px-3 py-1 text-xs font-bold text-ocean">Kode booking</span></div><div class="mt-6 rounded-2xl bg-lagoon p-5"><div class="flex items-start justify-between gap-4"><div><p class="font-bold text-slate-900">Citraland Waterpark Denpasar</p><p class="mt-2 flex items-center gap-2 text-sm text-slate-500"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon><span id="pay-date">Pilih tanggal kunjungan</span></p><p class="mt-3 text-sm font-semibold text-slate-700" id="pay-customer-name">Nama pemesan</p><p class="text-xs text-slate-500" id="pay-customer-email">Email pemesan</p></div><iconify-icon icon="lucide:waves" class="text-2xl text-ocean animate-float"></iconify-icon></div></div>
             <div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3"><div class="countdown-timer flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"><iconify-icon icon="lucide:clock" class="text-amber-600"></iconify-icon></div><div><p class="text-xs font-bold text-amber-800">Selesaikan dalam</p><p class="text-sm font-bold text-amber-700" id="countdown">23:59:45</p></div></div>
             <div class="mt-6 space-y-4 text-sm"><div id="pay-lines" class="space-y-3"></div><div class="flex justify-between"><span class="text-slate-500">Biaya layanan</span><span class="font-semibold text-slate-800" id="pay-service-fee">Rp0</span></div><div id="discount-row" class="hidden flex justify-between text-emerald-600"><span>Diskon promo</span><span class="font-semibold" id="pay-discount">-Rp10.000</span></div></div>
             <div class="my-6 h-px bg-slate-100"></div><div class="flex items-end justify-between"><span class="font-bold text-slate-700">Total pembayaran</span><span class="font-display text-2xl font-extrabold text-ocean" id="pay-total">Rp0</span></div>
             <button id="pay-btn" @click.prevent="window.processPayment()" class="btn-primary mt-7 flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 font-bold text-white shadow-xl shadow-cyan-200 transition-all hover:bg-ocean active:scale-[0.98]"><span id="pay-btn-text">Bayar Sekarang</span><iconify-icon icon="lucide:arrow-right" class="text-lg" id="pay-btn-icon"></iconify-icon><div class="loading-spinner hidden" id="pay-btn-spinner"></div></button>
+            <button id="check-payment-btn" @click.prevent="window.checkPaymentStatus()" class="mt-3 min-h-11 w-full rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-600 transition hover:border-ocean hover:text-ocean">Sudah membayar? Periksa status</button>
             <p class="mt-4 flex items-center justify-center gap-2 text-center text-xs text-slate-400"><iconify-icon icon="lucide:lock-keyhole" class="text-emerald-500"></iconify-icon> Pembayaran aman dan terenkripsi</p>
             <div class="mt-6 flex items-center justify-center gap-5 border-t border-slate-100 pt-5 text-slate-400"><span class="flex items-center gap-1 text-xs"><iconify-icon icon="lucide:shield-check" class="text-emerald-500"></iconify-icon> SSL Secure</span><span class="flex items-center gap-1 text-xs"><iconify-icon icon="lucide:badge-check" class="text-ocean"></iconify-icon> Terpercaya</span></div>
           </aside>
@@ -384,8 +467,21 @@ onMounted(initializeUserPage)
       <a href="#" @click.prevent="window.navigateTo('home');window.toggleMobileMenu(false)" class="transition hover:text-cyan-300">Galeri</a>
       <a href="#" @click.prevent="window.navigateTo('home');window.toggleMobileMenu(false)" class="transition hover:text-cyan-300">Tentang</a>
       <div class="mt-6 flex flex-col gap-3 w-full max-w-xs">
-        <a href="#" @click.prevent="window.navigateTo('login');window.toggleMobileMenu(false)" class="flex items-center justify-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean"><iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk</a>
-        <a href="#" @click.prevent="window.navigateTo('select-ticket');window.toggleMobileMenu(false)" class="btn-primary flex items-center justify-center gap-2 rounded-full bg-aqua px-5 py-3 text-sm font-bold text-white transition hover:bg-ocean">Pesan Tiket <iconify-icon icon="lucide:arrow-up-right" class="text-lg"></iconify-icon></a>
+        <a id="mobile-nav-login" href="#" @click.prevent="window.navigateTo('login');window.toggleMobileMenu(false)" class="flex items-center justify-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean"><iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon> Masuk</a>
+        <div id="mobile-nav-profile" class="w-full" style="display: none">
+          <button id="mobile-nav-profile-trigger" type="button" aria-expanded="false" aria-haspopup="true" @click.stop="window.toggleProfileMenu('mobile')" class="flex w-full items-center justify-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+            <iconify-icon icon="lucide:user-round" class="text-base"></iconify-icon>
+            <span id="mobile-nav-profile-name">Profil</span>
+            <iconify-icon icon="lucide:chevron-down" class="text-sm"></iconify-icon>
+          </button>
+          <div id="mobile-nav-profile-dropdown" class="hidden mt-2 rounded-2xl border border-white/15 bg-white/10 p-2">
+            <p id="mobile-nav-profile-email" class="truncate px-3 py-2 text-center text-sm text-white/70"></p>
+            <button type="button" @click="window.logoutUser()" class="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-white/10">
+              <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
+            </button>
+          </div>
+        </div>
+        <a href="#harga" @click="window.toggleMobileMenu(false)" class="btn-primary flex items-center justify-center gap-2 rounded-full bg-aqua px-5 py-3 text-sm font-bold text-white transition hover:bg-ocean">Pesan Tiket <iconify-icon icon="lucide:arrow-up-right" class="text-lg"></iconify-icon></a>
       </div>
     </nav>
   </div>

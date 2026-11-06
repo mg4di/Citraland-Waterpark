@@ -1,12 +1,26 @@
 <script setup>
-import { useRouter } from 'vue-router'
-import { grantAdminDemoAccess } from './admin-session.js'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { authService } from './services/authService.js'
 
 const router = useRouter()
+const route = useRoute()
+const email = ref('')
+const password = ref('')
+const errorMessage = ref(route.query.expired ? 'Sesi Anda telah berakhir. Silakan masuk kembali.' : '')
+const loading = ref(false)
 
-function enterAdmin() {
-  grantAdminDemoAccess()
-  router.push({ name: 'admin-dashboard' })
+async function enterAdmin() {
+  if (loading.value) return
+  loading.value = true
+  errorMessage.value = ''
+  const result = await authService.login(email.value, password.value, true)
+  loading.value = false
+  if (!result.success) {
+    errorMessage.value = result.error
+    return
+  }
+  await router.push({ name: 'admin-dashboard' })
 }
 </script>
 
@@ -50,7 +64,7 @@ function enterAdmin() {
             <div>
               <p class="text-sm font-bold uppercase tracking-[.2em] text-ocean">Admin portal</p>
               <h2 class="mt-3 font-display text-3xl font-extrabold tracking-tight text-slate-900">Masuk ke dashboard</h2>
-              <p class="mt-3 text-sm leading-6 text-slate-500">Gunakan formulir demo untuk membuka halaman admin.</p>
+              <p class="mt-3 text-sm leading-6 text-slate-500">Masuk dengan akun admin Citraland Waterpark.</p>
             </div>
             <a href="/" aria-label="Kembali ke halaman utama" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-all hover:border-aqua hover:text-ocean hover:rotate-90 duration-300">
               <iconify-icon icon="lucide:x"></iconify-icon>
@@ -62,27 +76,29 @@ function enterAdmin() {
               <label for="admin-email" class="mb-2 block text-sm font-bold text-slate-700">Alamat email</label>
               <div class="relative">
                 <iconify-icon icon="lucide:mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon>
-                <input id="admin-email" type="email" autocomplete="username" placeholder="admin@bluehaven.id" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400">
+                <input id="admin-email" v-model="email" type="email" autocomplete="username" placeholder="admin@bluehaven.id" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400">
               </div>
             </div>
             <div class="mt-5 animate-fade-in-up delay-300">
               <label for="admin-password" class="mb-2 block text-sm font-bold text-slate-700">Kata sandi</label>
               <div class="relative">
                 <iconify-icon icon="lucide:lock-keyhole" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon>
-                <input id="admin-password" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400">
+                <input id="admin-password" v-model="password" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi" class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400">
               </div>
             </div>
             <div class="mt-5 flex items-center justify-between animate-fade-in-up delay-400">
               <label class="flex cursor-pointer items-center gap-3 text-sm text-slate-600"><input type="checkbox" class="checkbox-custom h-4 w-4 rounded border-slate-300"><span>Ingat saya</span></label>
-              <span class="flex items-center gap-1.5 text-xs text-emerald-600"><iconify-icon icon="lucide:shield-check"></iconify-icon> Sesi demo</span>
+              <span class="flex items-center gap-1.5 text-xs text-emerald-600"><iconify-icon icon="lucide:shield-check"></iconify-icon> Sesi aman</span>
             </div>
             <button type="submit" class="btn-primary mt-7 flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition-all hover:bg-ocean hover:shadow-xl active:scale-[0.98] animate-fade-in-up delay-500">
-              <span>Masuk ke Admin</span>
-              <iconify-icon icon="lucide:arrow-right" class="text-lg"></iconify-icon>
+              <span>{{ loading ? 'Memeriksa...' : 'Masuk ke Admin' }}</span>
+              <iconify-icon v-if="!loading" icon="lucide:arrow-right" class="text-lg"></iconify-icon>
+              <div v-else class="loading-spinner"></div>
             </button>
+            <p v-if="errorMessage" class="mt-4 text-sm text-rose-600" role="alert">{{ errorMessage }}</p>
           </form>
 
-          <p class="mt-8 text-center text-sm text-slate-500 animate-fade-in-up delay-800">Mode demo: email dan kata sandi tidak diperlukan.</p>
+          <p class="mt-8 text-center text-sm text-slate-500 animate-fade-in-up delay-800">Gunakan email dan kata sandi yang terdaftar pada Supabase Auth.</p>
           <div class="mt-7 flex items-center justify-center gap-5 border-t border-slate-100 pt-6 text-xs text-slate-400">
             <span class="flex items-center gap-1.5"><iconify-icon icon="lucide:lock" class="text-emerald-500"></iconify-icon> SSL Secure</span>
             <a href="/" class="flex items-center gap-1.5 transition hover:text-ocean"><iconify-icon icon="lucide:arrow-left"></iconify-icon> Halaman utama</a>

@@ -1,28 +1,31 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { galleryService } from '../../services/galleryService.js'
+import { realtimeManager } from '../../services/realtimeService.js'
+import { waterparkGalleryImages } from '../../data/waterparkImages.js'
 
-const gallery = [
-  {
-    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sc6iYceeZF306CAScPqQZGGRo1-3Q8HBrSb32GOFWPtA9dQTfymZ0OrYndGYARdgsYRnjSV1KCjSOtSnI4Z17mycHGyE4zxkSpfbz6Y3wFnLnp-KrW3IoZWSkjR0vROGGnPiaaPA=w1200-h800-k-no',
-    alt: 'Kolam bermain dan kapal bajak laut di Citraland Waterpark, foto Google Maps',
-    caption: 'Kolam bermain bertema bajak laut',
-  },
-  {
-    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9QMdguxEu0WftzZVqJbPufprKkEzTdEPrGscjaHSvkaja_IcIx4_1iIx1GjSSVKR42-CPeNpGc_Q1CYZST8tmsOdK8PLSS5_MLw88liSj8oICFS9MRV4hByt7-VWynl9XXEbYCq9g=w1200-h1200-k-no',
-    alt: 'Seluncuran merah dan area bermain anak di Citraland Waterpark, foto Google Maps',
-    caption: 'Area seluncuran air anak',
-  },
-  {
-    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Tn5GEWcUGMO_8pjjyZBAr_CyH6XyUhHSF2Ff6ZFPJir8ifmlkd9xBb1RQafJhOigAoNre2Kn7MLMlz9zj3XqwpoQALtwCDYn4cD8qsqnTkjGKu973xARlyslm5tmAMr5yp_AY=w1200-h1600-k-no',
-    alt: 'Pintu masuk bertema bajak laut Citraland Waterpark Denpasar, foto Google Maps',
-    caption: 'Pintu masuk Citraland Waterpark',
-  },
-  {
-    src: 'https://lh3.googleusercontent.com/gps-cs-s/ANWiy9ReyG69OKZQcbE29PNRlHs6xK6uQuyqIwPoYFkWWJf6fM805NmjUv5e7U0wl5ZvjdJQv3BumMqwUVAxqYJj7Tfxf78eRZICXEupfLxw8qhGo2Ym4LWFdtoB4X53KaFsEPU2zeiF=w1200-h1600-k-no',
-    alt: 'Dekorasi patung bajak laut di Citraland Waterpark, foto Google Maps',
-    caption: 'Dekorasi bajak laut di area waterpark',
-  },
-]
+const window = globalThis.window
+const gallery = ref(waterparkGalleryImages.map((image) => ({ ...image })))
+
+function updateGallery(images) {
+  if (!images.length) {
+    gallery.value = waterparkGalleryImages.map((image) => ({ ...image }))
+    activeIndex.value = 0
+    requestAnimationFrame(updateActiveIndex)
+    return
+  }
+
+  gallery.value = images.map((image) => {
+    const localImage = waterparkGalleryImages.find((item) => item.caption === image.caption)
+    return {
+      src: localImage?.src || image.image_url,
+      alt: localImage?.alt || image.caption || 'Foto Citraland Waterpark Denpasar',
+      caption: image.caption || 'Citraland Waterpark Denpasar',
+    }
+  })
+  activeIndex.value = 0
+  requestAnimationFrame(updateActiveIndex)
+}
 
 const track = ref(null)
 const activeIndex = ref(0)
@@ -70,10 +73,21 @@ function onKeydown(event) {
 
 onMounted(() => {
   track.value?.addEventListener('scroll', onScroll, { passive: true })
+  galleryService.getPublishedImages().then((result) => {
+    if (result.success) updateGallery(result.images)
+    else window.showToast?.(result.error, 'error')
+  })
+  unsubscribeGallery = realtimeManager.subscribeToGallery(async () => {
+    const result = await galleryService.getPublishedImages()
+    if (result.success) updateGallery(result.images)
+    else window.showToast?.(result.error, 'error')
+  })
 })
 
+let unsubscribeGallery
 onBeforeUnmount(() => {
   track.value?.removeEventListener('scroll', onScroll)
+  unsubscribeGallery?.()
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame)
 })
 </script>
@@ -103,7 +117,7 @@ onBeforeUnmount(() => {
         @keydown="onKeydown"
       >
         <figure v-for="image in gallery" :key="image.src" data-gallery-slide class="relative h-full min-w-full snap-start overflow-hidden rounded-3xl bg-slate-100">
-          <img :src="image.src" :alt="image.alt" class="gallery-img h-full w-full object-cover">
+          <img :src="image.src" :alt="image.alt" loading="lazy" decoding="async" class="gallery-img h-full w-full object-cover">
           <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-6 pb-6 pt-20 text-lg font-bold text-white sm:px-10 sm:pb-9">{{ image.caption }}</figcaption>
         </figure>
       </div>
