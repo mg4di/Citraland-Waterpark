@@ -132,6 +132,39 @@ export const paymentService = {
     }
   },
 
+  async resumeTransaction(bookingCode) {
+    try {
+      const { data, error } = await getSupabaseClient().functions.invoke(
+        'midtrans-resume-transaction',
+        { body: { bookingCode } },
+      )
+      if (error) {
+        logError('Resume Midtrans transaction', error)
+        return {
+          success: false,
+          error: data?.error ?? await getFunctionErrorMessage(
+            error,
+            'Gagal melanjutkan pembayaran. Silakan coba lagi.',
+          ),
+        }
+      }
+      if (!data?.success || !data.snap_token || !data.booking_code) {
+        return { success: false, error: data?.error ?? 'Gagal melanjutkan pembayaran. Silakan coba lagi.' }
+      }
+      return {
+        success: true,
+        snap_token: data.snap_token,
+        redirect_url: data.redirect_url,
+        booking_code: data.booking_code,
+        booking_id: data.booking_id,
+        total_amount: data.total_amount,
+      }
+    } catch (error) {
+      const mapped = mapSupabaseError(error)
+      return failure(error, 'Resume Midtrans transaction', mapped.message)
+    }
+  },
+
   async getBookingStatus(bookingCode, email) {
     try {
       const { data, error } = await getSupabaseClient().functions.invoke('booking-status', {

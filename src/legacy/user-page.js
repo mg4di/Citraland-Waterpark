@@ -3,6 +3,16 @@ import { bookingService } from '../services/bookingService.js'
 import { paymentService } from '../services/paymentService.js'
 import { promotionService } from '../services/promotionService.js'
 import { ticketPricingService } from '../services/ticketPricingService.js'
+import {
+  formatDateID as formatTicketDate,
+  formatRupiah as formatTicketRupiah,
+  generateQrDataUrl,
+  getPaymentMethodLabel,
+  getPaymentStatusMeta,
+  getTicketLines,
+  getTicketSummary,
+  getUsageStatusMeta,
+} from '../services/ticketService.js'
 import { validateBookingForm } from '../utils/validation.js'
 
 export function initializeUserPage() {
@@ -21,9 +31,17 @@ export function initializeUserPage() {
       currentPage: '',
       pendingPage: null,
       isSnapOpen: false,
-      isVerifyingPayment: false
+      isVerifyingPayment: false,
+      confirmationBooking: null,
+      qrDataUrl: '',
+      isDownloadingTicket: false,
+      ticketHistory: [],
+      ticketHistoryFilter: 'all',
+      isLoadingHistory: false,
+      paymentTotalOverride: null,
     };
     const bookingPages = new Set(['select-ticket', 'booking-details', 'payment', 'confirmation']);
+    const protectedPages = new Set([...bookingPages, 'ticket-history']);
     let currentUser = null;
     const profileMenus = [
       {
@@ -143,6 +161,7 @@ export function initializeUserPage() {
         }
         if (page === 'payment') updatePaymentSummary();
         if (page === 'confirmation') updateConfirmationDetails();
+        if (page === 'ticket-history') loadTicketHistory();
         if (page === 'home') initScrollReveal();
         initScrollReveal();
         initBubbles(page);
@@ -153,6 +172,9 @@ export function initializeUserPage() {
     }
 
     async function navigateTo(page) {
+      closeProfileMenus();
+      toggleMobileMenu(false);
+      if (page === 'select-ticket') appState.paymentTotalOverride = null;
       if (page === 'confirmation' && appState.paymentStatus !== 'paid') {
         showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
         page = appState.bookingCode && appState.snapToken ? 'payment' : 'booking-details';
@@ -161,7 +183,7 @@ export function initializeUserPage() {
         showToast('Mulai pemesanan terlebih dahulu sebelum membuka pembayaran.', 'info');
         page = 'booking-details';
       }
-      if (bookingPages.has(page)) {
+      if (protectedPages.has(page)) {
         const result = await authService.getUser();
         if (!result.success) {
           currentUser = null;
@@ -173,7 +195,12 @@ export function initializeUserPage() {
         currentUser = result.user;
         if (!currentUser) {
           appState.pendingPage = page;
-          showToast('Silakan masuk atau daftar terlebih dahulu untuk memesan tiket.', 'info');
+          showToast(
+            page === 'ticket-history'
+              ? 'Silakan masuk untuk melihat riwayat tiket.'
+              : 'Silakan masuk atau daftar terlebih dahulu untuk memesan tiket.',
+            'info',
+          );
           renderPage('login');
           return;
         }
@@ -193,7 +220,13 @@ export function initializeUserPage() {
     authService.onAuthStateChange((user) => {
       currentUser = user;
       updateNavbarAuth(user);
-      if (!user && bookingPages.has(appState.currentPage)) {
+      if (!user) {
+        appState.ticketHistory = [];
+        appState.confirmationBooking = null;
+        appState.qrDataUrl = '';
+        appState.paymentTotalOverride = null;
+      }
+      if (!user && protectedPages.has(appState.currentPage)) {
         appState.pendingPage = appState.currentPage;
         renderPage('login');
       }
@@ -215,6 +248,10 @@ export function initializeUserPage() {
 
       currentUser = null;
       appState.pendingPage = null;
+      appState.ticketHistory = [];
+      appState.confirmationBooking = null;
+      appState.qrDataUrl = '';
+      appState.paymentTotalOverride = null;
       updateNavbarAuth(null);
       toggleMobileMenu(false);
       showToast('Anda berhasil keluar.', 'success');
@@ -277,6 +314,7 @@ export function initializeUserPage() {
     }
 
     function goToBooking(type) {
+      appState.paymentTotalOverride = null;
       const otherType = type === 'weekday' ? 'weekend' : 'weekday';
       appState.quantities[otherType] = 0;
       document.getElementById(otherType + '-qty').value = 0;
@@ -289,6 +327,7 @@ export function initializeUserPage() {
     }
 
     function goToBookingFromSummary() {
+      appState.paymentTotalOverride = null;
       const total = appState.quantities.weekday + appState.quantities.weekend;
       if (total === 0) { showToast('Pilih minimal 1 tiket','error'); return; }
       navigateTo('booking-details');
@@ -506,6 +545,9 @@ export function initializeUserPage() {
           appState.bookingCode = result.booking_code;
           appState.snapToken = result.snap_token;
           appState.paymentStatus = 'pending';
+          appState.confirmationBooking = null;
+          appState.qrDataUrl = '';
+          appState.paymentTotalOverride = null;
           updatePaymentSummary();
           navigateTo('payment');
         } else {
@@ -532,6 +574,7 @@ export function initializeUserPage() {
         const result = await paymentService.getBookingStatus(appState.bookingCode, appState.booking.email);
         if (result.success && result.payment_status === 'paid') {
           appState.paymentStatus = 'paid';
+          await loadConfirmationBooking();
           updateConfirmationDetails();
           navigateTo('confirmation');
         } else if (result.success && result.payment_status !== 'pending') {
@@ -570,6 +613,10 @@ export function initializeUserPage() {
     function getOrderTotals() {
       const subtotal = getSelectedTickets().reduce((total, ticket) => total + ticket.subtotal, 0);
       const serviceFee = 0;
+      if (appState.paymentTotalOverride !== null && Number.isFinite(Number(appState.paymentTotalOverride))) {
+        const total = Number(appState.paymentTotalOverride);
+        return { subtotal, serviceFee, discount: Math.max(0, subtotal + serviceFee - total), total };
+      }
       const discount = appState.promo ? Math.min(appState.promo.discountAmount, subtotal + serviceFee) : 0;
       return { subtotal, serviceFee, discount, total: subtotal + serviceFee - discount };
     }
@@ -653,52 +700,143 @@ export function initializeUserPage() {
       if (payTotal) payTotal.textContent = formatRupiah(total);
     }
 
-    function updateConfirmationDetails() {
-      const tickets = getSelectedTickets();
-      const { serviceFee, discount, total } = getOrderTotals();
+    async function loadConfirmationBooking() {
+      if (appState.confirmationBooking) return appState.confirmationBooking;
+      if (!appState.bookingCode) return null;
+      const result = await bookingService.getBookingByCode(appState.bookingCode);
+      if (!result.success) return null;
+      const booking = result.booking;
+      if (currentUser?.email && booking.user_email?.toLowerCase() !== currentUser.email.toLowerCase()) {
+        return null;
+      }
+      appState.confirmationBooking = booking;
+      return booking;
+    }
+
+    async function renderConfirmationQr(booking) {
+      const image = document.getElementById('confirm-qr-image');
+      const fallback = document.getElementById('confirm-qr-fallback');
+      if (!image || !fallback) return;
+      if (!booking) {
+        image.classList.add('hidden');
+        fallback.classList.remove('hidden');
+        return;
+      }
+      try {
+        const dataUrl = appState.qrDataUrl || await generateQrDataUrl(booking);
+        appState.qrDataUrl = dataUrl;
+        image.src = dataUrl;
+        image.classList.remove('hidden');
+        fallback.classList.add('hidden');
+      } catch (error) {
+        console.error('QR generation failed:', error);
+        image.classList.add('hidden');
+        fallback.classList.remove('hidden');
+      }
+    }
+
+    async function updateConfirmationDetails() {
+      appState.paymentTotalOverride = null;
+      const booking = appState.confirmationBooking || await loadConfirmationBooking();
+      if (booking) {
+        appState.bookingCode = booking.booking_code;
+        if (appState.paymentStatus !== 'paid') appState.paymentStatus = booking.payment_status;
+        appState.paymentType = booking.payment_method || booking.midtrans_payment_type || appState.paymentType;
+        appState.booking = {
+          name: booking.user_name,
+          email: booking.user_email,
+          phone: booking.user_phone,
+          date: booking.visit_date,
+        };
+      }
+
+      const tickets = booking ? getTicketLines(booking) : getSelectedTickets();
+      const ticketSubtotal = tickets.reduce((sum, ticket) => sum + ticket.subtotal, 0);
+      const totals = booking
+        ? {
+            serviceFee: 0,
+            discount: Math.max(0, ticketSubtotal - Number(booking.total_amount)),
+            total: Number(booking.total_amount),
+          }
+        : getOrderTotals();
       const customerName = document.getElementById('confirm-name');
       const ticketTypes = document.getElementById('confirm-ticket-types');
       const visitDate = document.getElementById('confirm-date');
       const customerEmail = document.getElementById('confirm-email');
       const customerPhone = document.getElementById('confirm-phone');
       const qrTicketTypes = document.getElementById('confirm-qr-types');
-      const paymentTypeNames = {
-        bank_transfer: 'Transfer bank',
-        credit_card: 'Kartu kredit',
-        gopay: 'GoPay',
-        shopeepay: 'ShopeePay',
-        qris: 'QRIS',
-        cstore: 'Gerai retail',
-        echannel: 'Pembayaran elektronik',
-        akulaku: 'Akulaku',
-      };
-      if (customerName) customerName.textContent = appState.booking.name || 'Nama pengunjung';
-      if (ticketTypes) ticketTypes.textContent = tickets.length
-        ? tickets.map(ticket => `${ticket.name} × ${ticket.quantity}`).join(', ')
-        : 'Belum ada tiket dipilih';
-      if (visitDate) visitDate.textContent = formatDateID(appState.booking.date);
-      if (customerEmail) customerEmail.textContent = appState.booking.email || 'Email belum tersedia';
-      if (customerPhone) customerPhone.textContent = appState.booking.phone || 'Nomor telepon belum tersedia';
+      const qrCode = document.getElementById('confirm-qr-code');
+      if (customerName) customerName.textContent = booking?.user_name || appState.booking.name || 'Nama pengunjung';
+      if (ticketTypes) ticketTypes.textContent = booking
+        ? getTicketSummary(booking)
+        : tickets.length
+          ? tickets.map(ticket => `${ticket.name} × ${ticket.quantity}`).join(', ')
+          : 'Belum ada tiket dipilih';
+      if (visitDate) visitDate.textContent = formatTicketDate(booking?.visit_date || appState.booking.date);
+      if (customerEmail) customerEmail.textContent = booking?.user_email || appState.booking.email || 'Email belum tersedia';
+      if (customerPhone) customerPhone.textContent = booking?.user_phone || appState.booking.phone || 'Nomor telepon belum tersedia';
       if (qrTicketTypes) qrTicketTypes.textContent = tickets.length
         ? tickets.map(ticket => ticket.type.toUpperCase()).join('-')
         : 'TICKET';
+      if (qrCode) qrCode.textContent = booking?.booking_code || appState.bookingCode || '-';
       renderOrderLines('confirm-lines', tickets, 'Belum ada tiket dipilih.');
       const serviceFeeElement = document.getElementById('confirm-service-fee');
-      if (serviceFeeElement) serviceFeeElement.textContent = formatRupiah(serviceFee);
+      if (serviceFeeElement) serviceFeeElement.textContent = formatRupiah(totals.serviceFee);
       const discountRow = document.getElementById('confirm-discount-row');
       if (discountRow) {
-        discountRow.classList.toggle('hidden', discount === 0);
+        discountRow.classList.toggle('hidden', totals.discount === 0);
         const discountAmount = document.getElementById('confirm-discount');
-        if (discountAmount) discountAmount.textContent = '-' + formatRupiah(discount);
+        if (discountAmount) discountAmount.textContent = '-' + formatRupiah(totals.discount);
       }
       const paymentMethodElement = document.getElementById('confirm-payment-method');
       if (paymentMethodElement) {
-        paymentMethodElement.textContent = paymentTypeNames[appState.paymentType] || appState.paymentType || 'Midtrans';
+        paymentMethodElement.textContent = getPaymentMethodLabel(booking ?? { payment_method: appState.paymentType });
       }
       const totalElement = document.getElementById('confirm-total');
-      if (totalElement) totalElement.textContent = formatRupiah(total);
+      if (totalElement) totalElement.textContent = formatRupiah(totals.total);
       const bookingCodeElement = document.getElementById('confirm-code');
-      if (bookingCodeElement && appState.bookingCode) bookingCodeElement.textContent = appState.bookingCode;
+      if (bookingCodeElement) bookingCodeElement.textContent = booking?.booking_code || appState.bookingCode || '-';
+      await renderConfirmationQr(booking);
+    }
+
+    function setDownloadButtonBusy(busy) {
+      const button = document.getElementById('download-ticket-btn');
+      const text = document.getElementById('download-ticket-text');
+      const icon = document.getElementById('download-ticket-icon');
+      const spinner = document.getElementById('download-ticket-spinner');
+      if (button) button.disabled = busy;
+      if (text) text.textContent = busy ? 'Menyiapkan PDF...' : 'Unduh e-ticket';
+      icon?.classList.toggle('hidden', busy);
+      spinner?.classList.toggle('hidden', !busy);
+    }
+
+    async function downloadTicket() {
+      if (appState.isDownloadingTicket) return;
+      const booking = appState.confirmationBooking || await loadConfirmationBooking();
+      if (!booking) {
+        showToast('Data tiket tidak ditemukan. Buka riwayat tiket untuk melihat pesanan.', 'error');
+        return;
+      }
+      if (booking.payment_status !== 'paid') {
+        showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        return;
+      }
+
+      appState.isDownloadingTicket = true;
+      setDownloadButtonBusy(true);
+      try {
+        const qrDataUrl = appState.qrDataUrl || await generateQrDataUrl(booking);
+        appState.qrDataUrl = qrDataUrl;
+        const { downloadTicketPdf } = await import('../services/ticketPdfService.js');
+        downloadTicketPdf(booking, qrDataUrl);
+        showToast('E-ticket berhasil diunduh!', 'success');
+      } catch (error) {
+        console.error('Download e-ticket failed:', error);
+        showToast('Gagal membuat PDF e-ticket. Silakan coba lagi.', 'error');
+      } finally {
+        appState.isDownloadingTicket = false;
+        setDownloadButtonBusy(false);
+      }
     }
 
     async function applyPromo() {
@@ -763,6 +901,7 @@ export function initializeUserPage() {
         if (result.success && result.payment_status === 'paid') {
           appState.paymentStatus = 'paid';
           appState.paymentType = paymentResult?.payment_type || appState.paymentType;
+          await loadConfirmationBooking();
           updateConfirmationDetails();
           navigateTo('confirmation');
           return;
@@ -828,6 +967,334 @@ export function initializeUserPage() {
     function copyBookingCode() {
       const code = document.getElementById('confirm-code').textContent;
       navigator.clipboard.writeText(code).then(() => showToast('Kode booking disalin: '+code,'success')).catch(() => showToast('Gagal menyalin','error'));
+    }
+
+    // ===== TICKET HISTORY =====
+    const HISTORY_TONE_CLASSES = {
+      emerald: 'bg-emerald-50 text-emerald-700',
+      amber: 'bg-amber-50 text-amber-700',
+      rose: 'bg-rose-50 text-rose-700',
+      slate: 'bg-slate-100 text-slate-600',
+      violet: 'bg-violet-50 text-violet-700',
+      ocean: 'bg-lagoon text-ocean',
+    };
+
+    function formatHistoryCreatedAt(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function createHistoryBadge(label, tone) {
+      const badge = document.createElement('span');
+      badge.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${HISTORY_TONE_CLASSES[tone] || HISTORY_TONE_CLASSES.slate}`;
+      badge.textContent = label;
+      return badge;
+    }
+
+    function createHistoryCard(booking) {
+      const payment = getPaymentStatusMeta(booking.payment_status);
+      const usage = getUsageStatusMeta(booking);
+      const article = document.createElement('article');
+      article.className = 'scroll-reveal visible flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md';
+
+      const header = document.createElement('div');
+      header.className = 'flex items-start justify-between gap-4';
+      const codeWrap = document.createElement('div');
+      const code = document.createElement('p');
+      code.className = 'font-display text-lg font-extrabold tracking-widest text-ocean';
+      code.textContent = booking.booking_code;
+      const created = document.createElement('p');
+      created.className = 'mt-1 text-xs text-slate-400';
+      created.textContent = `Dipesan ${formatHistoryCreatedAt(booking.created_at)}`;
+      codeWrap.append(code, created);
+      header.append(codeWrap, createHistoryBadge(payment.label, payment.tone));
+
+      const meta = document.createElement('div');
+      meta.className = 'mt-5 flex flex-wrap items-center gap-2 text-xs text-slate-500';
+      const dateBadge = document.createElement('span');
+      dateBadge.className = 'inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 font-semibold text-slate-600';
+      const dateIcon = document.createElement('iconify-icon');
+      dateIcon.setAttribute('icon', 'lucide:calendar-days');
+      dateIcon.className = 'text-ocean';
+      const dateText = document.createElement('span');
+      dateText.textContent = formatTicketDate(booking.visit_date);
+      dateBadge.append(dateIcon, dateText);
+      meta.append(dateBadge, createHistoryBadge(usage.label, usage.tone));
+
+      const summary = document.createElement('div');
+      summary.className = 'mt-5 rounded-2xl bg-lagoon p-4';
+      const summaryTitle = document.createElement('p');
+      summaryTitle.className = 'text-sm font-bold text-slate-800';
+      summaryTitle.textContent = getTicketSummary(booking);
+      const summaryTotal = document.createElement('p');
+      summaryTotal.className = 'mt-1 font-display text-xl font-extrabold text-ocean';
+      summaryTotal.textContent = formatTicketRupiah(booking.total_amount);
+      summary.append(summaryTitle, summaryTotal);
+
+      const actions = document.createElement('div');
+      actions.className = 'mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5';
+      if (booking.payment_status === 'paid') {
+        const view = document.createElement('button');
+        view.type = 'button';
+        view.className = 'inline-flex min-h-10 items-center gap-2 rounded-full bg-ocean px-4 text-xs font-bold text-white transition hover:bg-aqua';
+        view.textContent = 'Lihat E-Ticket';
+        view.addEventListener('click', () => openTicketFromHistory(booking.booking_code));
+        const download = document.createElement('button');
+        download.type = 'button';
+        download.className = 'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        download.textContent = 'Unduh PDF';
+        download.addEventListener('click', () => downloadHistoryTicket(booking.booking_code));
+        actions.append(view, download);
+      } else if (booking.payment_status === 'pending') {
+        const expired = booking.visit_date < formatDateValue(new Date());
+        const note = document.createElement('p');
+        note.className = 'w-full text-xs font-semibold text-amber-600';
+        note.textContent = expired
+          ? 'Tiket sudah kedaluwarsa karena tanggal kunjungan telah lewat.'
+          : 'Menunggu pembayaran. E-ticket tersedia setelah pembayaran berhasil.';
+        actions.append(note);
+        if (!expired) {
+          const pay = document.createElement('button');
+          pay.type = 'button';
+          pay.className = 'inline-flex min-h-10 items-center gap-2 rounded-full bg-amber-500 px-4 text-xs font-bold text-white transition hover:bg-amber-600';
+          pay.textContent = 'Lanjutkan Pembayaran';
+          pay.addEventListener('click', () => resumePaymentFromHistory(booking.booking_code));
+          actions.append(pay);
+        }
+      } else {
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        retry.textContent = 'Pesan tiket lagi';
+        retry.addEventListener('click', () => navigateTo('select-ticket'));
+        actions.append(retry);
+      }
+
+      article.append(header, meta, summary, actions);
+      return article;
+    }
+
+    function getFilteredHistory() {
+      const filter = appState.ticketHistoryFilter;
+      if (filter === 'all') return appState.ticketHistory;
+      if (filter === 'used') {
+        return appState.ticketHistory.filter((booking) => {
+          const usage = getUsageStatusMeta(booking);
+          return usage.label === 'Sudah digunakan' || usage.label === 'Kedaluwarsa';
+        });
+      }
+      return appState.ticketHistory.filter((booking) => booking.payment_status === filter);
+    }
+
+    function renderTicketHistory() {
+      const list = document.getElementById('ticket-history-list');
+      const empty = document.getElementById('ticket-history-empty');
+      const loading = document.getElementById('ticket-history-loading');
+      const error = document.getElementById('ticket-history-error');
+      if (!list) return;
+      loading?.classList.add('hidden');
+      error?.classList.add('hidden');
+      const bookings = getFilteredHistory();
+      list.replaceChildren();
+      if (!bookings.length) {
+        const hasAny = appState.ticketHistory.length > 0;
+        const title = empty?.querySelector('h3');
+        const description = empty?.querySelector('p');
+        if (title) title.textContent = hasAny ? 'Tidak ada tiket untuk filter ini' : 'Belum ada riwayat tiket';
+        if (description) description.textContent = hasAny
+          ? 'Coba pilih filter lain untuk melihat tiketmu.'
+          : 'Pesanan tiket yang sudah kamu buat akan muncul di sini.';
+        empty?.classList.remove('hidden');
+        return;
+      }
+      empty?.classList.add('hidden');
+      for (const booking of bookings) list.appendChild(createHistoryCard(booking));
+    }
+
+    async function loadTicketHistory() {
+      if (!currentUser?.email) return;
+      const list = document.getElementById('ticket-history-list');
+      const empty = document.getElementById('ticket-history-empty');
+      const loading = document.getElementById('ticket-history-loading');
+      const error = document.getElementById('ticket-history-error');
+      appState.isLoadingHistory = true;
+      loading?.classList.remove('hidden');
+      empty?.classList.add('hidden');
+      error?.classList.add('hidden');
+      list?.replaceChildren();
+
+      const result = await bookingService.getUserBookings(currentUser.email);
+      appState.isLoadingHistory = false;
+      if (!result.success) {
+        loading?.classList.add('hidden');
+        const message = document.getElementById('ticket-history-error-message');
+        if (message) message.textContent = result.error;
+        else if (error) error.textContent = result.error;
+        error?.classList.remove('hidden');
+        return;
+      }
+      appState.ticketHistory = result.bookings;
+      renderTicketHistory();
+    }
+
+    async function openTicketFromHistory(bookingCode) {
+      const result = await bookingService.getBookingByCode(bookingCode);
+      if (!result.success) {
+        showToast(result.error || 'Tiket tidak ditemukan.', 'error');
+        return;
+      }
+      const booking = result.booking;
+      if (currentUser?.email && booking.user_email?.toLowerCase() !== currentUser.email.toLowerCase()) {
+        showToast('Anda hanya dapat melihat tiket akun sendiri.', 'error');
+        return;
+      }
+      if (booking.payment_status !== 'paid') {
+        showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        return;
+      }
+      appState.confirmationBooking = booking;
+      appState.bookingCode = booking.booking_code;
+      appState.paymentStatus = booking.payment_status;
+      appState.paymentType = booking.payment_method || booking.midtrans_payment_type || '';
+      appState.booking = {
+        name: booking.user_name,
+        email: booking.user_email,
+        phone: booking.user_phone,
+        date: booking.visit_date,
+      };
+      appState.qrDataUrl = '';
+      appState.paymentTotalOverride = null;
+      navigateTo('confirmation');
+    }
+
+    async function resumePaymentFromHistory(bookingCode) {
+      const cached = appState.ticketHistory.find((booking) => booking.booking_code === bookingCode);
+      let booking = cached;
+      if (!booking) {
+        const result = await bookingService.getBookingByCode(bookingCode);
+        if (!result.success) {
+          showToast(result.error || 'Tiket tidak ditemukan.', 'error');
+          return;
+        }
+        booking = result.booking;
+      }
+      if (currentUser?.email && booking.user_email?.toLowerCase() !== currentUser.email.toLowerCase()) {
+        showToast('Anda hanya dapat melanjutkan pembayaran akun sendiri.', 'error');
+        return;
+      }
+      if (booking.payment_status !== 'pending') {
+        showToast('Booking ini tidak sedang menunggu pembayaran.', 'info');
+        return;
+      }
+      if (booking.visit_date < formatDateValue(new Date())) {
+        showToast('Tanggal kunjungan tiket ini sudah lewat. Silakan buat pesanan baru.', 'error');
+        return;
+      }
+
+      const result = await paymentService.resumeTransaction(booking.booking_code);
+      if (!result.success) {
+        showToast(result.error, 'error');
+        return;
+      }
+
+      appState.bookingCode = result.booking_code;
+      appState.snapToken = result.snap_token;
+      appState.paymentStatus = 'pending';
+      appState.paymentType = booking.payment_method || booking.midtrans_payment_type || '';
+      appState.confirmationBooking = null;
+      appState.qrDataUrl = '';
+      appState.promo = null;
+      appState.paymentTotalOverride = Number(result.total_amount ?? booking.total_amount);
+      appState.booking = {
+        name: booking.user_name,
+        email: booking.user_email,
+        phone: booking.user_phone,
+        date: booking.visit_date,
+      };
+
+      appState.quantities = { weekday: 0, weekend: 0 };
+      for (const [type, details] of Object.entries(booking.ticket_types ?? {})) {
+        if (!Object.hasOwn(appState.quantities, type)) continue;
+        const quantity = Number(details?.qty ?? 0);
+        const price = Number(details?.price ?? appState.prices[type]);
+        appState.quantities[type] = quantity;
+        if (Number.isFinite(price) && price >= 0) appState.prices[type] = price;
+      }
+      for (const type of Object.keys(appState.quantities)) {
+        const input = document.getElementById(`${type}-qty`);
+        if (input) input.value = String(appState.quantities[type]);
+      }
+
+      const promoInput = document.getElementById('promo-input');
+      if (promoInput) {
+        promoInput.value = '';
+        promoInput.disabled = false;
+      }
+      const promoSuccess = document.getElementById('promo-success');
+      if (promoSuccess) {
+        promoSuccess.classList.add('hidden');
+        promoSuccess.classList.remove('flex');
+      }
+      const promoButton = document.getElementById('promo-btn');
+      if (promoButton) promoButton.textContent = 'Pakai';
+
+      updateSummaryBar();
+      updatePaymentSummary();
+      showToast('Silakan lanjutkan pembayaran tiket kamu.', 'info');
+      navigateTo('payment');
+    }
+
+    async function downloadHistoryTicket(bookingCode) {
+      const cached = appState.ticketHistory.find((booking) => booking.booking_code === bookingCode);
+      let booking = cached;
+      if (!booking) {
+        const result = await bookingService.getBookingByCode(bookingCode);
+        if (!result.success) {
+          showToast(result.error || 'Tiket tidak ditemukan.', 'error');
+          return;
+        }
+        booking = result.booking;
+      }
+      if (currentUser?.email && booking.user_email?.toLowerCase() !== currentUser.email.toLowerCase()) {
+        showToast('Anda hanya dapat mengunduh tiket akun sendiri.', 'error');
+        return;
+      }
+      if (booking.payment_status !== 'paid') {
+        showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        return;
+      }
+      try {
+        const qrDataUrl = await generateQrDataUrl(booking);
+        const { downloadTicketPdf } = await import('../services/ticketPdfService.js');
+        downloadTicketPdf(booking, qrDataUrl);
+        showToast('E-ticket berhasil diunduh!', 'success');
+      } catch (error) {
+        console.error('Download history e-ticket failed:', error);
+        showToast('Gagal membuat PDF e-ticket. Silakan coba lagi.', 'error');
+      }
+    }
+
+    function setHistoryFilter(filter) {
+      appState.ticketHistoryFilter = filter;
+      document.querySelectorAll('.history-filter').forEach((button) => {
+        const active = button.dataset.filter === filter;
+        button.classList.toggle('bg-ocean', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('border', !active);
+        button.classList.toggle('border-slate-200', !active);
+        button.classList.toggle('bg-white', !active);
+        button.classList.toggle('text-slate-600', !active);
+      });
+      renderTicketHistory();
+    }
+
+    function initTicketHistoryPage() {
+      document.querySelectorAll('.history-filter').forEach((button) => {
+        button.addEventListener('click', () => setHistoryFilter(button.dataset.filter));
+      });
+      document.getElementById('ticket-history-retry')?.addEventListener('click', loadTicketHistory);
     }
 
     function createConfetti() {
@@ -979,12 +1446,13 @@ export function initializeUserPage() {
     (() => {
       // Show initial page
       const hash = location.hash.replace('#','') || 'home';
-      const initialPage = ['home','login','register','select-ticket','booking-details','payment','confirmation'].includes(hash) ? hash : 'home';
+      const initialPage = ['home','login','register','select-ticket','booking-details','payment','confirmation','ticket-history'].includes(hash) ? hash : 'home';
 
       initLoginForm();
       initRegisterForm();
       initBookingPage();
       initPaymentPage();
+      initTicketHistoryPage();
       initScrollReveal();
       setTimeout(animateCounters, 500);
       navigateTo(initialPage);
@@ -1011,6 +1479,10 @@ export function initializeUserPage() {
     window.processPayment = processPayment;
     window.checkPaymentStatus = checkPaymentStatus;
     window.copyBookingCode = copyBookingCode;
+    window.downloadTicket = downloadTicket;
+    window.openTicketFromHistory = openTicketFromHistory;
+    window.downloadHistoryTicket = downloadHistoryTicket;
+    window.setHistoryFilter = setHistoryFilter;
   }
 
   ticketPricingService.getActivePricing().then((result) => {

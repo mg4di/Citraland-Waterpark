@@ -52,6 +52,9 @@ onMounted(initializeUserPage)
                     <p id="nav-profile-dropdown-name" class="truncate text-sm font-bold"></p>
                     <p id="nav-profile-email" class="truncate text-xs text-slate-500"></p>
                   </div>
+                  <button type="button" @click="window.navigateTo('ticket-history')" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-ocean">
+                    <iconify-icon icon="lucide:history"></iconify-icon> Riwayat Tiket
+                  </button>
                   <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
                     <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
                   </button>
@@ -289,6 +292,9 @@ onMounted(initializeUserPage)
                     <p id="select-ticket-profile-dropdown-name" class="truncate text-sm font-bold"></p>
                     <p id="select-ticket-profile-email" class="truncate text-xs text-slate-500"></p>
                   </div>
+                  <button type="button" @click="window.navigateTo('ticket-history')" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-ocean">
+                    <iconify-icon icon="lucide:history"></iconify-icon> Riwayat Tiket
+                  </button>
                   <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
                     <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
                   </button>
@@ -347,6 +353,9 @@ onMounted(initializeUserPage)
                     <p id="booking-details-profile-dropdown-name" class="truncate text-sm font-bold"></p>
                     <p id="booking-details-profile-email" class="truncate text-xs text-slate-500"></p>
                   </div>
+                  <button type="button" @click="window.navigateTo('ticket-history')" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-ocean">
+                    <iconify-icon icon="lucide:history"></iconify-icon> Riwayat Tiket
+                  </button>
                   <button type="button" @click="window.logoutUser()" class="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
                     <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
                   </button>
@@ -442,16 +451,74 @@ onMounted(initializeUserPage)
       <main class="relative mx-auto -mt-10 max-w-7xl px-6 pb-24 lg:px-10">
         <div class="grid gap-6 lg:grid-cols-[1.35fr_.65fr]">
           <article class="animate-ticket-reveal overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/70">
-            <div class="flex flex-col justify-between gap-5 border-b border-slate-100 p-7 sm:flex-row sm:items-start sm:p-9"><div class="animate-slide-in-left delay-300"><div class="flex items-center gap-2 text-sm font-bold text-emerald-600"><iconify-icon icon="lucide:badge-check" class="text-lg"></iconify-icon> E-ticket terverifikasi</div><h2 class="mt-3 font-display text-2xl font-bold tracking-tight text-slate-900">Citraland Waterpark Denpasar</h2><p class="mt-1 text-sm text-slate-500">Tiket masuk wisata kolam renang</p></div><div class="animate-slide-in-right delay-400 rounded-2xl bg-lagoon px-5 py-3 text-left sm:text-right relative group cursor-pointer" @click.prevent="window.copyBookingCode()"><p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kode booking</p><p class="mt-1 font-display text-xl font-extrabold tracking-widest text-ocean booking-code" id="confirm-code">BH-7K4P9X</p><button class="copy-btn absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg bg-white/80 text-slate-400 opacity-0 transition-all group-hover:opacity-100 hover:text-ocean"><iconify-icon icon="lucide:copy" class="text-sm"></iconify-icon></button></div></div>
-            <div class="grid gap-8 p-7 sm:grid-cols-[1fr_190px] sm:p-9"><div class="animate-fade-in-up delay-500"><p class="text-xs font-bold uppercase tracking-[.18em] text-ocean">Detail pengunjung</p><div class="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2"><div><p class="text-xs text-slate-400">Nama pengunjung</p><p class="mt-1 font-bold text-slate-800" id="confirm-name">Nama pengunjung</p></div><div><p class="text-xs text-slate-400">Jenis tiket</p><p class="mt-1 font-bold text-slate-800" id="confirm-ticket-types">Tiket terpilih</p></div><div><p class="text-xs text-slate-400">Tanggal kunjungan</p><p class="mt-1 flex items-center gap-2 font-bold text-slate-800"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon><span id="confirm-date">Pilih tanggal kunjungan</span></p></div><div><p class="text-xs text-slate-400">Nomor telepon</p><p class="mt-1 font-bold text-slate-800" id="confirm-phone">Nomor telepon</p></div><div><p class="text-xs text-slate-400">Jam masuk</p><p class="mt-1 flex items-center gap-2 font-bold text-slate-800"><iconify-icon icon="lucide:clock-3" class="text-ocean"></iconify-icon>09.00 – 17.00 WIB</p></div></div><div class="mt-8 rounded-2xl bg-slate-50 p-5"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><iconify-icon icon="lucide:mail-check" class="text-xl"></iconify-icon></span><div><p class="font-bold text-slate-800">E-ticket telah dikirim</p><p class="mt-1 text-sm text-slate-500">Salinan tiket dikirim ke <span class="font-semibold text-ocean" id="confirm-email">Email pemesan</span></p></div></div></div></div>
-              <div class="flex flex-col items-center justify-center border-t border-slate-100 pt-7 sm:border-l sm:border-t-0 sm:pl-8 sm:pt-0 animate-scale-in delay-600"><div class="qr-container animate-qr-pulse"><div class="flex h-44 w-44 items-center justify-center rounded-2xl border-8 border-white bg-slate-900 shadow-md ring-1 ring-slate-200"><iconify-icon icon="lucide:qr-code" class="text-[9rem] text-white"></iconify-icon></div></div><p class="mt-4 text-center text-xs font-semibold text-slate-500">Scan di pintu masuk</p><p class="mt-1 text-center text-[11px] text-slate-400 booking-code">BH-7K4P9X-<span id="confirm-qr-types">TICKET</span></p></div>
+            <div class="flex flex-col justify-between gap-5 border-b border-slate-100 p-7 sm:flex-row sm:items-start sm:p-9"><div class="animate-slide-in-left delay-300"><div class="flex items-center gap-2 text-sm font-bold text-emerald-600"><iconify-icon icon="lucide:badge-check" class="text-lg"></iconify-icon> E-ticket terverifikasi</div><h2 class="mt-3 font-display text-2xl font-bold tracking-tight text-slate-900">Citraland Waterpark Denpasar</h2><p class="mt-1 text-sm text-slate-500">Tiket masuk wisata kolam renang</p></div><div class="animate-slide-in-right delay-400 rounded-2xl bg-lagoon px-5 py-3 text-left sm:text-right relative group cursor-pointer" @click.prevent="window.copyBookingCode()"><p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Kode booking</p><p class="mt-1 font-display text-xl font-extrabold tracking-widest text-ocean booking-code" id="confirm-code">-</p><button class="copy-btn absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg bg-white/80 text-slate-400 opacity-0 transition-all group-hover:opacity-100 hover:text-ocean"><iconify-icon icon="lucide:copy" class="text-sm"></iconify-icon></button></div></div>
+            <div class="grid gap-8 p-7 sm:grid-cols-[1fr_190px] sm:p-9"><div class="animate-fade-in-up delay-500"><p class="text-xs font-bold uppercase tracking-[.18em] text-ocean">Detail pengunjung</p><div class="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2"><div><p class="text-xs text-slate-400">Nama pengunjung</p><p class="mt-1 font-bold text-slate-800" id="confirm-name">Nama pengunjung</p></div><div><p class="text-xs text-slate-400">Jenis tiket</p><p class="mt-1 font-bold text-slate-800" id="confirm-ticket-types">Tiket terpilih</p></div><div><p class="text-xs text-slate-400">Tanggal kunjungan</p><p class="mt-1 flex items-center gap-2 font-bold text-slate-800"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon><span id="confirm-date">Pilih tanggal kunjungan</span></p></div><div><p class="text-xs text-slate-400">Nomor telepon</p><p class="mt-1 font-bold text-slate-800" id="confirm-phone">Nomor telepon</p></div><div><p class="text-xs text-slate-400">Jam masuk</p><p class="mt-1 flex items-center gap-2 font-bold text-slate-800"><iconify-icon icon="lucide:clock-3" class="text-ocean"></iconify-icon>09.00 – 17.00 WIB</p></div></div></div>
+              <div class="flex flex-col items-center justify-center border-t border-slate-100 pt-7 sm:border-l sm:border-t-0 sm:pl-8 sm:pt-0 animate-scale-in delay-600"><div class="qr-container animate-qr-pulse"><div class="relative flex h-44 w-44 items-center justify-center overflow-hidden rounded-2xl border-8 border-white bg-white shadow-md ring-1 ring-slate-200"><img id="confirm-qr-image" alt="QR code e-ticket" class="hidden h-full w-full object-contain" /><iconify-icon id="confirm-qr-fallback" icon="lucide:qr-code" class="text-[9rem] text-slate-300"></iconify-icon></div></div><p class="mt-4 text-center text-xs font-semibold text-slate-500">Scan di pintu masuk</p><p class="mt-1 text-center text-[11px] text-slate-400 booking-code"><span id="confirm-qr-code">-</span>-<span id="confirm-qr-types">TICKET</span></p></div>
             </div>
-            <div class="flex flex-col gap-3 border-t border-dashed border-slate-200 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-9"><p class="text-sm text-slate-500">Simpan tiket ini sebelum berangkat.</p><div class="flex gap-2"><button @click.prevent="window.showToast('E-ticket berhasil diunduh!','success')" class="btn-primary inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-aqua px-6 text-sm font-bold text-white transition hover:bg-ocean"><iconify-icon icon="lucide:download"></iconify-icon> Unduh e-ticket</button></div></div>
+            <div class="flex flex-col gap-3 border-t border-dashed border-slate-200 p-7 sm:flex-row sm:items-center sm:justify-between sm:p-9"><p class="text-sm text-slate-500">Simpan tiket ini sebelum berangkat.</p><div class="flex gap-2"><button id="download-ticket-btn" @click.prevent="window.downloadTicket()" class="btn-primary inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-aqua px-6 text-sm font-bold text-white transition hover:bg-ocean disabled:cursor-not-allowed disabled:opacity-60"><iconify-icon icon="lucide:download" id="download-ticket-icon"></iconify-icon><span id="download-ticket-text">Unduh e-ticket</span><span id="download-ticket-spinner" class="loading-spinner hidden"></span></button></div></div>
           </article>
           <aside class="animate-slide-in-right delay-400 rounded-3xl bg-white p-7 shadow-xl shadow-slate-200/70 lg:p-8 h-fit"><div class="flex items-center justify-between"><h2 class="font-display text-xl font-bold text-slate-900">Ringkasan pesanan</h2><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Lunas</span></div><div class="mt-7 space-y-5 border-b border-slate-100 pb-6"><div id="confirm-lines" class="space-y-3 text-sm"></div><div class="flex justify-between gap-4 text-sm"><span class="text-slate-500">Biaya layanan</span><span class="font-semibold text-slate-800" id="confirm-service-fee">Rp0</span></div><div id="confirm-discount-row" class="hidden flex justify-between gap-4 text-sm text-emerald-600"><span>Diskon promo</span><span class="font-semibold" id="confirm-discount"></span></div><div class="flex justify-between gap-4 text-sm"><span class="text-slate-500">Metode pembayaran</span><span class="font-semibold text-slate-800" id="confirm-payment-method">Kartu kredit / debit</span></div></div><div class="flex items-end justify-between pt-6"><span class="font-semibold text-slate-600">Total pembayaran</span><span class="font-display text-2xl font-extrabold text-ocean" id="confirm-total">Rp0</span></div><div class="mt-8 rounded-2xl bg-lagoon p-5"><div class="flex gap-3"><iconify-icon icon="lucide:info" class="mt-0.5 text-xl text-ocean shrink-0"></iconify-icon><p class="text-sm leading-6 text-slate-600">Tiket berlaku untuk satu kali kunjungan dan tidak dapat dipindahtangankan.</p></div></div></aside>
         </div>
         <section class="scroll-reveal mt-14"><div class="text-center"><p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Sebelum berkunjung</p><h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-slate-900">Langkah selanjutnya</h2></div><div class="mt-8 grid gap-5 md:grid-cols-3"><div class="step-card rounded-3xl bg-white p-7 shadow-sm"><span class="step-number flex h-12 w-12 items-center justify-center rounded-2xl bg-lagoon font-display text-lg font-extrabold text-ocean">01</span><h3 class="mt-6 font-display text-lg font-bold">Simpan e-ticket</h3><p class="mt-2 text-sm leading-6 text-slate-500">Simpan QR code di ponsel atau unduh tiket untuk akses lebih cepat.</p></div><div class="step-card rounded-3xl bg-white p-7 shadow-sm"><span class="step-number flex h-12 w-12 items-center justify-center rounded-2xl bg-lagoon font-display text-lg font-extrabold text-ocean">02</span><h3 class="mt-6 font-display text-lg font-bold">Datang sesuai jadwal</h3><p class="mt-2 text-sm leading-6 text-slate-500">Tunjukkan QR code dan kode booking kepada petugas di gerbang.</p></div><div class="step-card rounded-3xl bg-white p-7 shadow-sm"><span class="step-number flex h-12 w-12 items-center justify-center rounded-2xl bg-lagoon font-display text-lg font-extrabold text-ocean">03</span><h3 class="mt-6 font-display text-lg font-bold">Nikmati Citraland Waterpark</h3><p class="mt-2 text-sm leading-6 text-slate-500">Bersiap untuk hari penuh keseruan bersama keluarga dan teman.</p></div></div></section>
         <div class="scroll-reveal mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row" style="transition-delay:.2s"><a href="#" @click.prevent="window.navigateTo('home')" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 transition-all hover:border-aqua hover:text-ocean hover:shadow-sm"><iconify-icon icon="lucide:arrow-left"></iconify-icon> Kembali ke beranda</a><a href="#" @click.prevent="window.navigateTo('select-ticket')" class="btn-primary inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ocean px-6 text-sm font-bold text-white transition hover:bg-aqua shadow-lg shadow-cyan-900/15">Pesan tiket lagi <iconify-icon icon="lucide:arrow-up-right"></iconify-icon></a></div>
+      </main>
+      <UserFooter />
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 7: TICKET HISTORY ==================== -->
+  <div id="page-ticket-history" class="page">
+    <div class="min-h-screen bg-slate-50 font-sans text-slate-800">
+      <div class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-ocean to-[#20b8c5]">
+        <div class="absolute -right-24 -top-28 h-80 w-80 rounded-full border-[32px] border-white/10 animate-pulse-ring"></div>
+        <div class="absolute -bottom-32 left-1/4 h-72 w-72 rounded-full border-[24px] border-cyan-200/10 animate-pulse-ring" style="animation-delay:1.5s"></div>
+        <header class="absolute top-0 left-0 right-0 z-30">
+          <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
+            <a href="#" @click.prevent="window.navigateTo('home')" class="flex items-center gap-3 text-white group">
+              <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span>
+              <span class="font-display text-lg font-extrabold tracking-tight">CITRALAND<span class="text-cyan-200">.</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+              <a href="#" @click.prevent="window.navigateTo('select-ticket')" class="hidden min-h-11 items-center gap-2 rounded-full border border-white/50 px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-ocean sm:flex"><iconify-icon icon="lucide:ticket" class="text-base"></iconify-icon> Pesan Tiket</a>
+              <button @click.prevent="window.toggleMobileMenu(true)" class="flex h-11 w-11 items-center justify-center rounded-xl text-white lg:hidden"><iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon></button>
+            </div>
+          </div>
+        </header>
+        <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-32 lg:px-10">
+          <div class="max-w-2xl">
+            <p class="text-sm font-bold uppercase tracking-[.22em] text-cyan-200 animate-fade-in-up">Akun saya</p>
+            <h1 class="mt-4 font-display text-4xl font-extrabold tracking-tight text-white md:text-5xl animate-fade-in-up delay-100">Riwayat Tiket</h1>
+            <p class="mt-4 max-w-xl text-base leading-7 text-cyan-50/80 animate-fade-in-up delay-200">Lihat semua pesanan tiketmu, status pembayaran, dan status pemakaian tiket.</p>
+          </div>
+        </div>
+        <div class="wave-divider-slate"></div>
+      </div>
+      <main class="mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-14">
+        <div class="scroll-reveal flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Tiket saya</p>
+            <h2 class="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900">Semua pesanan tiket</h2>
+          </div>
+          <div id="ticket-history-filters" class="flex flex-wrap gap-2">
+            <button type="button" data-filter="all" class="history-filter rounded-full bg-ocean px-4 py-2 text-xs font-bold text-white transition">Semua</button>
+            <button type="button" data-filter="paid" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Sudah dibayar</button>
+            <button type="button" data-filter="pending" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Menunggu</button>
+            <button type="button" data-filter="failed" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Gagal</button>
+            <button type="button" data-filter="used" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Sudah digunakan</button>
+          </div>
+        </div>
+        <div id="ticket-history-loading" class="mt-8 hidden grid gap-5 md:grid-cols-2">
+          <div class="h-56 animate-pulse rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100"><div class="h-4 w-32 rounded bg-slate-100"></div><div class="mt-4 h-8 w-48 rounded bg-slate-100"></div><div class="mt-6 h-20 rounded-2xl bg-slate-50"></div></div>
+          <div class="h-56 animate-pulse rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100"><div class="h-4 w-32 rounded bg-slate-100"></div><div class="mt-4 h-8 w-48 rounded bg-slate-100"></div><div class="mt-6 h-20 rounded-2xl bg-slate-50"></div></div>
+        </div>
+        <div id="ticket-history-error" class="mt-8 hidden rounded-3xl border border-rose-100 bg-rose-50 p-6 text-sm text-rose-700"><p id="ticket-history-error-message"></p><button id="ticket-history-retry" type="button" class="mt-3 inline-flex min-h-10 items-center rounded-full bg-rose-600 px-4 text-xs font-bold text-white transition hover:bg-rose-700">Coba lagi</button></div>
+        <div id="ticket-history-empty" class="mt-8 hidden rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center">
+          <span class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-lagoon text-ocean"><iconify-icon icon="lucide:ticket" class="text-3xl"></iconify-icon></span>
+          <h3 class="mt-5 font-display text-xl font-bold text-slate-900">Belum ada riwayat tiket</h3>
+          <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Pesanan tiket yang sudah kamu buat akan muncul di sini.</p>
+          <a href="#" @click.prevent="window.navigateTo('select-ticket')" class="btn-primary mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-aqua px-6 text-sm font-bold text-white transition hover:bg-ocean">Pesan Tiket <iconify-icon icon="lucide:arrow-right"></iconify-icon></a>
+        </div>
+        <div id="ticket-history-list" class="mt-8 grid gap-5 md:grid-cols-2"></div>
       </main>
       <UserFooter />
     </div>
@@ -476,6 +543,9 @@ onMounted(initializeUserPage)
           </button>
           <div id="mobile-nav-profile-dropdown" class="hidden mt-2 rounded-2xl border border-white/15 bg-white/10 p-2">
             <p id="mobile-nav-profile-email" class="truncate px-3 py-2 text-center text-sm text-white/70"></p>
+            <button type="button" @click="window.navigateTo('ticket-history')" class="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-white/10">
+              <iconify-icon icon="lucide:history"></iconify-icon> Riwayat Tiket
+            </button>
             <button type="button" @click="window.logoutUser()" class="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-white/10">
               <iconify-icon icon="lucide:log-out"></iconify-icon> Keluar
             </button>

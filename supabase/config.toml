@@ -1,6 +1,9 @@
 [functions.midtrans-create-transaction]
 verify_jwt = true
 
+[functions.midtrans-resume-transaction]
+verify_jwt = true
+
 [functions.midtrans-payment-callback]
 verify_jwt = false
 
