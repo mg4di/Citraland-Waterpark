@@ -12,6 +12,8 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
 const root = document.getElementById('admin-root');
 const overlay = document.getElementById('mobile-overlay');
 const toastContainer = document.getElementById('toast-container');
+const documentListeners=[];
+const onDocument=(type,handler)=>{document.addEventListener(type,handler);documentListeners.push(()=>document.removeEventListener(type,handler))};
 
 // Bookings data
 let bookings = [];
@@ -123,21 +125,42 @@ document.addEventListener('click', (e)=>{
 
 // ===================== SIDEBAR & HEADER =====================
 document.getElementById('sidebar-collapse-button').addEventListener('click',()=>root.classList.toggle('sidebar-collapsed'));
-document.getElementById('mobile-menu-button').addEventListener('click',()=>{root.classList.toggle('sidebar-open');overlay.classList.toggle('hidden')});
+document.getElementById('mobile-menu-button')?.addEventListener('click',()=>{root.classList.toggle('sidebar-open');overlay.classList.toggle('hidden')});
 overlay.addEventListener('click',()=>{root.classList.remove('sidebar-open');overlay.classList.add('hidden')});
 
-// Dropdowns
-const notifBtn=document.getElementById('notification-button'), notifDD=document.getElementById('notification-dropdown');
-const profileBtn=document.getElementById('profile-menu-button'), profileDD=document.getElementById('profile-dropdown');
-function closeAllDD(){notifDD.classList.remove('show');profileDD.classList.remove('show')}
-notifBtn.addEventListener('click',e=>{e.stopPropagation();const o=notifDD.classList.contains('show');closeAllDD();if(!o)notifDD.classList.add('show')});
-profileBtn.addEventListener('click',e=>{e.stopPropagation();const o=profileDD.classList.contains('show');closeAllDD();if(!o)profileDD.classList.add('show')});
-document.getElementById('profile-settings-link').addEventListener('click',()=>profileDD.classList.remove('show'));
-document.addEventListener('click',()=>closeAllDD());
-[notifDD,profileDD].forEach(d=>d.addEventListener('click',e=>e.stopPropagation()));
-document.getElementById('admin-logout-btn')?.addEventListener('click',async ()=>{
+// Dropdowns (pakai event delegation agar tetap berjalan walau header di-render ulang)
+function closeAllDD(){document.getElementById('profile-dropdown')?.classList.remove('show')}
+onDocument('click',e=>{
+  const target=e.target instanceof Element?e.target:null;
+  if(!target){closeAllDD();return}
+  if(target.closest('#profile-menu-button')){
+    const dd=document.getElementById('profile-dropdown');
+    const open=dd?.classList.contains('show');
+    closeAllDD();
+    if(!open)dd?.classList.add('show');
+    return;
+  }
+  if(target.closest('#profile-dropdown')){
+    if(target.closest('#profile-settings-link'))closeAllDD();
+    return;
+  }
+  closeAllDD();
+});
+onDocument('click',async e=>{
+  const target=e.target instanceof Element?e.target:null;
+  const btn=target?target.closest('#admin-logout-btn'):null;
+  if(!btn||btn.dataset.busy==='1')return;
+  btn.dataset.busy='1';
+  btn.classList.add('opacity-60','pointer-events-none');
   const result=await authService.logout();
-  if(!result.success){showToast(result.error,'error');return}
+  if(!result.success){
+    delete btn.dataset.busy;
+    btn.classList.remove('opacity-60','pointer-events-none');
+    showToast(result.error,'error');
+    return;
+  }
+  closeAllDD();
+  showToast('Berhasil logout');
   await onLogout();
 });
 
@@ -155,17 +178,9 @@ Promise.all([authService.getUser(), authService.getAdminProfile()]).then(([userR
   document.getElementById('admin-avatar').textContent=name.split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase();
 });
 
-// Search modal
-const searchModal=document.getElementById('search-modal');
-document.getElementById('header-search-button').addEventListener('click',()=>{searchModal.classList.add('show');setTimeout(()=>document.getElementById('modal-search-input').focus(),100)});
-document.getElementById('close-search-modal').addEventListener('click',()=>searchModal.classList.remove('show'));
-searchModal.addEventListener('click',e=>{if(e.target===searchModal)searchModal.classList.remove('show')});
-document.getElementById('modal-search-input')?.addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('.search-result').forEach(i=>{i.style.display=i.textContent.toLowerCase().includes(q)?'flex':'none'})});
-
 // Keyboard
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();searchModal.classList.add('show');setTimeout(()=>document.getElementById('modal-search-input').focus(),100)}
-  if(e.key==='Escape'){searchModal.classList.remove('show');closeAllDD();document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'))}
+onDocument('keydown',e=>{
+  if(e.key==='Escape'){closeAllDD();document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show'))}
 });
 
 // ===================== BOOKINGS PAGE =====================
@@ -819,9 +834,6 @@ document.getElementById('delete-confirm-btn').addEventListener('click',async ()=
   }
 });
 
-// ===================== DESKTOP SEARCH =====================
-document.getElementById('admin-search-input')?.addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.trim();if(q)showToast(`Mencari: "${q}"`,'info')}});
-
 // ===================== INIT =====================
 handleHash();
 void loadBookings();
@@ -835,6 +847,7 @@ const unsubscribeFacilities=realtimeManager.subscribeToFacilities(()=>void loadC
 const unsubscribePromotions=realtimeManager.subscribeToPromotions(()=>void loadContent());
 const unsubscribeGallery=realtimeManager.subscribeToGallery(()=>void loadContent());
 return ()=>{
+  documentListeners.forEach(off=>off());
   unsubscribeBookings();
   unsubscribePricing();
   unsubscribeFacilities();
