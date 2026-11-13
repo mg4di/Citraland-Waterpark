@@ -7,6 +7,7 @@ import {
   formatDateID as formatTicketDate,
   formatRupiah as formatTicketRupiah,
   generateQrDataUrl,
+  getBookingDisplayStatus,
   getPaymentMethodLabel,
   getPaymentStatusMeta,
   getTicketLines,
@@ -79,6 +80,24 @@ export function initializeUserPage() {
         dropdownName: 'booking-details-profile-dropdown-name',
         email: 'booking-details-profile-email',
       },
+      {
+        key: 'payment',
+        container: 'payment-profile',
+        trigger: 'payment-profile-trigger',
+        dropdown: 'payment-profile-dropdown',
+        name: 'payment-profile-name',
+        dropdownName: 'payment-profile-dropdown-name',
+        email: 'payment-profile-email',
+      },
+      {
+        key: 'confirmation',
+        container: 'confirmation-profile',
+        trigger: 'confirmation-profile-trigger',
+        dropdown: 'confirmation-profile-dropdown',
+        name: 'confirmation-profile-name',
+        dropdownName: 'confirmation-profile-dropdown-name',
+        email: 'confirmation-profile-email',
+      },
     ];
 
     function updateNavbarAuth(user) {
@@ -87,6 +106,8 @@ export function initializeUserPage() {
         document.getElementById('mobile-nav-login'),
         document.getElementById('select-ticket-login'),
         document.getElementById('booking-details-login'),
+        document.getElementById('payment-login'),
+        document.getElementById('confirmation-login'),
       ];
       const displayName = user?.user_metadata?.full_name?.trim() || user?.email?.split('@')[0] || 'Profil';
       for (const link of loginLinks) {
@@ -964,10 +985,6 @@ export function initializeUserPage() {
     }
 
     // ===== CONFIRMATION =====
-    function copyBookingCode() {
-      const code = document.getElementById('confirm-code').textContent;
-      navigator.clipboard.writeText(code).then(() => showToast('Kode booking disalin: '+code,'success')).catch(() => showToast('Gagal menyalin','error'));
-    }
 
     // ===== TICKET HISTORY =====
     const HISTORY_TONE_CLASSES = {
@@ -994,7 +1011,8 @@ export function initializeUserPage() {
     }
 
     function createHistoryCard(booking) {
-      const payment = getPaymentStatusMeta(booking.payment_status);
+      const status = getBookingDisplayStatus(booking);
+      const payment = getPaymentStatusMeta(status);
       const usage = getUsageStatusMeta(booking);
       const article = document.createElement('article');
       article.className = 'scroll-reveal visible flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md';
@@ -1035,7 +1053,7 @@ export function initializeUserPage() {
 
       const actions = document.createElement('div');
       actions.className = 'mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5';
-      if (booking.payment_status === 'paid') {
+      if (status === 'paid') {
         const view = document.createElement('button');
         view.type = 'button';
         view.className = 'inline-flex min-h-10 items-center gap-2 rounded-full bg-ocean px-4 text-xs font-bold text-white transition hover:bg-aqua';
@@ -1047,7 +1065,7 @@ export function initializeUserPage() {
         download.textContent = 'Unduh PDF';
         download.addEventListener('click', () => downloadHistoryTicket(booking.booking_code));
         actions.append(view, download);
-      } else if (booking.payment_status === 'pending') {
+      } else if (status === 'pending') {
         const expired = booking.visit_date < formatDateValue(new Date());
         const note = document.createElement('p');
         note.className = 'w-full text-xs font-semibold text-amber-600';
@@ -1063,6 +1081,24 @@ export function initializeUserPage() {
           pay.addEventListener('click', () => resumePaymentFromHistory(booking.booking_code));
           actions.append(pay);
         }
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'inline-flex min-h-10 items-center gap-2 rounded-full border border-rose-200 px-4 text-xs font-bold text-rose-600 transition hover:bg-rose-50';
+        cancel.textContent = 'Batalkan Pesanan';
+        cancel.addEventListener('click', () => cancelPendingBooking(booking.booking_code));
+        actions.append(cancel);
+      } else if (status === 'cancelled') {
+        const note = document.createElement('p');
+        note.className = 'w-full text-xs font-semibold text-slate-500';
+        note.textContent = booking.cancellation_reason === 'expired'
+          ? 'Tiket tidak dipakai dan tanggal kunjungan sudah lewat, sehingga otomatis dibatalkan.'
+          : 'Pesanan ini telah dibatalkan.';
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        retry.textContent = 'Pesan tiket lagi';
+        retry.addEventListener('click', () => navigateTo('select-ticket'));
+        actions.append(note, retry);
       } else {
         const retry = document.createElement('button');
         retry.type = 'button';
@@ -1085,7 +1121,7 @@ export function initializeUserPage() {
           return usage.label === 'Sudah digunakan' || usage.label === 'Kedaluwarsa';
         });
       }
-      return appState.ticketHistory.filter((booking) => booking.payment_status === filter);
+      return appState.ticketHistory.filter((booking) => getBookingDisplayStatus(booking) === filter);
     }
 
     function renderTicketHistory() {
@@ -1125,6 +1161,9 @@ export function initializeUserPage() {
       error?.classList.add('hidden');
       list?.replaceChildren();
 
+      // Pastikan tiket yang tidak dipakai & sudah lewat masa berlaku
+      // langsung berstatus dibatalkan sebelum data ditampilkan.
+      await bookingService.expireUnusedBookings();
       const result = await bookingService.getUserBookings(currentUser.email);
       appState.isLoadingHistory = false;
       if (!result.success) {
@@ -1152,6 +1191,10 @@ export function initializeUserPage() {
       }
       if (booking.payment_status !== 'paid') {
         showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        return;
+      }
+      if (getBookingDisplayStatus(booking) === 'cancelled') {
+        showToast('Tiket ini sudah dibatalkan dan tidak dapat digunakan.', 'error');
         return;
       }
       appState.confirmationBooking = booking;
@@ -1246,6 +1289,33 @@ export function initializeUserPage() {
       navigateTo('payment');
     }
 
+    async function cancelPendingBooking(bookingCode) {
+      const cached = appState.ticketHistory.find((booking) => booking.booking_code === bookingCode);
+      if (currentUser?.email && cached && cached.user_email?.toLowerCase() !== currentUser.email.toLowerCase()) {
+        showToast('Anda hanya dapat membatalkan pesanan akun sendiri.', 'error');
+        return;
+      }
+      const confirmed = typeof window.confirm === 'function'
+        ? window.confirm(`Batalkan pesanan ${bookingCode}? Pesanan yang dibatalkan tidak dapat dilanjutkan lagi.`)
+        : true;
+      if (!confirmed) return;
+      const result = await bookingService.cancelOwnBooking(bookingCode);
+      if (!result.success) {
+        showToast(result.error, 'error');
+        return;
+      }
+      const wasActivePayment = appState.currentPage === 'payment' && appState.bookingCode === bookingCode;
+      if (wasActivePayment) {
+        appState.bookingCode = '';
+        appState.snapToken = '';
+        appState.paymentStatus = 'cancelled';
+        appState.paymentType = '';
+      }
+      showToast('Pesanan berhasil dibatalkan.', 'success');
+      await loadTicketHistory();
+      if (wasActivePayment) navigateTo('ticket-history');
+    }
+
     async function downloadHistoryTicket(bookingCode) {
       const cached = appState.ticketHistory.find((booking) => booking.booking_code === bookingCode);
       let booking = cached;
@@ -1263,6 +1333,10 @@ export function initializeUserPage() {
       }
       if (booking.payment_status !== 'paid') {
         showToast('E-ticket hanya tersedia setelah pembayaran dikonfirmasi.', 'info');
+        return;
+      }
+      if (getBookingDisplayStatus(booking) === 'cancelled') {
+        showToast('Tiket ini sudah dibatalkan sehingga tidak dapat diunduh.', 'error');
         return;
       }
       try {
@@ -1478,7 +1552,6 @@ export function initializeUserPage() {
     window.applyPromo = applyPromo;
     window.processPayment = processPayment;
     window.checkPaymentStatus = checkPaymentStatus;
-    window.copyBookingCode = copyBookingCode;
     window.downloadTicket = downloadTicket;
     window.openTicketFromHistory = openTicketFromHistory;
     window.downloadHistoryTicket = downloadHistoryTicket;

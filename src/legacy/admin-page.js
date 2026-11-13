@@ -205,7 +205,9 @@ function mapBooking(booking) {
     email: booking.user_email,
     ticket,
     date,
-    status: booking.payment_status,
+    status: booking.effective_status
+      ?? (booking.cancelled_at && !booking.checked_in_at ? 'cancelled' : booking.payment_status),
+    cancelledReason: booking.cancellation_reason ?? null,
     amount: `Rp${Number(booking.total_amount).toLocaleString('id-ID')}`,
     raw: booking,
   };
@@ -218,6 +220,8 @@ function escapeHtml(value) {
 }
 
 async function loadBookings() {
+  // Tiket tidak dipakai yang sudah lewat tanggal kunjungan otomatis dibatalkan.
+  await bookingService.expireUnusedBookings();
   const result = await bookingService.getAllBookings({
     status: bkFilter,
     searchTerm: bkSearch,

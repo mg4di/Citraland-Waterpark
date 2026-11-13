@@ -64,9 +64,17 @@ export function getPaymentStatusMeta(status) {
   return PAYMENT_STATUS[status] ?? { label: status || 'Tidak diketahui', tone: 'slate' }
 }
 
+export function getBookingDisplayStatus(booking) {
+  if (booking?.cancelled_at && !booking?.checked_in_at) return 'cancelled'
+  return booking?.payment_status ?? 'pending'
+}
+
 export function getUsageStatusMeta(booking) {
-  if (booking?.payment_status !== 'paid') return USAGE_STATUS.inactive
+  if (booking?.cancelled_at && !booking?.checked_in_at) {
+    return booking?.cancellation_reason === 'expired' ? USAGE_STATUS.expired : USAGE_STATUS.inactive
+  }
   if (booking?.checked_in_at) return USAGE_STATUS.used
+  if (booking?.payment_status !== 'paid') return USAGE_STATUS.inactive
   const visitDate = booking?.visit_date
   if (!visitDate) return USAGE_STATUS.valid
   const today = localDateString()

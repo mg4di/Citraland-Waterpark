@@ -245,7 +245,4 @@ html { scroll-behavior: smooth; }
 
     .promo-success{animation:successPop .4s ease both}
 
-    .copy-btn{transition:all .2s}
-    .copy-btn:active{transform:scale(0.95)}
-
     select{background-image:none}

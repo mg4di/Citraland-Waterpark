@@ -126,6 +126,55 @@ export const bookingService = {
     }
   },
 
+  async expireUnusedBookings() {
+    try {
+      const { data, error } = await getSupabaseClient().rpc('expire_unused_bookings')
+      if (error) {
+        logError('Expire unused bookings', error)
+        return { success: false, error: mapSupabaseError(error).message }
+      }
+      return { success: true, expired: Number(data ?? 0) }
+    } catch (error) {
+      logError('Expire unused bookings', error)
+      return { success: false, error: mapSupabaseError(error).message }
+    }
+  },
+
+  async cancelOwnBooking(bookingCode) {
+    if (!bookingCode) return { success: false, error: 'Kode booking tidak valid.' }
+    try {
+      const { data, error } = await getSupabaseClient().rpc('cancel_own_booking', {
+        p_booking_code: bookingCode,
+      })
+      if (error) {
+        logError('Cancel own booking', error)
+        const message = String(error.message ?? '').toLowerCase()
+        if (message.includes('not found')) {
+          return { success: false, error: 'Pesanan tidak ditemukan.' }
+        }
+        if (message.includes('not allowed')) {
+          return { success: false, error: 'Anda hanya dapat membatalkan pesanan akun sendiri.' }
+        }
+        if (message.includes('only pending')) {
+          return { success: false, error: 'Hanya pesanan yang menunggu pembayaran yang dapat dibatalkan.' }
+        }
+        if (message.includes('already used')) {
+          return { success: false, error: 'Tiket ini sudah dipakai sehingga tidak dapat dibatalkan.' }
+        }
+        if (message.includes('already cancelled')) {
+          return { success: false, error: 'Pesanan ini sudah dibatalkan.' }
+        }
+        if (message.includes('authentication required') || error.code === '42501') {
+          return { success: false, error: 'Sesi Anda telah berakhir. Silakan masuk kembali.' }
+        }
+        return { success: false, error: mapSupabaseError(error).message }
+      }
+      return { success: true, booking: data }
+    } catch (error) {
+      return failure(error, 'Cancel own booking')
+    }
+  },
+
   async getBookingByCode(bookingCode) {
     try {
       const { data, error } = await getSupabaseClient()
@@ -167,7 +216,13 @@ export const bookingService = {
         .from('bookings')
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
-      if (filters.status && filters.status !== 'all') query = query.eq('payment_status', filters.status)
+      if (filters.status && filters.status !== 'all') {
+        if (filters.status === 'cancelled') {
+          query = query.or('payment_status.eq.cancelled,cancelled_at.not.is.null')
+        } else {
+          query = query.eq('payment_status', filters.status).is('cancelled_at', null)
+        }
+      }
       const searchTerm = String(filters.searchTerm ?? '').replace(/[^\p{L}\p{N}@._ -]/gu, '').trim()
       if (searchTerm) {
         query = query.or([
