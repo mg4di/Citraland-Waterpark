@@ -1,225 +1,2157 @@
 <script setup>
-import { onBeforeUnmount, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { initializeAdminPage } from './legacy/admin-page.js'
-import AdminHeader from './components/admin/AdminHeader.vue'
-import AdminSidebar from './components/admin/AdminSidebar.vue'
+import { onBeforeUnmount, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { initializeAdminPage } from "./legacy/admin-page.js";
+import AdminHeader from "./components/admin/AdminHeader.vue";
+import AdminSidebar from "./components/admin/AdminSidebar.vue";
 
-const window = globalThis.window
-const router = useRouter()
-let cleanup
+const window = globalThis.window;
+const router = useRouter();
+let cleanup;
 onMounted(() => {
-  cleanup = initializeAdminPage(() => router.push({ name: 'admin-login' }))
-})
-onBeforeUnmount(() => cleanup?.())
+  cleanup = initializeAdminPage(() => router.push({ name: "admin-login" }));
+});
+onBeforeUnmount(() => cleanup?.());
 </script>
 
 <template>
-<div id="admin-root" class="min-h-screen bg-slate-50 font-sans text-slate-800">
+  <div
+    id="admin-root"
+    class="min-h-screen bg-slate-50 font-sans text-slate-800"
+  >
+    <AdminSidebar />
 
-  <AdminSidebar />
+    <!-- MAIN SHELL -->
+    <div class="main-shell ml-64 transition-all duration-300">
+      <AdminHeader />
 
-  <!-- MAIN SHELL -->
-  <div class="main-shell ml-64 transition-all duration-300">
-    <AdminHeader />
-
-    <!-- ==================== PAGE: DASHBOARD ==================== -->
-    <main id="page-dashboard" class="page-view active p-5 sm:p-8">
-      <div class="mx-auto max-w-[1500px]">
-        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up">
-          <div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Ringkasan bisnis</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Dashboard</h1><p class="mt-2 text-sm text-slate-500">Pantau performa Citraland Waterpark hari ini.</p></div>
-          <div class="flex items-center gap-3">
-            <button id="export-report-btn" class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"><iconify-icon icon="lucide:download"></iconify-icon><span class="hidden sm:inline">Export laporan</span></button>
-            <button class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon> 01–30 Des 2026 <iconify-icon icon="lucide:chevron-down"></iconify-icon></button>
-          </div>
-        </div>
-        <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"><iconify-icon icon="lucide:wallet" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 8.4%</span></div><p class="mt-5 text-sm font-medium text-slate-500">Total Revenue</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">Rp2.450.000</p><p class="mt-2 text-xs text-slate-400">vs. Rp2.260.000 bulan lalu</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"><iconify-icon icon="lucide:ticket" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 6.8%</span></div><p class="mt-5 text-sm font-medium text-slate-500">Total Bookings</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">156</p><p class="mt-2 text-xs text-slate-400">12 booking baru minggu ini</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"><iconify-icon icon="lucide:users" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 10.2%</span></div><p class="mt-5 text-sm font-medium text-slate-500">Total Visitors</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">487</p><p class="mt-2 text-xs text-slate-400">Pengunjung bulan ini</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><iconify-icon icon="lucide:chart-no-axes-combined" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 12.5%</span></div><p class="mt-5 text-sm font-medium text-slate-500">This Month Growth</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">+12,5%</p><p class="mt-2 text-xs text-slate-400">Pertumbuhan positif</p></article>
-        </section>
-        <section class="mt-6 grid gap-6 xl:grid-cols-[1.55fr_1fr]">
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"><div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div><h2 class="font-display text-lg font-bold text-slate-900">Revenue Trend</h2><p class="mt-1 text-sm text-slate-500">Performa pendapatan 30 hari terakhir</p></div><div class="flex items-center gap-4 text-xs font-semibold text-slate-500"><span class="flex items-center gap-2"><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span></div></div><div class="mt-6 h-64"><svg viewBox="0 0 760 250" preserveAspectRatio="none" class="h-full w-full"><defs><linearGradient id="revFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#00BCD4" stop-opacity=".25"></stop><stop offset="1" stop-color="#00BCD4" stop-opacity="0"></stop></linearGradient></defs><g stroke="#e2e8f0" stroke-dasharray="3 5"><line x1="50" y1="30" x2="740" y2="30"></line><line x1="50" y1="82" x2="740" y2="82"></line><line x1="50" y1="134" x2="740" y2="134"></line><line x1="50" y1="186" x2="740" y2="186"></line></g><path class="chart-fill" d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36 L740 210 L50 210Z" fill="url(#revFill)"></path><path class="chart-line" d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36" fill="none" stroke="#00BCD4" stroke-linecap="round" stroke-width="4"></path><g fill="#94a3b8" font-size="11"><text x="48" y="235">1 Des</text><text x="210" y="235">7 Des</text><text x="370" y="235">14 Des</text><text x="530" y="235">21 Des</text><text x="700" y="235">30 Des</text></g></svg></div></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"><div><h2 class="font-display text-lg font-bold text-slate-900">Booking Status</h2><p class="mt-1 text-sm text-slate-500">Distribusi status pemesanan</p></div><div class="mt-6 flex items-center justify-center gap-8"><div class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full" style="background:conic-gradient(#00BCD4 0 77%,#94a3b8 77% 95%,#f43f5e 95% 100%)"><div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"><span class="font-display text-2xl font-extrabold text-slate-900">156</span><span class="text-xs text-slate-400">Total</span></div></div><div class="space-y-4 text-sm"><p class="flex items-center gap-3"><i class="h-3 w-3 rounded-full bg-aqua"></i><span class="w-20 text-slate-500">Confirmed</span><b class="text-slate-800">120</b></p><p class="flex items-center gap-3"><i class="h-3 w-3 rounded-full bg-slate-400"></i><span class="w-20 text-slate-500">Completed</span><b class="text-slate-800">28</b></p><p class="flex items-center gap-3"><i class="h-3 w-3 rounded-full bg-rose-500"></i><span class="w-20 text-slate-500">Cancelled</span><b class="text-slate-800">8</b></p></div></div></article>
-        </section>
-        <section class="mt-6 grid gap-6">
-          <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5">
-            <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"><div><h2 class="font-display text-lg font-bold text-slate-900">Recent Bookings</h2><p class="mt-1 text-sm text-slate-500">Pemesanan terbaru hari ini</p></div><a href="#bookings" class="nav-trigger flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua" data-page="bookings">Lihat semua <iconify-icon icon="lucide:arrow-up-right"></iconify-icon></a></div>
-            <div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-6 py-4 font-bold">Booking ID</th><th class="px-4 py-4 font-bold">Guest</th><th class="px-4 py-4 font-bold">Type</th><th class="px-4 py-4 font-bold">Date</th><th class="px-4 py-4 font-bold">Status</th><th class="px-6 py-4 text-right font-bold">Amount</th></tr></thead><tbody class="divide-y divide-slate-100"><tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-ocean">BH-7K4P9X</td><td class="px-4 py-4 font-semibold text-slate-700">Dimas Pratama</td><td class="px-4 py-4 text-slate-500">Weekend - 1 tiket</td><td class="px-4 py-4 text-slate-500">27 Des 2026</td><td class="px-4 py-4"><span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">Confirmed</span></td><td class="px-6 py-4 text-right font-bold text-slate-800">Rp50.000</td></tr><tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-ocean">BH-8A2M1Q</td><td class="px-4 py-4 font-semibold text-slate-700">Rina Pratiwi</td><td class="px-4 py-4 text-slate-500">Weekdays - 1 tiket</td><td class="px-4 py-4 text-slate-500">29 Des 2026</td><td class="px-4 py-4"><span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">Confirmed</span></td><td class="px-6 py-4 text-right font-bold text-slate-800">Rp35.000</td></tr><tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-ocean">BH-5D8L3C</td><td class="px-4 py-4 font-semibold text-slate-700">Andi Saputra</td><td class="px-4 py-4 text-slate-500">Weekdays - 2 tiket</td><td class="px-4 py-4 text-slate-500">30 Des 2026</td><td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">Completed</span></td><td class="px-6 py-4 text-right font-bold text-slate-800">Rp70.000</td></tr></tbody></table></div>
-          </article>
-        </section>
-      </div>
-    </main>
-
-    <!-- ==================== PAGE: BOOKINGS ==================== -->
-    <main id="page-bookings" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-[1500px]">
-        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Booking Management</h1><p class="mt-2 text-sm text-slate-500">Kelola seluruh pemesanan tiket Citraland Waterpark.</p></div><button id="export-bookings-btn" class="flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean sm:self-auto"><iconify-icon icon="lucide:download"></iconify-icon> Export booking</button></div>
-        <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"><iconify-icon icon="lucide:ticket" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+6.8%</span></div><p class="mt-5 text-sm text-slate-500">Total Bookings</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900" id="bk-stat-total">156</p><p class="mt-2 text-xs text-slate-400">Semua pemesanan</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><iconify-icon icon="lucide:badge-check" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+8.4%</span></div><p class="mt-5 text-sm text-slate-500">Confirmed</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900" id="bk-stat-confirmed">97</p><p class="mt-2 text-xs text-slate-400">Terverifikasi</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-500"><iconify-icon icon="lucide:circle-x" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">-2.1%</span></div><p class="mt-5 text-sm text-slate-500">Cancelled</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900" id="bk-stat-cancelled">8</p><p class="mt-2 text-xs text-slate-400">Dibatalkan</p></article>
-        </section>
-        <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4">
-          <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="flex flex-wrap gap-2" id="bk-status-filters">
-              <button data-status="all" class="bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white">All <span class="ml-1 text-cyan-100" id="bk-c-all">156</span></button>
-              <button data-status="paid" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean">Paid <span class="ml-1 text-slate-400" id="bk-c-conf">0</span></button>
-              <button data-status="pending" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100">Pending <span class="ml-1 text-slate-400" id="bk-c-comp">0</span></button>
-              <button data-status="failed" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600">Failed <span class="ml-1 text-slate-400" id="bk-c-failed">0</span></button>
-              <button data-status="cancelled" class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600">Cancelled <span class="ml-1 text-slate-400" id="bk-c-canc">0</span></button>
+      <!-- ==================== PAGE: DASHBOARD ==================== -->
+      <main id="page-dashboard" class="page-view active p-5 sm:p-8">
+        <div class="mx-auto max-w-[1500px]">
+          <div
+            class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
+          >
+            <div>
+              <p
+                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
+              >
+                Ringkasan bisnis
+              </p>
+              <h1
+                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+              >
+                Dashboard
+              </h1>
+              <p class="mt-2 text-sm text-slate-500">
+                Pantau performa Citraland Waterpark hari ini.
+              </p>
             </div>
-            <div class="relative"><iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="bk-search" type="search" placeholder="Cari guest atau booking ID..." class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50 sm:w-64"></div>
+            <div class="flex items-center gap-3">
+              <button
+                id="export-report-btn"
+                class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"
+              >
+                <iconify-icon icon="lucide:download"></iconify-icon
+                ><span class="hidden sm:inline">Export laporan</span>
+              </button>
+              <button
+                class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"
+              >
+                <iconify-icon
+                  icon="lucide:calendar-days"
+                  class="text-ocean"
+                ></iconify-icon>
+                01–30 Des 2026
+                <iconify-icon icon="lucide:chevron-down"></iconify-icon>
+              </button>
+            </div>
           </div>
-        </section>
-        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5">
-          <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"><div><h2 class="font-display text-lg font-bold text-slate-900">Semua Booking</h2><p id="bk-result-count" class="mt-1 text-sm text-slate-500">Menampilkan 5 dari 156 pemesanan</p></div></div>
-          <div class="overflow-x-auto"><table class="w-full min-w-[1050px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-6 py-4 font-bold">Booking ID</th><th class="px-4 py-4 font-bold">Guest Name</th><th class="px-4 py-4 font-bold">Ticket Type</th><th class="px-4 py-4 font-bold">Date</th><th class="px-4 py-4 font-bold">Status</th><th class="px-4 py-4 text-right font-bold">Amount</th><th class="px-6 py-4 text-center font-bold">Actions</th></tr></thead><tbody id="bk-table-body" class="divide-y divide-slate-100"></tbody></table></div>
-          <div class="flex flex-col items-center justify-between gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row"><p class="text-sm text-slate-500">Menampilkan <b class="text-slate-700" id="bk-page-range">1–5</b> dari <b class="text-slate-700" id="bk-page-total">156</b></p><div class="flex items-center gap-1" id="bk-pagination"></div></div>
-        </section>
-      </div>
-    </main>
+          <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                  ><iconify-icon
+                    icon="lucide:wallet"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  8.4%</span
+                >
+              </div>
+              <p class="mt-5 text-sm font-medium text-slate-500">
+                Total Revenue
+              </p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                Rp2.450.000
+              </p>
+              <p class="mt-2 text-xs text-slate-400">
+                vs. Rp2.260.000 bulan lalu
+              </p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                  ><iconify-icon
+                    icon="lucide:ticket"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  6.8%</span
+                >
+              </div>
+              <p class="mt-5 text-sm font-medium text-slate-500">
+                Total Bookings
+              </p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                156
+              </p>
+              <p class="mt-2 text-xs text-slate-400">
+                12 booking baru minggu ini
+              </p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                  ><iconify-icon
+                    icon="lucide:users"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  10.2%</span
+                >
+              </div>
+              <p class="mt-5 text-sm font-medium text-slate-500">
+                Total Visitors
+              </p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                487
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Pengunjung bulan ini</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+                  ><iconify-icon
+                    icon="lucide:chart-no-axes-combined"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  12.5%</span
+                >
+              </div>
+              <p class="mt-5 text-sm font-medium text-slate-500">
+                This Month Growth
+              </p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                +12,5%
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Pertumbuhan positif</p>
+            </article>
+          </section>
+          <section class="mt-6 grid gap-6 xl:grid-cols-[1.55fr_1fr]">
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
+            >
+              <div
+                class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
+              >
+                <div>
+                  <h2 class="font-display text-lg font-bold text-slate-900">
+                    Revenue Trend
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Performa pendapatan 30 hari terakhir
+                  </p>
+                </div>
+                <div
+                  class="flex items-center gap-4 text-xs font-semibold text-slate-500"
+                >
+                  <span class="flex items-center gap-2"
+                    ><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span
+                  >
+                </div>
+              </div>
+              <div class="mt-6 h-64">
+                <svg
+                  viewBox="0 0 760 250"
+                  preserveAspectRatio="none"
+                  class="h-full w-full"
+                >
+                  <defs>
+                    <linearGradient id="revFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop
+                        offset="0"
+                        stop-color="#00BCD4"
+                        stop-opacity=".25"
+                      ></stop>
+                      <stop
+                        offset="1"
+                        stop-color="#00BCD4"
+                        stop-opacity="0"
+                      ></stop>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="#e2e8f0" stroke-dasharray="3 5">
+                    <line x1="50" y1="30" x2="740" y2="30"></line>
+                    <line x1="50" y1="82" x2="740" y2="82"></line>
+                    <line x1="50" y1="134" x2="740" y2="134"></line>
+                    <line x1="50" y1="186" x2="740" y2="186"></line>
+                  </g>
+                  <path
+                    class="chart-fill"
+                    d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36 L740 210 L50 210Z"
+                    fill="url(#revFill)"
+                  ></path>
+                  <path
+                    class="chart-line"
+                    d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36"
+                    fill="none"
+                    stroke="#00BCD4"
+                    stroke-linecap="round"
+                    stroke-width="4"
+                  ></path>
+                  <g fill="#94a3b8" font-size="11">
+                    <text x="48" y="235">1 Des</text>
+                    <text x="210" y="235">7 Des</text>
+                    <text x="370" y="235">14 Des</text>
+                    <text x="530" y="235">21 Des</text>
+                    <text x="700" y="235">30 Des</text>
+                  </g>
+                </svg>
+              </div>
+            </article>
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"
+            >
+              <div>
+                <h2 class="font-display text-lg font-bold text-slate-900">
+                  Booking Status
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Distribusi status pemesanan
+                </p>
+              </div>
+              <div class="mt-6 flex items-center justify-center gap-8">
+                <div
+                  class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full"
+                  style="
+                    background: conic-gradient(
+                      #00bcd4 0 77%,
+                      #94a3b8 77% 95%,
+                      #f43f5e 95% 100%
+                    );
+                  "
+                >
+                  <div
+                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
+                  >
+                    <span
+                      class="font-display text-2xl font-extrabold text-slate-900"
+                      >156</span
+                    ><span class="text-xs text-slate-400">Total</span>
+                  </div>
+                </div>
+                <div class="space-y-4 text-sm">
+                  <p class="flex items-center gap-3">
+                    <i class="h-3 w-3 rounded-full bg-aqua"></i
+                    ><span class="w-20 text-slate-500">Confirmed</span
+                    ><b class="text-slate-800">120</b>
+                  </p>
+                  <p class="flex items-center gap-3">
+                    <i class="h-3 w-3 rounded-full bg-slate-400"></i
+                    ><span class="w-20 text-slate-500">Completed</span
+                    ><b class="text-slate-800">28</b>
+                  </p>
+                  <p class="flex items-center gap-3">
+                    <i class="h-3 w-3 rounded-full bg-rose-500"></i
+                    ><span class="w-20 text-slate-500">Cancelled</span
+                    ><b class="text-slate-800">8</b>
+                  </p>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section class="mt-6 grid gap-6">
+            <article
+              class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
+            >
+              <div
+                class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
+              >
+                <div>
+                  <h2 class="font-display text-lg font-bold text-slate-900">
+                    Recent Bookings
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Pemesanan terbaru hari ini
+                  </p>
+                </div>
+                <a
+                  href="#bookings"
+                  class="nav-trigger flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
+                  data-page="bookings"
+                  >Lihat semua
+                  <iconify-icon icon="lucide:arrow-up-right"></iconify-icon
+                ></a>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[760px] text-left text-sm">
+                  <thead
+                    class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
+                  >
+                    <tr>
+                      <th class="px-6 py-4 font-bold">Booking ID</th>
+                      <th class="px-4 py-4 font-bold">Guest</th>
+                      <th class="px-4 py-4 font-bold">Type</th>
+                      <th class="px-4 py-4 font-bold">Date</th>
+                      <th class="px-4 py-4 font-bold">Status</th>
+                      <th class="px-6 py-4 text-right font-bold">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-6 py-4 font-bold text-ocean">BH-7K4P9X</td>
+                      <td class="px-4 py-4 font-semibold text-slate-700">
+                        Dimas Pratama
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">
+                        Weekend - 1 tiket
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">27 Des 2026</td>
+                      <td class="px-4 py-4">
+                        <span
+                          class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                          >Confirmed</span
+                        >
+                      </td>
+                      <td class="px-6 py-4 text-right font-bold text-slate-800">
+                        Rp50.000
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-6 py-4 font-bold text-ocean">BH-8A2M1Q</td>
+                      <td class="px-4 py-4 font-semibold text-slate-700">
+                        Rina Pratiwi
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">
+                        Weekdays - 1 tiket
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">29 Des 2026</td>
+                      <td class="px-4 py-4">
+                        <span
+                          class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                          >Confirmed</span
+                        >
+                      </td>
+                      <td class="px-6 py-4 text-right font-bold text-slate-800">
+                        Rp35.000
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-50">
+                      <td class="px-6 py-4 font-bold text-ocean">BH-5D8L3C</td>
+                      <td class="px-4 py-4 font-semibold text-slate-700">
+                        Andi Saputra
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">
+                        Weekdays - 2 tiket
+                      </td>
+                      <td class="px-4 py-4 text-slate-500">30 Des 2026</td>
+                      <td class="px-4 py-4">
+                        <span
+                          class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600"
+                          >Completed</span
+                        >
+                      </td>
+                      <td class="px-6 py-4 text-right font-bold text-slate-800">
+                        Rp70.000
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+        </div>
+      </main>
 
-    <!-- ==================== PAGE: USERS ==================== -->
-    <main id="page-users" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-[1500px]">
-        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">User Management</h1><p class="mt-2 text-sm text-slate-500">Kelola akun pengunjung dan akses member Citraland Waterpark.</p></div><div class="flex items-center gap-3"><button id="export-users-btn" class="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"><iconify-icon icon="lucide:download"></iconify-icon> Export data</button><button id="add-user-btn" class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white shadow-sm hover:bg-ocean/90"><iconify-icon icon="lucide:user-plus"></iconify-icon> Add new user</button></div></div>
-        <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"><iconify-icon icon="lucide:users" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 8.2%</span></div><p class="mt-5 text-sm text-slate-500">Total Users</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">2.458</p><p class="mt-2 text-xs text-slate-400">Semua akun terdaftar</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><iconify-icon icon="lucide:user-check" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">92.4%</span></div><p class="mt-5 text-sm text-slate-500">Active Users</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900" id="usr-stat-active">8</p><p class="mt-2 text-xs text-slate-400">Aktif dalam 30 hari</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500"><iconify-icon icon="lucide:user-round-x" class="text-xl"></iconify-icon></span><span class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600">7.6%</span></div><p class="mt-5 text-sm text-slate-500">Inactive Users</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900" id="usr-stat-inactive">3</p><p class="mt-2 text-xs text-slate-400">Perlu ditinjau</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"><iconify-icon icon="lucide:user-round-plus" class="text-xl"></iconify-icon></span><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 14.8%</span></div><p class="mt-5 text-sm text-slate-500">New This Month</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">184</p><p class="mt-2 text-xs text-slate-400">+24 dari bulan lalu</p></article>
-        </section>
-        <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4">
-          <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="relative w-full xl:max-w-sm"><iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></iconify-icon><input id="usr-search" type="search" placeholder="Cari nama, email, atau telepon..." class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></div>
+      <!-- ==================== PAGE: BOOKINGS ==================== -->
+      <main id="page-bookings" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-[1500px]">
+          <div
+            class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
+          >
+            <div>
+              <p
+                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
+              >
+                Workspace
+              </p>
+              <h1
+                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+              >
+                Booking Management
+              </h1>
+              <p class="mt-2 text-sm text-slate-500">
+                Kelola seluruh pemesanan tiket Citraland Waterpark.
+              </p>
+            </div>
+            <button
+              id="export-bookings-btn"
+              class="flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean sm:self-auto"
+            >
+              <iconify-icon icon="lucide:download"></iconify-icon> Export
+              booking
+            </button>
+          </div>
+          <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                  ><iconify-icon
+                    icon="lucide:ticket"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+6.8%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+                id="bk-stat-total"
+              >
+                156
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Semua pemesanan</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
+                  ><iconify-icon
+                    icon="lucide:badge-check"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+8.4%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Confirmed</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+                id="bk-stat-confirmed"
+              >
+                97
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Terverifikasi</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-500"
+                  ><iconify-icon
+                    icon="lucide:circle-x"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >-2.1%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Cancelled</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+                id="bk-stat-cancelled"
+              >
+                8
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Dibatalkan</p>
+            </article>
+          </section>
+          <section
+            class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
+          >
+            <div
+              class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+            >
+              <div class="flex flex-wrap gap-2" id="bk-status-filters">
+                <button
+                  data-status="all"
+                  class="bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white"
+                >
+                  All <span class="ml-1 text-cyan-100" id="bk-c-all">156</span>
+                </button>
+                <button
+                  data-status="paid"
+                  class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean"
+                >
+                  Paid <span class="ml-1 text-slate-400" id="bk-c-conf">0</span>
+                </button>
+                <button
+                  data-status="pending"
+                  class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-100"
+                >
+                  Pending
+                  <span class="ml-1 text-slate-400" id="bk-c-comp">0</span>
+                </button>
+                <button
+                  data-status="failed"
+                  class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                >
+                  Failed
+                  <span class="ml-1 text-slate-400" id="bk-c-failed">0</span>
+                </button>
+                <button
+                  data-status="cancelled"
+                  class="bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                >
+                  Cancelled
+                  <span class="ml-1 text-slate-400" id="bk-c-canc">0</span>
+                </button>
+              </div>
+              <div class="relative">
+                <iconify-icon
+                  icon="lucide:search"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                ></iconify-icon
+                ><input
+                  id="bk-search"
+                  type="search"
+                  placeholder="Cari guest atau booking ID..."
+                  class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50 sm:w-64"
+                />
+              </div>
+            </div>
+          </section>
+          <section
+            class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
+            >
+              <div>
+                <h2 class="font-display text-lg font-bold text-slate-900">
+                  Semua Booking
+                </h2>
+                <p id="bk-result-count" class="mt-1 text-sm text-slate-500">
+                  Menampilkan 5 dari 156 pemesanan
+                </p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1050px] text-left text-sm">
+                <thead
+                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
+                >
+                  <tr>
+                    <th class="px-6 py-4 font-bold">Booking ID</th>
+                    <th class="px-4 py-4 font-bold">Guest Name</th>
+                    <th class="px-4 py-4 font-bold">Ticket Type</th>
+                    <th class="px-4 py-4 font-bold">Date</th>
+                    <th class="px-4 py-4 font-bold">Status</th>
+                    <th class="px-4 py-4 text-right font-bold">Amount</th>
+                    <th class="px-6 py-4 text-center font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="bk-table-body"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+            <div
+              class="flex flex-col items-center justify-between gap-4 border-t border-slate-100 px-5 py-4 sm:flex-row"
+            >
+              <p class="text-sm text-slate-500">
+                Menampilkan
+                <b class="text-slate-700" id="bk-page-range">1–5</b> dari
+                <b class="text-slate-700" id="bk-page-total">156</b>
+              </p>
+              <div class="flex items-center gap-1" id="bk-pagination"></div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ==================== PAGE: USERS ==================== -->
+      <main id="page-users" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-[1500px]">
+          <div
+            class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
+          >
+            <div>
+              <p
+                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
+              >
+                Workspace
+              </p>
+              <h1
+                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+              >
+                User Management
+              </h1>
+              <p class="mt-2 text-sm text-slate-500">
+                Kelola akun pengunjung dan akses member Citraland Waterpark.
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button
+                id="export-users-btn"
+                class="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
+              >
+                <iconify-icon icon="lucide:download"></iconify-icon> Export data</button
+              ><button
+                id="add-user-btn"
+                class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white shadow-sm hover:bg-ocean/90"
+              >
+                <iconify-icon icon="lucide:user-plus"></iconify-icon> Add new
+                user
+              </button>
+            </div>
+          </div>
+          <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                  ><iconify-icon
+                    icon="lucide:users"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  8.2%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Total Users</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                2.458
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Semua akun terdaftar</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
+                  ><iconify-icon
+                    icon="lucide:user-check"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >92.4%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Active Users</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+                id="usr-stat-active"
+              >
+                8
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Aktif dalam 30 hari</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500"
+                  ><iconify-icon
+                    icon="lucide:user-round-x"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600"
+                  >7.6%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Inactive Users</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+                id="usr-stat-inactive"
+              >
+                3
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Perlu ditinjau</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                  ><iconify-icon
+                    icon="lucide:user-round-plus"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  14.8%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">New This Month</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                184
+              </p>
+              <p class="mt-2 text-xs text-slate-400">+24 dari bulan lalu</p>
+            </article>
+          </section>
+          <section
+            class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
+          >
+            <div
+              class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
+            >
+              <div class="relative w-full xl:max-w-sm">
+                <iconify-icon
+                  icon="lucide:search"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                ></iconify-icon
+                ><input
+                  id="usr-search"
+                  type="search"
+                  placeholder="Cari nama, email, atau telepon..."
+                  class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"
+                />
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <select
+                  id="usr-status-filter"
+                  class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-aqua cursor-pointer"
+                >
+                  <option value="all">All status</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"
+            >
+              <p id="usr-selected-count" class="text-sm text-slate-500">
+                0 user dipilih
+              </p>
+              <div class="flex items-center gap-2">
+                <button
+                  id="usr-activate-btn"
+                  class="flex h-9 items-center gap-2 rounded-lg border border-emerald-200 px-3 text-xs font-bold text-emerald-600 hover:bg-emerald-50"
+                >
+                  <iconify-icon icon="lucide:user-check"></iconify-icon>
+                  Activate
+                </button>
+                <button
+                  id="usr-deactivate-btn"
+                  class="flex h-9 items-center gap-2 rounded-lg border border-amber-200 px-3 text-xs font-bold text-amber-600 hover:bg-amber-50"
+                >
+                  <iconify-icon icon="lucide:user-round-x"></iconify-icon>
+                  Deactivate
+                </button>
+              </div>
+            </div>
+          </section>
+          <section
+            class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
+            >
+              <div>
+                <h2 class="font-display text-lg font-bold text-slate-900">
+                  Registered Users
+                </h2>
+                <p id="usr-result-count" class="mt-1 text-sm text-slate-500">
+                  Menampilkan 11 pengguna
+                </p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[900px] text-left text-sm">
+                <thead
+                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
+                >
+                  <tr>
+                    <th class="w-12 px-5 py-4">
+                      <input
+                        id="usr-select-all"
+                        type="checkbox"
+                        class="h-4 w-4 rounded border-slate-300 accent-ocean cursor-pointer"
+                      />
+                    </th>
+                    <th class="px-4 py-4 font-bold">User</th>
+                    <th class="px-4 py-4 font-bold">Email</th>
+                    <th class="px-4 py-4 font-bold">Phone</th>
+                    <th class="px-4 py-4 font-bold">Join Date</th>
+                    <th class="px-4 py-4 font-bold">Status</th>
+                    <th class="px-5 py-4 text-right font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="usr-table-body"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ==================== PAGE: CONTENT ==================== -->
+      <main id="page-content" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-[1500px]">
+          <div
+            class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
+          >
+            <div>
+              <p
+                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
+              >
+                Workspace
+              </p>
+              <h1
+                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+              >
+                Content Management
+              </h1>
+              <p class="mt-2 text-sm text-slate-500">
+                Kelola harga tiket, fasilitas, promosi, dan galeri Citraland
+                Waterpark.
+              </p>
+            </div>
+          </div>
+          <div
+            class="mt-8 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in-up delay-1"
+          >
+            <button
+              data-ctab="pricing"
+              class="ctab-btn active flex items-center gap-2 rounded-xl bg-ocean px-5 py-3 text-sm font-bold text-white"
+            >
+              <iconify-icon icon="lucide:ticket"></iconify-icon> Ticket Pricing
+            </button>
+            <button
+              data-ctab="facilities"
+              class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+            >
+              <iconify-icon icon="lucide:building-2"></iconify-icon> Facilities
+            </button>
+            <button
+              data-ctab="promotions"
+              class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+            >
+              <iconify-icon icon="lucide:badge-percent"></iconify-icon>
+              Promotions
+            </button>
+            <button
+              data-ctab="gallery"
+              class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+            >
+              <iconify-icon icon="lucide:images"></iconify-icon> Gallery
+            </button>
+          </div>
+          <!-- Pricing Tab -->
+          <section id="ctab-pricing" class="tab-panel active mt-6">
+            <div class="mb-5 flex items-center justify-between">
+              <div>
+                <h2 class="font-display text-xl font-bold text-slate-900">
+                  Ticket Pricing
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Atur harga dan tampilan tiket.
+                </p>
+              </div>
+              <span
+                class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                >3 Published</span
+              >
+            </div>
+            <div class="grid gap-5 xl:grid-cols-3" id="pricing-cards"></div>
+          </section>
+          <!-- Facilities Tab -->
+          <section id="ctab-facilities" class="tab-panel mt-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="font-display text-xl font-bold text-slate-900">
+                  Facilities
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Kelola fasilitas landing page.
+                </p>
+              </div>
+              <button
+                id="add-facility-btn"
+                class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-4 text-sm font-bold text-white hover:bg-ocean/90"
+              >
+                <iconify-icon icon="lucide:plus"></iconify-icon> Tambah
+                fasilitas
+              </button>
+            </div>
+            <div
+              class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            >
+              <table class="w-full text-left text-sm">
+                <thead
+                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
+                >
+                  <tr>
+                    <th class="px-6 py-4 font-bold">Nama</th>
+                    <th class="px-4 py-4 font-bold">Deskripsi</th>
+                    <th class="px-4 py-4 font-bold">Icon</th>
+                    <th class="px-4 py-4 font-bold">Status</th>
+                    <th class="px-6 py-4 text-right font-bold">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="fac-table-body"
+                  class="divide-y divide-slate-100"
+                ></tbody>
+              </table>
+            </div>
+          </section>
+          <!-- Promotions Tab -->
+          <section id="ctab-promotions" class="tab-panel mt-6">
+            <div class="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
+              <div
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <h2 class="font-display text-xl font-bold text-slate-900">
+                  Create Promotion
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">Buat kode promo baru.</p>
+                <div class="mt-6 space-y-4">
+                  <label class="block text-sm font-bold text-slate-700"
+                    >Discount code<input
+                      id="promo-code"
+                      placeholder="Contoh: CITRALAND10"
+                      class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"
+                  /></label>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <label class="block text-sm font-bold text-slate-700"
+                      >Type<select
+                        id="promo-type"
+                        class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"
+                      >
+                        <option>Percentage (%)</option>
+                        <option>Nominal (Rp)</option>
+                      </select></label
+                    ><label class="block text-sm font-bold text-slate-700"
+                      >Amount<input
+                        id="promo-amount"
+                        type="number"
+                        min="0"
+                        placeholder="10"
+                        class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"
+                    /></label>
+                  </div>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <label class="block text-sm font-bold text-slate-700"
+                      >Start date<input
+                        id="promo-start"
+                        type="date"
+                        class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer" /></label
+                    ><label class="block text-sm font-bold text-slate-700"
+                      >End date<input
+                        id="promo-end"
+                        type="date"
+                        class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"
+                    /></label>
+                  </div>
+                  <button
+                    id="publish-promo-btn"
+                    class="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-ocean font-bold text-white hover:bg-ocean/90"
+                  >
+                    <iconify-icon icon="lucide:megaphone"></iconify-icon>
+                    Publish promotion
+                  </button>
+                </div>
+              </div>
+              <div
+                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h2 class="font-display text-xl font-bold text-slate-900">
+                      Active Promotions
+                    </h2>
+                    <p class="mt-1 text-sm text-slate-500">
+                      Promo yang sedang berjalan.
+                    </p>
+                  </div>
+                  <span
+                    id="promo-active-count"
+                    class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                    >2 Active</span
+                  >
+                </div>
+                <div id="promo-list" class="mt-6 space-y-3"></div>
+              </div>
+            </div>
+          </section>
+          <!-- Gallery Tab -->
+          <section id="ctab-gallery" class="tab-panel mt-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="font-display text-xl font-bold text-slate-900">
+                  Gallery
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Kelola foto galeri website.
+                </p>
+              </div>
+              <span
+                id="gallery-count-badge"
+                class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                >4 Published</span
+              >
+            </div>
+            <div
+              id="drop-zone"
+              class="drop-zone mt-6 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-cyan-200 bg-lagoon/60 p-8 text-center hover:border-aqua"
+            >
+              <span
+                class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ocean shadow-sm"
+                ><iconify-icon
+                  icon="lucide:cloud-upload"
+                  class="text-2xl"
+                ></iconify-icon
+              ></span>
+              <h3 class="mt-4 font-display font-bold">
+                Drag & drop images here
+              </h3>
+              <p class="mt-1 text-sm text-slate-500">
+                atau klik untuk memilih file · JPG, PNG, WebP maks 5MB
+              </p>
+              <input
+                id="gallery-file-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                class="hidden"
+              /><button
+                id="choose-gallery-btn"
+                type="button"
+                class="mt-4 rounded-xl border border-aqua px-4 py-2 text-sm font-bold text-ocean hover:bg-aqua hover:text-white"
+              >
+                Choose files
+              </button>
+            </div>
+            <div
+              id="gallery-grid"
+              class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            ></div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ==================== PAGE: ANALYTICS ==================== -->
+      <main id="page-analytics" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-[1500px]">
+          <div
+            class="flex flex-col justify-between gap-5 lg:flex-row lg:items-end animate-fade-in-up"
+          >
+            <div>
+              <p
+                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
+              >
+                Business intelligence
+              </p>
+              <h1
+                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+              >
+                Analytics & Reports
+              </h1>
+              <p class="mt-2 text-sm text-slate-500">
+                Pahami performa tiket dan destinasi di seluruh platform.
+              </p>
+            </div>
             <div class="flex flex-wrap items-center gap-3">
-              <select id="usr-status-filter" class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-aqua cursor-pointer"><option value="all">All status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+              <div class="relative">
+                <button
+                  id="analytics-export-btn"
+                  class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
+                >
+                  <iconify-icon icon="lucide:download"></iconify-icon> Export
+                </button>
+              </div>
+              <button
+                class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
+              >
+                <iconify-icon
+                  icon="lucide:calendar-days"
+                  class="text-ocean"
+                ></iconify-icon>
+                01–30 Des 2026
+                <iconify-icon icon="lucide:chevron-down"></iconify-icon>
+              </button>
             </div>
           </div>
-          <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            <p id="usr-selected-count" class="text-sm text-slate-500">0 user dipilih</p>
-            <div class="flex items-center gap-2">
-              <button id="usr-activate-btn" class="flex h-9 items-center gap-2 rounded-lg border border-emerald-200 px-3 text-xs font-bold text-emerald-600 hover:bg-emerald-50"><iconify-icon icon="lucide:user-check"></iconify-icon> Activate</button>
-              <button id="usr-deactivate-btn" class="flex h-9 items-center gap-2 rounded-lg border border-amber-200 px-3 text-xs font-bold text-amber-600 hover:bg-amber-50"><iconify-icon icon="lucide:user-round-x"></iconify-icon> Deactivate</button>
+          <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                  ><iconify-icon
+                    icon="lucide:wallet"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+8,4%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Total Revenue</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                Rp2.450.000
+              </p>
+              <p class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                  ><iconify-icon
+                    icon="lucide:ticket-check"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+6,8%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                156
+              </p>
+              <p class="mt-2 text-xs text-slate-400">
+                12 booking baru minggu ini
+              </p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                  ><iconify-icon
+                    icon="lucide:users-round"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+10,2%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Total Visitors</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                487
+              </p>
+              <p class="mt-2 text-xs text-slate-400">
+                Pengunjung dalam periode
+              </p>
+            </article>
+            <article
+              class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+                  ><iconify-icon
+                    icon="lucide:badge-dollar-sign"
+                    class="text-xl"
+                  ></iconify-icon></span
+                ><span
+                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
+                  >+4,1%</span
+                >
+              </div>
+              <p class="mt-5 text-sm text-slate-500">Rentang Harga Tiket</p>
+              <p
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                Rp35?50 rb
+              </p>
+              <p class="mt-2 text-xs text-slate-400">Weekdays hingga Weekend</p>
+            </article>
+          </section>
+          <section class="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]">
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
+            >
+              <div
+                class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
+              >
+                <div>
+                  <h2 class="font-display text-lg font-bold text-slate-900">
+                    Revenue by Month
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Perbandingan revenue bulanan 2026
+                  </p>
+                </div>
+                <div
+                  class="flex items-center gap-4 text-xs font-semibold text-slate-500"
+                >
+                  <span class="flex items-center gap-2"
+                    ><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span
+                  ><span class="flex items-center gap-2"
+                    ><i class="h-2 w-2 rounded-full bg-cyan-100"></i
+                    >Target</span
+                  >
+                </div>
+              </div>
+              <div class="mt-6 h-64">
+                <svg
+                  viewBox="0 0 760 250"
+                  preserveAspectRatio="none"
+                  class="h-full w-full"
+                >
+                  <g stroke="#e2e8f0" stroke-dasharray="3 5">
+                    <line x1="50" y1="25" x2="740" y2="25" />
+                    <line x1="50" y1="75" x2="740" y2="75" />
+                    <line x1="50" y1="125" x2="740" y2="125" />
+                    <line x1="50" y1="175" x2="740" y2="175" />
+                  </g>
+                  <g fill="#d9f7fa">
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.1s"
+                      x="73"
+                      y="105"
+                      width="28"
+                      height="105"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.15s"
+                      x="127"
+                      y="92"
+                      width="28"
+                      height="118"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.2s"
+                      x="181"
+                      y="116"
+                      width="28"
+                      height="94"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.25s"
+                      x="235"
+                      y="80"
+                      width="28"
+                      height="130"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.3s"
+                      x="289"
+                      y="90"
+                      width="28"
+                      height="120"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.35s"
+                      x="343"
+                      y="63"
+                      width="28"
+                      height="147"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.4s"
+                      x="397"
+                      y="72"
+                      width="28"
+                      height="138"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.45s"
+                      x="451"
+                      y="49"
+                      width="28"
+                      height="161"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.5s"
+                      x="505"
+                      y="57"
+                      width="28"
+                      height="153"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.55s"
+                      x="559"
+                      y="38"
+                      width="28"
+                      height="172"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.6s"
+                      x="613"
+                      y="45"
+                      width="28"
+                      height="165"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate"
+                      style="animation-delay: 0.65s"
+                      x="667"
+                      y="26"
+                      width="28"
+                      height="184"
+                      rx="5"
+                    />
+                  </g>
+                  <g fill="#00BCD4">
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.15s"
+                      x="73"
+                      y="123"
+                      width="28"
+                      height="87"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.2s"
+                      x="127"
+                      y="111"
+                      width="28"
+                      height="99"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.25s"
+                      x="181"
+                      y="131"
+                      width="28"
+                      height="79"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.3s"
+                      x="235"
+                      y="95"
+                      width="28"
+                      height="115"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.35s"
+                      x="289"
+                      y="106"
+                      width="28"
+                      height="104"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.4s"
+                      x="343"
+                      y="79"
+                      width="28"
+                      height="131"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.45s"
+                      x="397"
+                      y="84"
+                      width="28"
+                      height="126"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.5s"
+                      x="451"
+                      y="64"
+                      width="28"
+                      height="146"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.55s"
+                      x="505"
+                      y="71"
+                      width="28"
+                      height="139"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.6s"
+                      x="559"
+                      y="54"
+                      width="28"
+                      height="156"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.65s"
+                      x="613"
+                      y="59"
+                      width="28"
+                      height="151"
+                      rx="5"
+                    />
+                    <rect
+                      class="bar-animate bar-hover"
+                      style="animation-delay: 0.7s"
+                      x="667"
+                      y="40"
+                      width="28"
+                      height="170"
+                      rx="5"
+                    />
+                  </g>
+                  <g fill="#94a3b8" font-size="11" text-anchor="middle">
+                    <text x="87" y="232">Jan</text>
+                    <text x="141" y="232">Feb</text>
+                    <text x="195" y="232">Mar</text>
+                    <text x="249" y="232">Apr</text>
+                    <text x="303" y="232">Mei</text>
+                    <text x="357" y="232">Jun</text>
+                    <text x="411" y="232">Jul</text>
+                    <text x="465" y="232">Agu</text>
+                    <text x="519" y="232">Sep</text>
+                    <text x="573" y="232">Okt</text>
+                    <text x="627" y="232">Nov</text>
+                    <text x="681" y="232">Des</text>
+                  </g>
+                </svg>
+              </div>
+            </article>
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"
+            >
+              <div>
+                <h2 class="font-display text-lg font-bold text-slate-900">
+                  Ticket Distribution
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Komposisi tiket terjual
+                </p>
+              </div>
+              <div class="mt-6 flex items-center justify-center gap-7">
+                <div
+                  class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full"
+                  style="
+                    background: conic-gradient(#00bcd4 0 46%, #0097a7 46% 100%);
+                  "
+                >
+                  <div
+                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
+                  >
+                    <span
+                      class="font-display text-2xl font-extrabold text-slate-900"
+                      >487</span
+                    ><span class="text-xs text-slate-400">Tiket</span>
+                  </div>
+                </div>
+                <div class="space-y-4 text-sm">
+                  <p class="flex items-center gap-3">
+                    <i class="h-3 w-3 rounded-full bg-aqua"></i
+                    ><span class="w-16 text-slate-500">Weekdays</span><b>46%</b>
+                  </p>
+                  <p class="flex items-center gap-3">
+                    <i class="h-3 w-3 rounded-full bg-ocean"></i
+                    ><span class="w-16 text-slate-500">Weekend</span><b>54%</b>
+                  </p>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section class="mt-6 grid gap-6 xl:grid-cols-2">
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="font-display text-lg font-bold text-slate-900">
+                    Peak Hours Heatmap
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Pola kunjungan berdasarkan hari & jam
+                  </p>
+                </div>
+                <span
+                  class="rounded-lg bg-lagoon px-3 py-2 text-xs font-bold text-ocean"
+                  >Desember</span
+                >
+              </div>
+              <div class="mt-6 overflow-x-auto">
+                <div class="min-w-[560px]">
+                  <div
+                    class="mb-2 grid grid-cols-[70px_repeat(8,1fr)] gap-1 text-[10px] text-slate-400"
+                  >
+                    <span></span><span class="text-center">08</span
+                    ><span class="text-center">10</span
+                    ><span class="text-center">12</span
+                    ><span class="text-center">14</span
+                    ><span class="text-center">16</span
+                    ><span class="text-center">18</span
+                    ><span class="text-center">20</span><span></span>
+                  </div>
+                  <div id="heatmap-grid" class="space-y-1 text-[11px]"></div>
+                  <div
+                    class="mt-4 flex items-center justify-end gap-2 text-[10px] text-slate-400"
+                  >
+                    <span>Sepi</span><i class="h-3 w-3 rounded bg-cyan-50"></i
+                    ><i class="h-3 w-3 rounded bg-cyan-100"></i
+                    ><i class="h-3 w-3 rounded bg-aqua/50"></i
+                    ><i class="h-3 w-3 rounded bg-aqua/70"></i
+                    ><i class="h-3 w-3 rounded bg-ocean"></i><span>Ramai</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article
+              class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-6"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="font-display text-lg font-bold text-slate-900">
+                    User Growth
+                  </h2>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Pertumbuhan member terdaftar
+                  </p>
+                </div>
+                <span
+                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
+                  18,6%</span
+                >
+              </div>
+              <div class="mt-6 h-56">
+                <svg
+                  viewBox="0 0 720 220"
+                  preserveAspectRatio="none"
+                  class="h-full w-full"
+                >
+                  <defs>
+                    <linearGradient id="ugFill" x1="0" x2="0" y1="0" y2="1">
+                      <stop
+                        offset="0"
+                        stop-color="#0097A7"
+                        stop-opacity=".22"
+                      />
+                      <stop offset="1" stop-color="#0097A7" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <g stroke="#e2e8f0" stroke-dasharray="3 5">
+                    <line x1="45" y1="25" x2="700" y2="25" />
+                    <line x1="45" y1="75" x2="700" y2="75" />
+                    <line x1="45" y1="125" x2="700" y2="125" />
+                    <line x1="45" y1="175" x2="700" y2="175" />
+                  </g>
+                  <path
+                    class="chart-fill"
+                    d="M45 178 C90 166 105 160 140 164 S185 145 215 150 S255 130 285 137 S330 112 360 120 S405 105 435 108 S480 81 510 91 S555 69 585 76 S630 46 660 53 S685 37 700 32 L700 190 L45 190Z"
+                    fill="url(#ugFill)"
+                  />
+                  <path
+                    class="chart-line"
+                    d="M45 178 C90 166 105 160 140 164 S185 145 215 150 S255 130 285 137 S330 112 360 120 S405 105 435 108 S480 81 510 91 S555 69 585 76 S630 46 660 53 S685 37 700 32"
+                    fill="none"
+                    stroke="#0097A7"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                  />
+                  <g class="chart-fill">
+                    <circle
+                      cx="140"
+                      cy="164"
+                      r="4"
+                      fill="#0097A7"
+                      stroke="white"
+                      stroke-width="2"
+                    />
+                    <circle
+                      cx="285"
+                      cy="137"
+                      r="4"
+                      fill="#0097A7"
+                      stroke="white"
+                      stroke-width="2"
+                    />
+                    <circle
+                      cx="435"
+                      cy="108"
+                      r="4"
+                      fill="#0097A7"
+                      stroke="white"
+                      stroke-width="2"
+                    />
+                    <circle
+                      cx="585"
+                      cy="76"
+                      r="4"
+                      fill="#0097A7"
+                      stroke="white"
+                      stroke-width="2"
+                    />
+                    <circle
+                      cx="700"
+                      cy="32"
+                      r="5"
+                      fill="#00BCD4"
+                      stroke="white"
+                      stroke-width="3"
+                    />
+                  </g>
+                  <g fill="#94a3b8" font-size="11">
+                    <text x="45" y="212">Jan</text>
+                    <text x="155" y="212">Mar</text>
+                    <text x="270" y="212">Mei</text>
+                    <text x="385" y="212">Jul</text>
+                    <text x="500" y="212">Sep</text>
+                    <text x="615" y="212">Nov</text>
+                  </g>
+                </svg>
+              </div>
+            </article>
+          </section>
+        </div>
+      </main>
+
+      <!-- ==================== PAGE: SETTINGS ==================== -->
+      <main id="page-settings" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-3xl">
+          <div class="animate-fade-in-up">
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
+              System
+            </p>
+            <h1
+              class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+            >
+              Pengaturan
+            </h1>
+            <p class="mt-2 text-sm text-slate-500">
+              Konfigurasi sistem dan preferensi admin.
+            </p>
+          </div>
+          <div class="mt-8 space-y-6">
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-1"
+            >
+              <h2 class="font-display text-lg font-bold text-slate-900">
+                Profil Administrator
+              </h2>
+              <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                <label class="block text-sm font-bold text-slate-700"
+                  >Nama lengkap<input
+                    value="Alya Rahma"
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+                ><label class="block text-sm font-bold text-slate-700"
+                  >Email<input
+                    value="alya@bluehaven.id"
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+                ><label class="block text-sm font-bold text-slate-700"
+                  >Role<input
+                    value="Super Administrator"
+                    disabled
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 outline-none" /></label
+                ><label class="block text-sm font-bold text-slate-700"
+                  >Telepon<input
+                    value="+62 812-3456-7890"
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"
+                /></label>
+              </div>
+              <div class="mt-5 flex justify-end">
+                <button
+                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"
+                >
+                  <iconify-icon icon="lucide:save"></iconify-icon> Simpan
+                  perubahan
+                </button>
+              </div>
+            </div>
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-3"
+            >
+              <h2 class="font-display text-lg font-bold text-slate-900">
+                Keamanan
+              </h2>
+              <div class="mt-5 space-y-4">
+                <label class="block text-sm font-bold text-slate-700"
+                  >Password lama<input
+                    type="password"
+                    placeholder="••••••••"
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+                ><label class="block text-sm font-bold text-slate-700"
+                  >Password baru<input
+                    type="password"
+                    placeholder="••••••••"
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"
+                /></label>
+              </div>
+              <div class="mt-5 flex justify-end">
+                <button
+                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"
+                >
+                  <iconify-icon icon="lucide:shield-check"></iconify-icon>
+                  Update password
+                </button>
+              </div>
             </div>
           </div>
-        </section>
-        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5">
-          <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"><div><h2 class="font-display text-lg font-bold text-slate-900">Registered Users</h2><p id="usr-result-count" class="mt-1 text-sm text-slate-500">Menampilkan 11 pengguna</p></div></div>
-          <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="w-12 px-5 py-4"><input id="usr-select-all" type="checkbox" class="h-4 w-4 rounded border-slate-300 accent-ocean cursor-pointer"></th><th class="px-4 py-4 font-bold">User</th><th class="px-4 py-4 font-bold">Email</th><th class="px-4 py-4 font-bold">Phone</th><th class="px-4 py-4 font-bold">Join Date</th><th class="px-4 py-4 font-bold">Status</th><th class="px-5 py-4 text-right font-bold">Actions</th></tr></thead><tbody id="usr-table-body" class="divide-y divide-slate-100"></tbody></table></div>
-        </section>
-      </div>
-    </main>
-
-    <!-- ==================== PAGE: CONTENT ==================== -->
-    <main id="page-content" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-[1500px]">
-        <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Content Management</h1><p class="mt-2 text-sm text-slate-500">Kelola harga tiket, fasilitas, promosi, dan galeri Citraland Waterpark.</p></div><button id="preview-site-btn" class="flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean sm:self-auto"><iconify-icon icon="lucide:external-link"></iconify-icon> Preview website</button></div>
-        <div class="mt-8 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm animate-fade-in-up delay-1">
-          <button data-ctab="pricing" class="ctab-btn active flex items-center gap-2 rounded-xl bg-ocean px-5 py-3 text-sm font-bold text-white"><iconify-icon icon="lucide:ticket"></iconify-icon> Ticket Pricing</button>
-          <button data-ctab="facilities" class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"><iconify-icon icon="lucide:building-2"></iconify-icon> Facilities</button>
-          <button data-ctab="promotions" class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"><iconify-icon icon="lucide:badge-percent"></iconify-icon> Promotions</button>
-          <button data-ctab="gallery" class="ctab-btn flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 hover:text-ocean"><iconify-icon icon="lucide:images"></iconify-icon> Gallery</button>
         </div>
-        <!-- Pricing Tab -->
-        <section id="ctab-pricing" class="tab-panel active mt-6">
-          <div class="mb-5 flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Ticket Pricing</h2><p class="mt-1 text-sm text-slate-500">Atur harga dan tampilan tiket.</p></div><span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">3 Published</span></div>
-          <div class="grid gap-5 xl:grid-cols-3" id="pricing-cards"></div>
-        </section>
-        <!-- Facilities Tab -->
-        <section id="ctab-facilities" class="tab-panel mt-6">
-          <div class="flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Facilities</h2><p class="mt-1 text-sm text-slate-500">Kelola fasilitas landing page.</p></div><button id="add-facility-btn" class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-4 text-sm font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:plus"></iconify-icon> Tambah fasilitas</button></div>
-          <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><table class="w-full text-left text-sm"><thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"><tr><th class="px-6 py-4 font-bold">Nama</th><th class="px-4 py-4 font-bold">Deskripsi</th><th class="px-4 py-4 font-bold">Icon</th><th class="px-4 py-4 font-bold">Status</th><th class="px-6 py-4 text-right font-bold">Aksi</th></tr></thead><tbody id="fac-table-body" class="divide-y divide-slate-100"></tbody></table></div>
-        </section>
-        <!-- Promotions Tab -->
-        <section id="ctab-promotions" class="tab-panel mt-6">
-          <div class="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 class="font-display text-xl font-bold text-slate-900">Create Promotion</h2><p class="mt-1 text-sm text-slate-500">Buat kode promo baru.</p><div class="mt-6 space-y-4"><label class="block text-sm font-bold text-slate-700">Discount code<input id="promo-code" placeholder="Contoh: CITRALAND10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 uppercase font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Type<select id="promo-type" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"><option>Percentage (%)</option><option>Nominal (Rp)</option></select></label><label class="block text-sm font-bold text-slate-700">Amount<input id="promo-amount" type="number" min="0" placeholder="10" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label></div><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Start date<input id="promo-start" type="date" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label><label class="block text-sm font-bold text-slate-700">End date<input id="promo-end" type="date" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"></label></div><button id="publish-promo-btn" class="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-ocean font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:megaphone"></iconify-icon> Publish promotion</button></div></div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Active Promotions</h2><p class="mt-1 text-sm text-slate-500">Promo yang sedang berjalan.</p></div><span id="promo-active-count" class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">2 Active</span></div><div id="promo-list" class="mt-6 space-y-3"></div></div>
+      </main>
+
+      <!-- ==================== PAGE: HELP ==================== -->
+      <main id="page-help" class="page-view p-5 sm:p-8">
+        <div class="mx-auto max-w-3xl">
+          <div class="animate-fade-in-up">
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
+              System
+            </p>
+            <h1
+              class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
+            >
+              Pusat Bantuan
+            </h1>
+            <p class="mt-2 text-sm text-slate-500">
+              Temukan jawaban dan panduan penggunaan sistem.
+            </p>
           </div>
-        </section>
-        <!-- Gallery Tab -->
-        <section id="ctab-gallery" class="tab-panel mt-6">
-          <div class="flex items-center justify-between"><div><h2 class="font-display text-xl font-bold text-slate-900">Gallery</h2><p class="mt-1 text-sm text-slate-500">Kelola foto galeri website.</p></div><span id="gallery-count-badge" class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">4 Published</span></div>
-          <div id="drop-zone" class="drop-zone mt-6 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-cyan-200 bg-lagoon/60 p-8 text-center hover:border-aqua"><span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ocean shadow-sm"><iconify-icon icon="lucide:cloud-upload" class="text-2xl"></iconify-icon></span><h3 class="mt-4 font-display font-bold">Drag & drop images here</h3><p class="mt-1 text-sm text-slate-500">atau klik untuk memilih file · JPG, PNG, WebP maks 5MB</p><input id="gallery-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden"><button id="choose-gallery-btn" type="button" class="mt-4 rounded-xl border border-aqua px-4 py-2 text-sm font-bold text-ocean hover:bg-aqua hover:text-white">Choose files</button></div>
-          <div id="gallery-grid" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"></div>
-        </section>
-      </div>
-    </main>
+          <div class="mt-8 space-y-4">
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-1"
+            >
+              <div class="flex items-start gap-4">
+                <span
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                  ><iconify-icon
+                    icon="lucide:book-open"
+                    class="text-xl"
+                  ></iconify-icon
+                ></span>
+                <div>
+                  <h3 class="font-display text-base font-bold text-slate-900">
+                    Panduan Penggunaan
+                  </h3>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Pelajari cara menggunakan semua fitur admin panel Citraland
+                    Waterpark.
+                  </p>
+                  <a
+                    href="#"
+                    class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
+                    >Baca panduan
+                    <iconify-icon icon="lucide:arrow-right"></iconify-icon
+                  ></a>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-2"
+            >
+              <div class="flex items-start gap-4">
+                <span
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                  ><iconify-icon
+                    icon="lucide:video"
+                    class="text-xl"
+                  ></iconify-icon
+                ></span>
+                <div>
+                  <h3 class="font-display text-base font-bold text-slate-900">
+                    Video Tutorial
+                  </h3>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Tonton video tutorial untuk pemahaman yang lebih baik.
+                  </p>
+                  <a
+                    href="#"
+                    class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
+                    >Lihat video
+                    <iconify-icon icon="lucide:arrow-right"></iconify-icon
+                  ></a>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-3"
+            >
+              <div class="flex items-start gap-4">
+                <span
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                  ><iconify-icon
+                    icon="lucide:message-circle"
+                    class="text-xl"
+                  ></iconify-icon
+                ></span>
+                <div>
+                  <h3 class="font-display text-base font-bold text-slate-900">
+                    Hubungi Support
+                  </h3>
+                  <p class="mt-1 text-sm text-slate-500">
+                    Tim support kami siap membantu 24/7.
+                  </p>
+                  <div class="mt-3 flex gap-3">
+                    <a
+                      href="#"
+                      class="inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
+                      ><iconify-icon icon="lucide:mail"></iconify-icon> Email</a
+                    ><a
+                      href="#"
+                      class="inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
+                      ><iconify-icon icon="lucide:phone"></iconify-icon>
+                      Telepon</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-4"
+            >
+              <div>
+                <h3 class="font-display text-base font-bold text-slate-900">
+                  FAQ
+                </h3>
+                <div class="mt-4 space-y-3">
+                  <details class="group rounded-xl border border-slate-100">
+                    <summary
+                      class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Bagaimana cara menambah tiket baru?
+                      <iconify-icon
+                        icon="lucide:chevron-down"
+                        class="transition group-open:rotate-180"
+                      ></iconify-icon>
+                    </summary>
+                    <div
+                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
+                    >
+                      Buka Content Management → Harga Tiket, ubah harga pada
+                      jenis tiket yang ingin disesuaikan, lalu klik Simpan.
+                    </div>
+                  </details>
+                  <details class="group rounded-xl border border-slate-100">
+                    <summary
+                      class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Cara export laporan keuangan?
+                      <iconify-icon
+                        icon="lucide:chevron-down"
+                        class="transition group-open:rotate-180"
+                      ></iconify-icon>
+                    </summary>
+                    <div
+                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
+                    >
+                      Buka Analytics ? klik tombol Export ? pilih format CSV
+                      atau PDF.
+                    </div>
+                  </details>
+                  <details class="group rounded-xl border border-slate-100">
+                    <summary
+                      class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Bagaimana mengelola promo?
+                      <iconify-icon
+                        icon="lucide:chevron-down"
+                        class="transition group-open:rotate-180"
+                      ></iconify-icon>
+                    </summary>
+                    <div
+                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
+                    >
+                      Buka Content Management ? Promotions ? isi form dan klik
+                      Publish.
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
 
-    <!-- ==================== PAGE: ANALYTICS ==================== -->
-    <main id="page-analytics" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-[1500px]">
-        <div class="flex flex-col justify-between gap-5 lg:flex-row lg:items-end animate-fade-in-up"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Business intelligence</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Analytics & Reports</h1><p class="mt-2 text-sm text-slate-500">Pahami performa tiket dan destinasi di seluruh platform.</p></div><div class="flex flex-wrap items-center gap-3"><div class="relative"><button id="analytics-export-btn" class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"><iconify-icon icon="lucide:download"></iconify-icon> Export</button></div><button class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"><iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon> 01–30 Des 2026 <iconify-icon icon="lucide:chevron-down"></iconify-icon></button></div></div>
-        <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"><iconify-icon icon="lucide:wallet" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+8,4%</span></div><p class="mt-5 text-sm text-slate-500">Total Revenue</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">Rp2.450.000</p><p class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"><iconify-icon icon="lucide:ticket-check" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+6,8%</span></div><p class="mt-5 text-sm text-slate-500">Total Bookings</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">156</p><p class="mt-2 text-xs text-slate-400">12 booking baru minggu ini</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"><iconify-icon icon="lucide:users-round" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+10,2%</span></div><p class="mt-5 text-sm text-slate-500">Total Visitors</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">487</p><p class="mt-2 text-xs text-slate-400">Pengunjung dalam periode</p></article>
-          <article class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"><div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><iconify-icon icon="lucide:badge-dollar-sign" class="text-xl"></iconify-icon></span><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600">+4,1%</span></div><p class="mt-5 text-sm text-slate-500">Rentang Harga Tiket</p><p class="mt-1 font-display text-2xl font-extrabold text-slate-900">Rp35?50 rb</p><p class="mt-2 text-xs text-slate-400">Weekdays hingga Weekend</p></article>
-        </section>
-        <section class="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]">
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"><div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div><h2 class="font-display text-lg font-bold text-slate-900">Revenue by Month</h2><p class="mt-1 text-sm text-slate-500">Perbandingan revenue bulanan 2026</p></div><div class="flex items-center gap-4 text-xs font-semibold text-slate-500"><span class="flex items-center gap-2"><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span><span class="flex items-center gap-2"><i class="h-2 w-2 rounded-full bg-cyan-100"></i>Target</span></div></div><div class="mt-6 h-64"><svg viewBox="0 0 760 250" preserveAspectRatio="none" class="h-full w-full"><g stroke="#e2e8f0" stroke-dasharray="3 5"><line x1="50" y1="25" x2="740" y2="25"/><line x1="50" y1="75" x2="740" y2="75"/><line x1="50" y1="125" x2="740" y2="125"/><line x1="50" y1="175" x2="740" y2="175"/></g><g fill="#d9f7fa"><rect class="bar-animate" style="animation-delay:.1s" x="73" y="105" width="28" height="105" rx="5"/><rect class="bar-animate" style="animation-delay:.15s" x="127" y="92" width="28" height="118" rx="5"/><rect class="bar-animate" style="animation-delay:.2s" x="181" y="116" width="28" height="94" rx="5"/><rect class="bar-animate" style="animation-delay:.25s" x="235" y="80" width="28" height="130" rx="5"/><rect class="bar-animate" style="animation-delay:.3s" x="289" y="90" width="28" height="120" rx="5"/><rect class="bar-animate" style="animation-delay:.35s" x="343" y="63" width="28" height="147" rx="5"/><rect class="bar-animate" style="animation-delay:.4s" x="397" y="72" width="28" height="138" rx="5"/><rect class="bar-animate" style="animation-delay:.45s" x="451" y="49" width="28" height="161" rx="5"/><rect class="bar-animate" style="animation-delay:.5s" x="505" y="57" width="28" height="153" rx="5"/><rect class="bar-animate" style="animation-delay:.55s" x="559" y="38" width="28" height="172" rx="5"/><rect class="bar-animate" style="animation-delay:.6s" x="613" y="45" width="28" height="165" rx="5"/><rect class="bar-animate" style="animation-delay:.65s" x="667" y="26" width="28" height="184" rx="5"/></g><g fill="#00BCD4"><rect class="bar-animate bar-hover" style="animation-delay:.15s" x="73" y="123" width="28" height="87" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.2s" x="127" y="111" width="28" height="99" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.25s" x="181" y="131" width="28" height="79" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.3s" x="235" y="95" width="28" height="115" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.35s" x="289" y="106" width="28" height="104" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.4s" x="343" y="79" width="28" height="131" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.45s" x="397" y="84" width="28" height="126" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.5s" x="451" y="64" width="28" height="146" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.55s" x="505" y="71" width="28" height="139" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.6s" x="559" y="54" width="28" height="156" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.65s" x="613" y="59" width="28" height="151" rx="5"/><rect class="bar-animate bar-hover" style="animation-delay:.7s" x="667" y="40" width="28" height="170" rx="5"/></g><g fill="#94a3b8" font-size="11" text-anchor="middle"><text x="87" y="232">Jan</text><text x="141" y="232">Feb</text><text x="195" y="232">Mar</text><text x="249" y="232">Apr</text><text x="303" y="232">Mei</text><text x="357" y="232">Jun</text><text x="411" y="232">Jul</text><text x="465" y="232">Agu</text><text x="519" y="232">Sep</text><text x="573" y="232">Okt</text><text x="627" y="232">Nov</text><text x="681" y="232">Des</text></g></svg></div></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"><div><h2 class="font-display text-lg font-bold text-slate-900">Ticket Distribution</h2><p class="mt-1 text-sm text-slate-500">Komposisi tiket terjual</p></div><div class="mt-6 flex items-center justify-center gap-7"><div class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full" style="background:conic-gradient(#00BCD4 0 46%,#0097A7 46% 100%)"><div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"><span class="font-display text-2xl font-extrabold text-slate-900">487</span><span class="text-xs text-slate-400">Tiket</span></div></div><div class="space-y-4 text-sm"><p class="flex items-center gap-3"><i class="h-3 w-3 rounded-full bg-aqua"></i><span class="w-16 text-slate-500">Weekdays</span><b>46%</b></p><p class="flex items-center gap-3"><i class="h-3 w-3 rounded-full bg-ocean"></i><span class="w-16 text-slate-500">Weekend</span><b>54%</b></p></div></div></article>
-        </section>
-        <section class="mt-6 grid gap-6 xl:grid-cols-2">
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"><div class="flex items-center justify-between"><div><h2 class="font-display text-lg font-bold text-slate-900">Peak Hours Heatmap</h2><p class="mt-1 text-sm text-slate-500">Pola kunjungan berdasarkan hari & jam</p></div><span class="rounded-lg bg-lagoon px-3 py-2 text-xs font-bold text-ocean">Desember</span></div><div class="mt-6 overflow-x-auto"><div class="min-w-[560px]"><div class="mb-2 grid grid-cols-[70px_repeat(8,1fr)] gap-1 text-[10px] text-slate-400"><span></span><span class="text-center">08</span><span class="text-center">10</span><span class="text-center">12</span><span class="text-center">14</span><span class="text-center">16</span><span class="text-center">18</span><span class="text-center">20</span><span></span></div><div id="heatmap-grid" class="space-y-1 text-[11px]"></div><div class="mt-4 flex items-center justify-end gap-2 text-[10px] text-slate-400"><span>Sepi</span><i class="h-3 w-3 rounded bg-cyan-50"></i><i class="h-3 w-3 rounded bg-cyan-100"></i><i class="h-3 w-3 rounded bg-aqua/50"></i><i class="h-3 w-3 rounded bg-aqua/70"></i><i class="h-3 w-3 rounded bg-ocean"></i><span>Ramai</span></div></div></div></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-6"><div class="flex items-center justify-between"><div><h2 class="font-display text-lg font-bold text-slate-900">User Growth</h2><p class="mt-1 text-sm text-slate-500">Pertumbuhan member terdaftar</p></div><span class="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:trending-up"></iconify-icon> 18,6%</span></div><div class="mt-6 h-56"><svg viewBox="0 0 720 220" preserveAspectRatio="none" class="h-full w-full"><defs><linearGradient id="ugFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0097A7" stop-opacity=".22"/><stop offset="1" stop-color="#0097A7" stop-opacity="0"/></linearGradient></defs><g stroke="#e2e8f0" stroke-dasharray="3 5"><line x1="45" y1="25" x2="700" y2="25"/><line x1="45" y1="75" x2="700" y2="75"/><line x1="45" y1="125" x2="700" y2="125"/><line x1="45" y1="175" x2="700" y2="175"/></g><path class="chart-fill" d="M45 178 C90 166 105 160 140 164 S185 145 215 150 S255 130 285 137 S330 112 360 120 S405 105 435 108 S480 81 510 91 S555 69 585 76 S630 46 660 53 S685 37 700 32 L700 190 L45 190Z" fill="url(#ugFill)"/><path class="chart-line" d="M45 178 C90 166 105 160 140 164 S185 145 215 150 S255 130 285 137 S330 112 360 120 S405 105 435 108 S480 81 510 91 S555 69 585 76 S630 46 660 53 S685 37 700 32" fill="none" stroke="#0097A7" stroke-width="4" stroke-linecap="round"/><g class="chart-fill"><circle cx="140" cy="164" r="4" fill="#0097A7" stroke="white" stroke-width="2"/><circle cx="285" cy="137" r="4" fill="#0097A7" stroke="white" stroke-width="2"/><circle cx="435" cy="108" r="4" fill="#0097A7" stroke="white" stroke-width="2"/><circle cx="585" cy="76" r="4" fill="#0097A7" stroke="white" stroke-width="2"/><circle cx="700" cy="32" r="5" fill="#00BCD4" stroke="white" stroke-width="3"/></g><g fill="#94a3b8" font-size="11"><text x="45" y="212">Jan</text><text x="155" y="212">Mar</text><text x="270" y="212">Mei</text><text x="385" y="212">Jul</text><text x="500" y="212">Sep</text><text x="615" y="212">Nov</text></g></svg></div></article>
-        </section>
-      </div>
-    </main>
+    <!-- OVERLAYS & MODALS -->
+    <div
+      id="mobile-overlay"
+      class="fixed inset-0 z-30 hidden bg-slate-950/30 md:hidden"
+    ></div>
 
-    <!-- ==================== PAGE: SETTINGS ==================== -->
-    <main id="page-settings" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-3xl">
-        <div class="animate-fade-in-up"><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">System</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Pengaturan</h1><p class="mt-2 text-sm text-slate-500">Konfigurasi sistem dan preferensi admin.</p></div>
-        <div class="mt-8 space-y-6">
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-1"><h2 class="font-display text-lg font-bold text-slate-900">Profil Administrator</h2><div class="mt-5 grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Nama lengkap<input value="Alya Rahma" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="block text-sm font-bold text-slate-700">Email<input value="alya@bluehaven.id" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="block text-sm font-bold text-slate-700">Role<input value="Super Administrator" disabled class="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 outline-none"></label><label class="block text-sm font-bold text-slate-700">Telepon<input value="+62 812-3456-7890" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label></div><div class="mt-5 flex justify-end"><button class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:save"></iconify-icon> Simpan perubahan</button></div></div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-3"><h2 class="font-display text-lg font-bold text-slate-900">Keamanan</h2><div class="mt-5 space-y-4"><label class="block text-sm font-bold text-slate-700">Password lama<input type="password" placeholder="••••••••" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="block text-sm font-bold text-slate-700">Password baru<input type="password" placeholder="••••••••" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label></div><div class="mt-5 flex justify-end"><button class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:shield-check"></iconify-icon> Update password</button></div></div>
+    <!-- User Modal -->
+    <div
+      id="user-modal"
+      class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+    >
+      <div
+        class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+      >
+        <div
+          class="flex items-start justify-between border-b border-slate-100 px-6 py-5"
+        >
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
+              User profile
+            </p>
+            <h2
+              id="user-modal-title"
+              class="mt-2 font-display text-2xl font-bold text-slate-900"
+            >
+              Add new user
+            </h2>
+          </div>
+          <button
+            id="close-user-modal"
+            class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50"
+          >
+            <iconify-icon icon="lucide:x"></iconify-icon>
+          </button>
+        </div>
+        <form id="user-form" class="p-6 grid gap-5 sm:grid-cols-2">
+          <label class="text-sm font-bold text-slate-700"
+            >Nama lengkap<input
+              id="um-name"
+              required
+              class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+          ><label class="text-sm font-bold text-slate-700"
+            >Email<input
+              id="um-email"
+              type="email"
+              required
+              class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+          ><label class="text-sm font-bold text-slate-700"
+            >Telepon<input
+              id="um-phone"
+              class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+          ><label class="text-sm font-bold text-slate-700"
+            >Status<select
+              id="um-status"
+              class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua cursor-pointer"
+            >
+              <option>Active</option>
+              <option>Inactive</option>
+            </select></label
+          >
+          <div class="flex justify-end gap-3 sm:col-span-2 pt-2">
+            <button
+              type="button"
+              id="cancel-user-modal"
+              class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
+            >
+              Batal</button
+            ><button
+              type="submit"
+              class="rounded-xl bg-ocean px-5 py-3 text-sm font-bold text-white hover:bg-ocean/90"
+            >
+              Simpan user
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Facility Modal -->
+    <div
+      id="facility-modal"
+      class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+    >
+      <div
+        class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-100 px-6 py-5"
+        >
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
+              Facility editor
+            </p>
+            <h2
+              id="fac-modal-title"
+              class="mt-2 font-display text-2xl font-bold text-slate-900"
+            >
+              Tambah fasilitas
+            </h2>
+          </div>
+          <button
+            id="close-facility-modal"
+            class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50"
+          >
+            <iconify-icon icon="lucide:x"></iconify-icon>
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <label class="block text-sm font-bold text-slate-700"
+            >Nama<input
+              id="fac-name"
+              placeholder="Contoh: Kolam Ombak"
+              class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100" /></label
+          ><label class="block text-sm font-bold text-slate-700"
+            >Deskripsi<textarea
+              id="fac-desc"
+              placeholder="Deskripsi singkat"
+              class="mt-2 h-24 w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"
+            ></textarea>
+          </label>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block text-sm font-bold text-slate-700"
+              >Icon<input
+                id="fac-icon"
+                placeholder="lucide:waves"
+                class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua" /></label
+            ><label class="block text-sm font-bold text-slate-700"
+              >Status<select
+                id="fac-status"
+                class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"
+              >
+                <option>Active</option>
+                <option>Inactive</option>
+              </select></label
+            >
+          </div>
+          <div class="flex justify-end gap-3 pt-2">
+            <button
+              id="cancel-facility-modal"
+              class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
+            >
+              Batal</button
+            ><button
+              id="save-facility-btn"
+              class="flex min-h-12 items-center gap-2 rounded-xl bg-ocean px-5 py-3 font-bold text-white hover:bg-ocean/90"
+            >
+              <iconify-icon icon="lucide:save"></iconify-icon> Simpan
+            </button>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
 
-    <!-- ==================== PAGE: HELP ==================== -->
-    <main id="page-help" class="page-view p-5 sm:p-8">
-      <div class="mx-auto max-w-3xl">
-        <div class="animate-fade-in-up"><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">System</p><h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">Pusat Bantuan</h1><p class="mt-2 text-sm text-slate-500">Temukan jawaban dan panduan penggunaan sistem.</p></div>
-        <div class="mt-8 space-y-4">
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-1"><div class="flex items-start gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lagoon text-ocean"><iconify-icon icon="lucide:book-open" class="text-xl"></iconify-icon></span><div><h3 class="font-display text-base font-bold text-slate-900">Panduan Penggunaan</h3><p class="mt-1 text-sm text-slate-500">Pelajari cara menggunakan semua fitur admin panel Citraland Waterpark.</p><a href="#" class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua">Baca panduan <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div></div></div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-2"><div class="flex items-start gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"><iconify-icon icon="lucide:video" class="text-xl"></iconify-icon></span><div><h3 class="font-display text-base font-bold text-slate-900">Video Tutorial</h3><p class="mt-1 text-sm text-slate-500">Tonton video tutorial untuk pemahaman yang lebih baik.</p><a href="#" class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua">Lihat video <iconify-icon icon="lucide:arrow-right"></iconify-icon></a></div></div></div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-3"><div class="flex items-start gap-4"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500"><iconify-icon icon="lucide:message-circle" class="text-xl"></iconify-icon></span><div><h3 class="font-display text-base font-bold text-slate-900">Hubungi Support</h3><p class="mt-1 text-sm text-slate-500">Tim support kami siap membantu 24/7.</p><div class="mt-3 flex gap-3"><a href="#" class="inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"><iconify-icon icon="lucide:mail"></iconify-icon> Email</a><a href="#" class="inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"><iconify-icon icon="lucide:phone"></iconify-icon> Telepon</a></div></div></div></div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-4"><div><h3 class="font-display text-base font-bold text-slate-900">FAQ</h3><div class="mt-4 space-y-3"><details class="group rounded-xl border border-slate-100"><summary class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Bagaimana cara menambah tiket baru? <iconify-icon icon="lucide:chevron-down" class="transition group-open:rotate-180"></iconify-icon></summary><div class="border-t border-slate-100 p-4 text-sm text-slate-500">Buka Content Management → Harga Tiket, ubah harga pada jenis tiket yang ingin disesuaikan, lalu klik Simpan.</div></details><details class="group rounded-xl border border-slate-100"><summary class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cara export laporan keuangan? <iconify-icon icon="lucide:chevron-down" class="transition group-open:rotate-180"></iconify-icon></summary><div class="border-t border-slate-100 p-4 text-sm text-slate-500">Buka Analytics ? klik tombol Export ? pilih format CSV atau PDF.</div></details><details class="group rounded-xl border border-slate-100"><summary class="flex cursor-pointer items-center justify-between p-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Bagaimana mengelola promo? <iconify-icon icon="lucide:chevron-down" class="transition group-open:rotate-180"></iconify-icon></summary><div class="border-t border-slate-100 p-4 text-sm text-slate-500">Buka Content Management ? Promotions ? isi form dan klik Publish.</div></details></div></div></div>
+    <!-- Delete Modal -->
+    <div
+      id="delete-modal"
+      class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+    >
+      <div
+        class="modal-panel w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+      >
+        <div class="p-6 text-center">
+          <span
+            class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-500"
+            ><iconify-icon
+              icon="lucide:alert-triangle"
+              class="text-2xl"
+            ></iconify-icon
+          ></span>
+          <h3 class="mt-4 font-display text-lg font-bold text-slate-900">
+            Hapus item?
+          </h3>
+          <p class="mt-2 text-sm text-slate-500" id="delete-message">
+            Item ini akan dihapus permanen.
+          </p>
+        </div>
+        <div
+          class="flex items-center gap-3 border-t border-slate-100 px-6 py-4"
+        >
+          <button
+            id="delete-cancel-btn"
+            class="flex-1 flex h-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50"
+          >
+            Batal</button
+          ><button
+            id="delete-confirm-btn"
+            class="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-rose-500 text-sm font-bold text-white hover:bg-rose-600"
+          >
+            <iconify-icon icon="lucide:trash-2"></iconify-icon> Hapus
+          </button>
         </div>
       </div>
-    </main>
-  </div>
-
-  <!-- OVERLAYS & MODALS -->
-  <div id="mobile-overlay" class="fixed inset-0 z-30 hidden bg-slate-950/30 md:hidden"></div>
-
-  <!-- User Modal -->
-  <div id="user-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-    <div class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
-      <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">User profile</p><h2 id="user-modal-title" class="mt-2 font-display text-2xl font-bold text-slate-900">Add new user</h2></div><button id="close-user-modal" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
-      <form id="user-form" class="p-6 grid gap-5 sm:grid-cols-2"><label class="text-sm font-bold text-slate-700">Nama lengkap<input id="um-name" required class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="text-sm font-bold text-slate-700">Email<input id="um-email" type="email" required class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="text-sm font-bold text-slate-700">Telepon<input id="um-phone" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"></label><label class="text-sm font-bold text-slate-700">Status<select id="um-status" class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal outline-none focus:border-aqua cursor-pointer"><option>Active</option><option>Inactive</option></select></label><div class="flex justify-end gap-3 sm:col-span-2 pt-2"><button type="button" id="cancel-user-modal" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean">Batal</button><button type="submit" class="rounded-xl bg-ocean px-5 py-3 text-sm font-bold text-white hover:bg-ocean/90">Simpan user</button></div></form>
     </div>
-  </div>
 
-  <!-- Facility Modal -->
-  <div id="facility-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-    <div class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
-      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5"><div><p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Facility editor</p><h2 id="fac-modal-title" class="mt-2 font-display text-2xl font-bold text-slate-900">Tambah fasilitas</h2></div><button id="close-facility-modal" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50"><iconify-icon icon="lucide:x"></iconify-icon></button></div>
-      <div class="p-6 space-y-4"><label class="block text-sm font-bold text-slate-700">Nama<input id="fac-name" placeholder="Contoh: Kolam Ombak" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label><label class="block text-sm font-bold text-slate-700">Deskripsi<textarea id="fac-desc" placeholder="Deskripsi singkat" class="mt-2 h-24 w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></textarea></label><div class="grid gap-4 sm:grid-cols-2"><label class="block text-sm font-bold text-slate-700">Icon<input id="fac-icon" placeholder="lucide:waves" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua"></label><label class="block text-sm font-bold text-slate-700">Status<select id="fac-status" class="mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none focus:border-aqua cursor-pointer"><option>Active</option><option>Inactive</option></select></label></div><div class="flex justify-end gap-3 pt-2"><button id="cancel-facility-modal" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean">Batal</button><button id="save-facility-btn" class="flex min-h-12 items-center gap-2 rounded-xl bg-ocean px-5 py-3 font-bold text-white hover:bg-ocean/90"><iconify-icon icon="lucide:save"></iconify-icon> Simpan</button></div></div>
-    </div>
+    <!-- Toast Container -->
+    <div
+      id="toast-container"
+      class="pointer-events-none fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 flex-col items-center gap-3"
+    ></div>
   </div>
-
-  <!-- Delete Modal -->
-  <div id="delete-modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-    <div class="modal-panel w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"><div class="p-6 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-500"><iconify-icon icon="lucide:alert-triangle" class="text-2xl"></iconify-icon></span><h3 class="mt-4 font-display text-lg font-bold text-slate-900">Hapus item?</h3><p class="mt-2 text-sm text-slate-500" id="delete-message">Item ini akan dihapus permanen.</p></div><div class="flex items-center gap-3 border-t border-slate-100 px-6 py-4"><button id="delete-cancel-btn" class="flex-1 flex h-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">Batal</button><button id="delete-confirm-btn" class="flex-1 flex h-10 items-center justify-center gap-2 rounded-xl bg-rose-500 text-sm font-bold text-white hover:bg-rose-600"><iconify-icon icon="lucide:trash-2"></iconify-icon> Hapus</button></div></div>
-  </div>
-
-  <!-- Toast Container -->
-  <div id="toast-container" class="pointer-events-none fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 flex-col items-center gap-3"></div>
-</div>
 </template>
