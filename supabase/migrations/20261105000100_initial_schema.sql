@@ -89,6 +89,24 @@ CREATE TABLE IF NOT EXISTS public.gallery_images (
   storage_path text
 );
 
+CREATE TABLE IF NOT EXISTS public.gates (
+  gate_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  gate_name text NOT NULL,
+  api_key_hash text NOT NULL UNIQUE,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.scan_logs (
+  log_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  gate_id uuid NOT NULL REFERENCES public.gates(gate_id),
+  booking_id uuid REFERENCES public.bookings(booking_id) ON DELETE SET NULL,
+  scanned_code text NOT NULL,
+  result text NOT NULL CHECK (result IN ('accepted', 'rejected')),
+  reason text,
+  scanned_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE SCHEMA IF NOT EXISTS private;
 REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated;
 GRANT USAGE ON SCHEMA private TO authenticated;
@@ -231,6 +249,10 @@ CREATE INDEX IF NOT EXISTS idx_promotions_date_range ON public.promotions(start_
 CREATE INDEX IF NOT EXISTS idx_gallery_images_status ON public.gallery_images(status);
 CREATE INDEX IF NOT EXISTS idx_gallery_images_display_order ON public.gallery_images(display_order);
 CREATE INDEX IF NOT EXISTS idx_gallery_images_uploaded_at ON public.gallery_images(uploaded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_gates_is_active ON public.gates(is_active);
+CREATE INDEX IF NOT EXISTS idx_scan_logs_gate_id ON public.scan_logs(gate_id);
+CREATE INDEX IF NOT EXISTS idx_scan_logs_booking_id ON public.scan_logs(booking_id);
+CREATE INDEX IF NOT EXISTS idx_scan_logs_scanned_at ON public.scan_logs(scanned_at DESC);
 
 DROP TRIGGER IF EXISTS users_set_updated_at ON public.users;
 DROP TRIGGER IF EXISTS bookings_validate_insert ON public.bookings;
@@ -397,6 +419,8 @@ ALTER TABLE public.ticket_pricing ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.facilities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gallery_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scan_logs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
@@ -471,6 +495,13 @@ CREATE POLICY "Public can view published images" ON public.gallery_images
 CREATE POLICY "Admins can manage gallery" ON public.gallery_images
   FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can manage gates" ON public.gates;
+DROP POLICY IF EXISTS "Admins can view scan logs" ON public.scan_logs;
+CREATE POLICY "Admins can manage gates" ON public.gates
+  FOR ALL TO authenticated USING (public.is_admin()) WITH CHECK (public.is_admin());
+CREATE POLICY "Admins can view scan logs" ON public.scan_logs
+  FOR SELECT TO authenticated USING (public.is_admin());
+
 GRANT SELECT ON public.users TO authenticated;
 GRANT UPDATE (full_name, phone) ON public.users TO authenticated;
 GRANT SELECT ON public.admin_users TO authenticated;
@@ -479,6 +510,8 @@ GRANT SELECT ON public.ticket_pricing, public.facilities, public.promotions, pub
   TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.ticket_pricing, public.facilities,
   public.promotions, public.gallery_images TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.gates TO authenticated;
+GRANT SELECT ON public.scan_logs TO authenticated;
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES ('gallery', 'gallery', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp'])
