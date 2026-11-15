@@ -56,3 +56,7 @@ SET full_name = EXCLUDED.full_name,
 
 -- Create sample bookings through the application or a trusted service-role
 -- workflow so the booking validation trigger and payment flow remain in effect.
+
+-- INI BUAT TES DOANG NANTI GANTI JADI RANDOM HEX
+INSERT INTO public.gates (gate_name, api_key_hash)
+VALUES ('Gate Utama', encode(extensions.digest('letmein', 'sha256'), 'hex'));
