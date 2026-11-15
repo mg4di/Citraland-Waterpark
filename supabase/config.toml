@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.booking-status]
 verify_jwt = true
+
+[functions.gate-scan]
+verify_jwt = false
