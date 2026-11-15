@@ -93,6 +93,7 @@ Dashboard, Booking, Users, Analytics, dan Settings memuat data dari database dan
    ```sh
    npx supabase functions deploy midtrans-create-transaction
    npx supabase functions deploy midtrans-payment-callback
+   npx supabase functions deploy midtrans-resume-transaction
    npx supabase functions deploy booking-status
    ```
 
