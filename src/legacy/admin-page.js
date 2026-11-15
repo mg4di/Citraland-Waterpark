@@ -1,10 +1,13 @@
 import { authService } from '../services/authService.js'
+import { analyticsService } from '../services/analyticsService.js'
 import { bookingService } from '../services/bookingService.js'
 import { facilitiesService } from '../services/facilitiesService.js'
 import { galleryService } from '../services/galleryService.js'
 import { promotionService } from '../services/promotionService.js'
 import { realtimeManager } from '../services/realtimeService.js'
 import { ticketPricingService } from '../services/ticketPricingService.js'
+import { usersService } from '../services/usersService.js'
+import { areaChart, barChart, donutSegments } from '../lib/chart.js'
 
 export function initializeAdminPage(onLogout = () => window.location.assign('/admin')) {
 
@@ -20,20 +23,16 @@ let bookings = [];
 let bkFilter='all', bkSearch='', bkPage=1; const bkPerPage=5;
 
 // Users data
-let users = [
-  {id:'USR-1001',name:'Dimas Pratama',email:'dimas@email.com',phone:'0812-3456-7890',joinDate:'12 Des 2024',status:'Active'},
-  {id:'USR-1002',name:'Rina Pratiwi',email:'rina@email.com',phone:'0813-2201-8842',joinDate:'10 Des 2024',status:'Active'},
-  {id:'USR-1003',name:'Andi Saputra',email:'andi@email.com',phone:'0815-9921-4400',joinDate:'08 Des 2024',status:'Active'},
-  {id:'USR-1004',name:'Maya Lestari',email:'maya@email.com',phone:'0812-7700-1234',joinDate:'05 Des 2024',status:'Inactive'},
-  {id:'USR-1005',name:'Fajar Nugraha',email:'fajar@email.com',phone:'0819-6722-1108',joinDate:'02 Des 2024',status:'Active'},
-  {id:'USR-1006',name:'Sari Wulandari',email:'sari@email.com',phone:'0821-5531-2240',joinDate:'28 Nov 2024',status:'Active'},
-  {id:'USR-1007',name:'Budi Hartono',email:'budi@email.com',phone:'0817-8841-3200',joinDate:'25 Nov 2024',status:'Inactive'},
-  {id:'USR-1008',name:'Nadia Permata',email:'nadia@email.com',phone:'0822-1088-7731',joinDate:'21 Nov 2024',status:'Active'},
-  {id:'USR-1009',name:'Rizky Maulana',email:'rizky@email.com',phone:'0812-6012-9921',joinDate:'18 Nov 2024',status:'Active'},
-  {id:'USR-1010',name:'Lia Anggraini',email:'lia@email.com',phone:'0813-4455-7788',joinDate:'14 Nov 2024',status:'Active'},
-  {id:'USR-1011',name:'Yoga Prasetyo',email:'yoga@email.com',phone:'0818-3321-9900',joinDate:'10 Nov 2024',status:'Inactive'},
-];
-let usrSearch='', usrStatusFilter='all', usrSelected=new Set(), editingUserIdx=null;
+let users = [];
+let userStats = { total: 0, active: 0, inactive: 0, new_this_month: 0, new_prev_month: 0 };
+let usrSearch='', usrStatusFilter='all', usrSelected=new Set(), editingUserId=null;
+
+// Dashboard / analytics period
+let dashFrom='', dashTo='', anFrom='', anTo='';
+let lastExpireAt=0;
+let analyticsCache={};
+let dashboardRequest=0, analyticsRequest=0, usersRequest=0, bookingsRequest=0;
+let pollTimer=null;
 
 // Facilities data
 let facilities = [];
@@ -66,6 +65,68 @@ function showToast(msg, type='success') {
   setTimeout(()=>{t.style.animation='toastOut .3s ease both';setTimeout(()=>t.remove(),300)},2500);
 }
 
+// ===================== FORMAT & UI HELPERS =====================
+function todayWita(){
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Makassar', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const part = (type) => parts.find((item) => item.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+function monthStartWita(){ return todayWita().slice(0,8)+'01'; }
+function formatRupiah(value){ return `Rp${Number(value||0).toLocaleString('id-ID')}`; }
+function formatRupiahShort(value){
+  const amount=Number(value||0);
+  return amount >= 1000 ? `Rp${compactNumber(amount)}` : formatRupiah(amount);
+}
+function formatNumber(value){ return Number(value||0).toLocaleString('id-ID'); }
+function compactNumber(value){
+  return new Intl.NumberFormat('id-ID', { notation: 'compact', maximumFractionDigits: 1 }).format(Number(value||0));
+}
+function formatShortDate(value){
+  if(!value) return '-';
+  const date = new Date(`${String(value).slice(0,10)}T00:00:00+08:00`);
+  if(Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Makassar', day: '2-digit', month: 'short' }).format(date);
+}
+function formatDateTimeWita(value){
+  if(!value) return '-';
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return '-';
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Makassar', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+}
+function monthShort(value){
+  if(!value) return '';
+  const date = new Date(`${String(value).slice(0,7)}-01T00:00:00+08:00`);
+  if(Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Makassar', month: 'short' }).format(date);
+}
+function setText(selector, value){
+  const el = document.querySelector(selector);
+  if(el) el.textContent = value;
+}
+function debounce(fn, wait=300){
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+function setBusy(button, busy, label){
+  if(!button) return;
+  if(busy){
+    button.dataset.idleLabel = button.innerHTML;
+    button.disabled = true;
+    button.classList.add('opacity-60');
+    if(label) button.textContent = label;
+  } else {
+    button.disabled = false;
+    button.classList.remove('opacity-60');
+    if(button.dataset.idleLabel) button.innerHTML = button.dataset.idleLabel;
+    delete button.dataset.idleLabel;
+  }
+}
+
 // ===================== ROUTING =====================
 function navigateTo(page) {
   document.querySelectorAll('.page-view').forEach(p=>p.classList.remove('active'));
@@ -94,9 +155,10 @@ function navigateTo(page) {
 
   // Re-render page-specific content
   if(page==='bookings') renderBookings();
-  if(page==='users') renderUsers();
-  if(page==='content'){ void loadContent(); renderHeatmap(); }
-  if(page==='analytics') renderHeatmap();
+  if(page==='users'){ void loadUsers(); }
+  if(page==='content'){ void loadContent(); }
+  if(page==='analytics'){ void loadAnalytics(); }
+  if(page==='settings'){ void loadAdminProfile(); }
 }
 
 // Hash routing
@@ -164,19 +226,34 @@ onDocument('click',async e=>{
   await onLogout();
 });
 
-Promise.all([authService.getUser(), authService.getAdminProfile()]).then(([userResult, profileResult])=>{
-  if(!userResult.success||!userResult.user)return;
-  const user=userResult.user;
+let currentAdminUser=null;
+let currentAdminProfile=null;
+async function loadAdminProfile(){
+  const [userResult, profileResult]=await Promise.all([authService.getUser(), authService.getAdminProfile()]);
+  if(!userResult.success||!userResult.user) return;
+  currentAdminUser=userResult.user;
   if(!profileResult.success){
     showToast(profileResult.error,'error');
+    setText('#admin-profile-status', profileResult.error);
     return;
   }
-  const name=profileResult.admin.full_name||user.user_metadata?.full_name||user.email||'Administrator';
-  document.getElementById('admin-display-name').textContent=name;
-  document.getElementById('admin-dropdown-name').textContent=name;
-  document.getElementById('admin-dropdown-email').textContent=user.email||'';
-  document.getElementById('admin-avatar').textContent=name.split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase();
-});
+  currentAdminProfile=profileResult.admin;
+  const name=currentAdminProfile.full_name||currentAdminUser.user_metadata?.full_name||currentAdminUser.email||'Administrator';
+  setText('#admin-display-name', name);
+  setText('#admin-dropdown-name', name);
+  setText('#admin-dropdown-email', currentAdminUser.email||'');
+  setText('#admin-avatar', name.split(/\s+/).slice(0,2).map((part)=>part[0]).join('').toUpperCase());
+  setText('#admin-profile-status', 'Profil dimuat dari database.');
+  const nameInput=document.getElementById('admin-profile-name');
+  const emailInput=document.getElementById('admin-profile-email');
+  const roleInput=document.getElementById('admin-profile-role');
+  const phoneInput=document.getElementById('admin-profile-phone');
+  if(nameInput) nameInput.value=currentAdminProfile.full_name||'';
+  if(emailInput) emailInput.value=currentAdminUser.email||'';
+  if(roleInput) roleInput.value=String(currentAdminProfile.role||'').replace(/_/g,' ').replace(/\b\w/g,(character)=>character.toUpperCase());
+  if(phoneInput) phoneInput.value=currentAdminProfile.phone||'';
+}
+void loadAdminProfile();
 
 // Keyboard
 onDocument('keydown',e=>{
@@ -198,6 +275,10 @@ function mapBooking(booking) {
     .join(', ');
   const date = new Date(`${booking.visit_date}T00:00:00`)
     .toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  const checkedInAt = booking.checked_in_at ?? null;
+  const checkInTime = checkedInAt
+    ? new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(checkedInAt))
+    : '';
   return {
     dbId: booking.booking_id,
     id: booking.booking_code,
@@ -208,6 +289,12 @@ function mapBooking(booking) {
     status: booking.effective_status
       ?? (booking.cancelled_at && !booking.checked_in_at ? 'cancelled' : booking.payment_status),
     cancelledReason: booking.cancellation_reason ?? null,
+    checkedInAt,
+    checkInLabel: checkedInAt ? `${checkInTime} WITA` : 'Belum masuk',
+    canCheckIn: booking.payment_status === 'paid'
+      && !booking.checked_in_at
+      && !booking.cancelled_at
+      && booking.visit_date === todayWita(),
     amount: `Rp${Number(booking.total_amount).toLocaleString('id-ID')}`,
     raw: booking,
   };
@@ -220,14 +307,20 @@ function escapeHtml(value) {
 }
 
 async function loadBookings() {
+  const requestId = ++bookingsRequest;
   // Tiket tidak dipakai yang sudah lewat tanggal kunjungan otomatis dibatalkan.
-  await bookingService.expireUnusedBookings();
+  // Jangan panggil setiap event realtime agar tidak memicu loop update.
+  if(Date.now() - lastExpireAt > 5 * 60 * 1000){
+    lastExpireAt = Date.now();
+    await bookingService.expireUnusedBookings();
+  }
   const result = await bookingService.getAllBookings({
     status: bkFilter,
     searchTerm: bkSearch,
     page: 1,
     pageSize: 1000,
   });
+  if(requestId !== bookingsRequest) return;
   if (!result.success) {
     showToast(result.error, 'error');
     return;
@@ -236,68 +329,100 @@ async function loadBookings() {
   renderBookings();
 }
 
-async function loadDashboard() {
-  const result = await bookingService.getDashboardStats();
-  if (!result.success) {
-    showToast(result.error, 'error');
+function renderDonut(donutSelector, legendSelector, distribution, total, labels){
+  const donut = document.querySelector(donutSelector);
+  const legend = document.querySelector(legendSelector);
+  if(!donut) return;
+  const order = ['paid','pending','failed','cancelled','refunded'];
+  const items = order.map((key)=>({ key, label: labels[key] ?? key, value: Number(distribution?.[key] ?? 0) }));
+  const result = donutSegments(items);
+  donut.style.background = result.gradient;
+  const totalEl = donut.querySelector('span');
+  if(totalEl) totalEl.textContent = formatNumber(total);
+  if(!legend) return;
+  legend.replaceChildren();
+  if(!result.total){
+    legend.innerHTML = '<p class="text-sm text-slate-400">Belum ada data pada periode ini.</p>';
     return;
   }
-  const stats = result.stats;
-  const cards = document.querySelectorAll('#page-dashboard .stat-card');
-  if (cards[0]) cards[0].querySelector('.font-display.text-2xl').textContent =
-    `Rp${Number(stats.total_revenue).toLocaleString('id-ID')}`;
-  if (cards[1]) cards[1].querySelector('.font-display.text-2xl').textContent = stats.total_bookings;
+  for(const segment of result.segments){
+    const row = document.createElement('p');
+    row.className = 'flex items-center gap-3';
+    const dot = document.createElement('i');
+    dot.className = 'h-3 w-3 rounded-full';
+    dot.style.backgroundColor = segment.color;
+    const label = document.createElement('span');
+    label.className = 'w-20 text-slate-500';
+    label.textContent = segment.label;
+    const value = document.createElement('b');
+    value.className = 'ml-auto text-slate-800';
+    value.textContent = `${formatNumber(segment.value)} · ${Math.round((segment.value / result.total) * 100)}%`;
+    row.append(dot, label, value);
+    legend.appendChild(row);
+  }
+}
 
-  const donutTotal = document.querySelector('#page-dashboard .donut-chart span');
-  if (donutTotal) donutTotal.textContent = stats.total_bookings;
-  const distribution=stats.booking_status_distribution??{};
-  const paid=Number(distribution.paid??0);
-  const pending=Number(distribution.pending??0);
-  const other=Math.max(0,Number(stats.total_bookings)-paid-pending);
-  const total=Number(stats.total_bookings);
-  const paidEnd=total?paid/total*100:0;
-  const pendingEnd=total?(paid+pending)/total*100:0;
-  const donut=document.querySelector('#page-dashboard .donut-chart');
-  if(donut){
-    donut.style.background=total
-      ?`conic-gradient(#00BCD4 0 ${paidEnd}%,#94a3b8 ${paidEnd}% ${pendingEnd}%,#f43f5e ${pendingEnd}% 100%)`
-      :'conic-gradient(#e2e8f0 0 100%)';
+function renderDashboardRecent(bookings){
+  const body = document.querySelector('#page-dashboard table tbody');
+  if(!body) return;
+  body.replaceChildren();
+  if(!bookings.length){
+    body.innerHTML = '<tr><td colspan="6" class="px-6 py-14 text-center text-sm text-slate-400">Belum ada booking pada periode ini.</td></tr>';
+    return;
   }
-  const statusLegend=document.querySelectorAll('#page-dashboard .donut-chart + div > p');
-  for(const [index,label,value] of [
-    [0,'Paid',paid],
-    [1,'Pending',pending],
-    [2,'Other',other],
-  ]){
-    const row=statusLegend[index];
-    if(!row)continue;
-    row.querySelector('span')?.replaceChildren(document.createTextNode(label));
-    const count=row.querySelector('b');
-    if(count)count.textContent=String(value);
+  for(const rawBooking of bookings){
+    const booking = mapBooking(rawBooking);
+    const status = statusCfg[booking.status] ?? statusCfg.pending;
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-slate-50';
+    row.innerHTML = `<td class="px-6 py-4 font-bold text-ocean">${escapeHtml(booking.id)}</td>
+      <td class="px-4 py-4 font-semibold text-slate-700">${escapeHtml(booking.name)}</td>
+      <td class="px-4 py-4 text-slate-500">${escapeHtml(booking.ticket)}</td>
+      <td class="px-4 py-4 text-slate-500">${escapeHtml(booking.date)}</td>
+      <td class="px-4 py-4"><span class="rounded-full ${status.bg} px-3 py-1.5 text-xs font-bold ${status.text}">${status.label}</span></td>
+      <td class="px-6 py-4 text-right font-bold text-slate-800">${escapeHtml(booking.amount)}</td>`;
+    body.appendChild(row);
   }
-  const recentBody = document.querySelector('#page-dashboard table tbody');
-  if (recentBody) {
-    recentBody.replaceChildren();
-    for (const rawBooking of stats.recent_bookings ?? []) {
-      const booking = mapBooking(rawBooking);
-      const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50';
-      for (const [value, className] of [
-        [booking.id, 'px-6 py-4 font-bold text-ocean'],
-        [booking.name, 'px-4 py-4 font-semibold text-slate-700'],
-        [booking.ticket, 'px-4 py-4 text-slate-500'],
-        [booking.date, 'px-4 py-4 text-slate-500'],
-        [statusCfg[booking.status]?.label ?? booking.status, 'px-4 py-4 text-slate-500'],
-        [booking.amount, 'px-6 py-4 text-right font-bold text-slate-800'],
-      ]) {
-        const cell = document.createElement('td');
-        cell.className = className;
-        cell.textContent = value;
-        row.appendChild(cell);
-      }
-      recentBody.appendChild(row);
-    }
+}
+
+async function loadDashboard(){
+  if(!dashFrom || !dashTo){ dashTo = todayWita(); dashFrom = monthStartWita(); }
+  const fromInput = document.getElementById('dash-date-from');
+  const toInput = document.getElementById('dash-date-to');
+  if(fromInput && !fromInput.value) fromInput.value = dashFrom;
+  if(toInput && !toInput.value) toInput.value = dashTo;
+
+  const requestId = ++dashboardRequest;
+  const result = await analyticsService.getDashboardSummary(dashFrom, dashTo);
+  if(requestId !== dashboardRequest) return;
+  if(!result.success){ showToast(result.error, 'error'); return; }
+  const s = result.summary;
+
+  setText('#dash-revenue', formatRupiah(s.total_revenue));
+  setText('#dash-bookings', formatNumber(s.total_bookings));
+  setText('#dash-visitors', formatNumber(s.tickets_sold));
+  setText('#dash-checkin', formatNumber(s.checked_in_today));
+  setText('#dash-revenue-sub', `vs ${formatRupiah(s.prev_revenue)} periode sebelumnya`);
+  setText('#dash-bookings-sub', `${formatNumber(s.new_bookings_week)} booking dalam 7 hari terakhir`);
+  setText('#dash-visitors-sub', `${formatNumber(s.checked_in_total)} check-in pada periode ini`);
+  setText('#dash-checkin-sub', `Kemarin ${formatNumber(s.checked_in_yesterday)} check-in`);
+  setText('#dash-trend-sub', `${formatShortDate(s.range_from)} – ${formatShortDate(s.range_to)} · WITA`);
+
+  const daily = s.daily_revenue ?? [];
+  const chart = document.querySelector('#page-dashboard .h-64');
+  if(chart){
+    chart.innerHTML = areaChart(daily.map((item)=>Number(item.revenue)), {
+      labels: daily.map((item)=>formatShortDate(item.date)),
+      valueFormatter: (value)=>`Rp${compactNumber(value)}`,
+      emptyLabel: 'Belum ada pendapatan pada periode ini',
+      gradientId: 'dashRevenueFill',
+    });
   }
+
+  renderDonut('#page-dashboard .donut-chart', '#page-dashboard .donut-chart + div', s.status_distribution, s.total_bookings, {
+    paid: 'Paid', pending: 'Pending', failed: 'Failed', cancelled: 'Cancelled', refunded: 'Refunded',
+  });
+  renderDashboardRecent(s.recent_bookings ?? []);
 }
 
 function formatPromotionDate(value) {
@@ -331,7 +456,7 @@ async function loadContent() {
       price: Number(item.price),
       status: item.status,
       featured: item.ticket_type === 'weekend',
-      icon: item.ticket_type === 'weekend' ? 'lucide:calendar-days' : 'lucide:sun',
+      icon: 'lucide:calendar-days',
     }))
   }
   if (facilitiesResult.success) {
@@ -368,6 +493,9 @@ async function loadContent() {
   if (facilitiesResult.success) renderFacilities()
   if (promotionsResult.success) renderPromotions()
   if (galleryResult.success) renderGallery()
+  if (pricingResult.success) setText('#pricing-count-badge', `${pricing.filter((item)=>item.status==='active').length} Published`)
+  if (galleryResult.success) setText('#gallery-count-badge', `${galleryItems.filter((item)=>item.status==='published').length} Published`)
+  if (promotionsResult.success) setText('#promo-active-count', `${promotions.filter((item)=>item.active).length} Active`)
   return !failed
 }
 
@@ -398,21 +526,42 @@ function renderBookings(){
 
   const tbody=document.getElementById('bk-table-body');
   tbody.innerHTML='';
-  if(!pageData.length){tbody.innerHTML='<tr><td colspan="7" class="px-6 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400"><iconify-icon icon="lucide:search-x" class="text-2xl"></iconify-icon></span><p class="mt-4 font-display font-bold text-slate-700">Tidak ada booking</p></td></tr>';return}
+  if(!pageData.length){tbody.innerHTML='<tr><td colspan="8" class="px-6 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400"><iconify-icon icon="lucide:search-x" class="text-2xl"></iconify-icon></span><p class="mt-4 font-display font-bold text-slate-700">Tidak ada booking</p></td></tr>';return}
 
   pageData.forEach(b=>{
     const sc=statusCfg[b.status] ?? statusCfg.pending;
+    const checkinBtn = b.canCheckIn
+      ? `<button class="checkin-booking rounded-lg p-2 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600" title="Check-in manual" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:door-open"></iconify-icon></button>`
+      : '';
     const actions=b.status==='cancelled'
       ? '<span class="px-2 text-xs font-semibold text-slate-400">Riwayat</span>'
-      : `<button class="delete-booking rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
+      : `${checkinBtn}<button class="delete-booking rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
+    const checkinCell = b.checkedInAt
+      ? `<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:check"></iconify-icon>${escapeHtml(b.checkInLabel)}</span>`
+      : '<span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500">Belum masuk</span>';
     const tr=document.createElement('tr');
     tr.className='table-row hover:bg-slate-50';
-    tr.innerHTML=`<td class="px-6 py-5 font-bold text-ocean">${escapeHtml(b.id)}</td><td class="px-4 py-5"><p class="font-semibold text-slate-700">${escapeHtml(b.name)}</p><p class="mt-1 text-xs text-slate-400">${escapeHtml(b.email)}</p></td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.ticket)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.date)}</td><td class="px-4 py-5"><span class="rounded-full ${sc.bg} px-3 py-1.5 text-xs font-bold ${sc.text}">${sc.label}</span></td><td class="px-4 py-5 text-right font-bold text-slate-800">${escapeHtml(b.amount)}</td><td class="px-6 py-5"><div class="flex justify-center gap-1">${actions}</div></td>`;
+    tr.innerHTML=`<td class="px-6 py-5 font-bold text-ocean">${escapeHtml(b.id)}</td><td class="px-4 py-5"><p class="font-semibold text-slate-700">${escapeHtml(b.name)}</p><p class="mt-1 text-xs text-slate-400">${escapeHtml(b.email)}</p></td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.ticket)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.date)}</td><td class="px-4 py-5"><span class="rounded-full ${sc.bg} px-3 py-1.5 text-xs font-bold ${sc.text}">${sc.label}</span></td><td class="px-4 py-5">${checkinCell}</td><td class="px-4 py-5 text-right font-bold text-slate-800">${escapeHtml(b.amount)}</td><td class="px-6 py-5"><div class="flex justify-center gap-1">${actions}</div></td>`;
     tbody.appendChild(tr);
   });
 
   tbody.querySelectorAll('.delete-booking').forEach(button=>{
     button.addEventListener('click',()=>window.confirmDeleteBk(button.dataset.id));
+  });
+  tbody.querySelectorAll('.checkin-booking').forEach(button=>{
+    button.addEventListener('click',async ()=>{
+      if(button.dataset.busy==='1') return;
+      if(!window.confirm(`Check-in booking ${button.dataset.id} sekarang?`)) return;
+      button.dataset.busy='1';
+      button.classList.add('opacity-50','pointer-events-none');
+      const result=await bookingService.adminCheckIn(button.dataset.id);
+      delete button.dataset.busy;
+      button.classList.remove('opacity-50','pointer-events-none');
+      if(!result.success){ showToast(result.error,'error'); return; }
+      showToast(`Check-in ${button.dataset.id} berhasil`);
+      await loadBookings();
+      await loadDashboard();
+    });
   });
 
   // Pagination
@@ -445,6 +594,7 @@ function exportBookings() {
     'booking_code', 'user_name', 'user_email', 'user_phone', 'visit_date',
     'ticket_types', 'total_amount', 'payment_status', 'payment_method',
     'midtrans_transaction_id', 'midtrans_payment_type', 'created_at',
+    'checked_in_at', 'cancelled_at', 'cancellation_reason',
   ];
   const escapeCsv = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
   const content = [
@@ -467,72 +617,164 @@ document.getElementById('export-bookings-btn').addEventListener('click',exportBo
 document.getElementById('export-report-btn')?.addEventListener('click',exportBookings);
 
 // ===================== USERS PAGE =====================
-function getInitials(n){return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
-function getFilteredUsers(){return users.filter(u=>{const ms=usrStatusFilter==='all'||u.status===usrStatusFilter;const mq=!usrSearch||u.name.toLowerCase().includes(usrSearch)||u.email.toLowerCase().includes(usrSearch)||u.phone.includes(usrSearch)||u.id.toLowerCase().includes(usrSearch);return ms&&mq})}
+function getInitials(name){
+  return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
+}
+function formatJoinDate(value){
+  if(!value) return '-';
+  return new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Makassar', day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+}
+
+async function loadUsers(){
+  const requestId = ++usersRequest;
+  const result = await usersService.getOverview({ search: usrSearch, status: usrStatusFilter });
+  if(requestId !== usersRequest) return;
+  if(!result.success){ showToast(result.error,'error'); return; }
+  users = result.users;
+  userStats = result.stats;
+  const ids = new Set(users.map((user)=>user.user_id));
+  for(const selected of [...usrSelected]) if(!ids.has(selected)) usrSelected.delete(selected);
+  renderUsers();
+}
 
 function renderUsers(){
-  const filtered=getFilteredUsers();
-  const activeC=users.filter(u=>u.status==='Active').length;
-  const inactiveC=users.filter(u=>u.status==='Inactive').length;
-  document.getElementById('usr-stat-active').textContent=activeC;
-  document.getElementById('usr-stat-inactive').textContent=inactiveC;
-  document.getElementById('usr-result-count').textContent=`Menampilkan ${filtered.length} dari ${users.length} pengguna`;
+  setText('#usr-stat-total', formatNumber(userStats.total));
+  setText('#usr-stat-active', formatNumber(userStats.active));
+  setText('#usr-stat-inactive', formatNumber(userStats.inactive));
+  setText('#usr-stat-new', formatNumber(userStats.new_this_month));
+  const diff = Number(userStats.new_this_month||0) - Number(userStats.new_prev_month||0);
+  setText('#usr-stat-new-sub', userStats.new_prev_month
+    ? `${diff >= 0 ? '+' : ''}${formatNumber(diff)} dari bulan lalu`
+    : 'Bulan berjalan');
+  setText('#usr-result-count', `Menampilkan ${users.length} pengguna`);
 
   const tbody=document.getElementById('usr-table-body');
   tbody.innerHTML='';
-  if(!filtered.length){tbody.innerHTML='<tr><td colspan="7" class="px-6 py-16 text-center"><p class="font-display font-bold text-slate-700">Tidak ada user</p></td></tr>';return}
+  if(!users.length){
+    tbody.innerHTML='<tr><td colspan="9" class="px-6 py-16 text-center"><p class="font-display font-bold text-slate-700">Tidak ada pengguna</p><p class="mt-1 text-sm text-slate-400">Coba ubah kata kunci atau filter status.</p></td></tr>';
+    updateUsrCount();
+    return;
+  }
 
-  filtered.forEach(u=>{
-    const idx=users.indexOf(u);
-    const sc=`avatar-c${idx%8}`;
-    const stBg=u.status==='Active'?'bg-emerald-50 text-emerald-600':'bg-slate-100 text-slate-500';
+  users.forEach((u,index)=>{
+    const status = u.status === 'active' ? 'Active' : 'Inactive';
+    const stBg = u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500';
     const tr=document.createElement('tr');
     tr.className='user-row hover:bg-slate-50';
-    tr.innerHTML=`<td class="px-5 py-4"><input type="checkbox" class="usr-check h-4 w-4 rounded border-slate-300 accent-ocean cursor-pointer" data-idx="${idx}" ${usrSelected.has(idx)?'checked':''}></td><td class="px-4 py-4"><div class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full ${sc} text-xs font-bold">${getInitials(u.name)}</span><div><p class="font-bold text-slate-800">${u.name}</p><p class="text-xs text-slate-400">${u.id}</p></div></div></td><td class="px-4 py-4 text-slate-500">${u.email}</td><td class="px-4 py-4 text-slate-500">${u.phone}</td><td class="px-4 py-4 text-slate-500">${u.joinDate}</td><td class="px-4 py-4"><span class="rounded-full ${stBg} px-3 py-1.5 text-xs font-bold">${u.status}</span></td><td class="px-5 py-4"><div class="flex justify-end gap-1"><button class="edit-usr rounded-lg p-2 text-slate-400 hover:bg-lagoon hover:text-ocean" data-idx="${idx}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="toggle-usr rounded-lg p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-600" data-idx="${idx}"><iconify-icon icon="${u.status==='Active'?'lucide:user-round-x':'lucide:user-check'}"></iconify-icon></button></div></td>`;
+    tr.innerHTML=`<td class="px-5 py-4"><input type="checkbox" class="usr-check h-4 w-4 rounded border-slate-300 accent-ocean cursor-pointer" data-id="${escapeHtml(u.user_id)}" ${usrSelected.has(u.user_id)?'checked':''}></td><td class="px-4 py-4"><div class="flex items-center gap-3"><span class="avatar-c${index%8} flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold">${escapeHtml(getInitials(u.full_name))}</span><div><p class="font-bold text-slate-800">${escapeHtml(u.full_name)}</p><p class="text-xs text-slate-400">${escapeHtml(u.email)}</p></div></div></td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.email)}</td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.phone || '—')}</td><td class="px-4 py-4 text-slate-500">${formatJoinDate(u.created_at)}</td><td class="px-4 py-4 text-slate-500">${formatNumber(u.paid_bookings)} / ${formatNumber(u.booking_count)}</td><td class="px-4 py-4 text-right font-semibold text-slate-700">${formatRupiah(u.total_spend)}</td><td class="px-4 py-4"><span class="rounded-full ${stBg} px-3 py-1.5 text-xs font-bold">${status}</span></td><td class="px-5 py-4"><div class="flex justify-end gap-1"><button class="edit-usr rounded-lg p-2 text-slate-400 hover:bg-lagoon hover:text-ocean" data-id="${escapeHtml(u.user_id)}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="toggle-usr rounded-lg p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-600" data-id="${escapeHtml(u.user_id)}" title="${u.status==='active'?'Nonaktifkan':'Aktifkan'}"><iconify-icon icon="${u.status==='active'?'lucide:user-round-x':'lucide:user-check'}"></iconify-icon></button></div></td>`;
     tbody.appendChild(tr);
   });
 
-  tbody.querySelectorAll('.usr-check').forEach(cb=>{cb.addEventListener('change',e=>{const i=parseInt(e.target.dataset.idx);if(e.target.checked)usrSelected.add(i);else usrSelected.delete(i);updateUsrCount()})});
-  tbody.querySelectorAll('.edit-usr').forEach(b=>{b.addEventListener('click',()=>openUserModal(users[parseInt(b.dataset.idx)]))});
-  tbody.querySelectorAll('.toggle-usr').forEach(b=>{b.addEventListener('click',()=>{const i=parseInt(b.dataset.idx);users[i].status=users[i].status==='Active'?'Inactive':'Active';showToast(`${users[i].name} → ${users[i].status}`);renderUsers()})});
+  tbody.querySelectorAll('.usr-check').forEach(cb=>{
+    cb.addEventListener('change',()=>{
+      if(cb.checked) usrSelected.add(cb.dataset.id);
+      else usrSelected.delete(cb.dataset.id);
+      updateUsrCount();
+    });
+  });
+  tbody.querySelectorAll('.edit-usr').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const user = users.find((item)=>item.user_id === button.dataset.id);
+      if(user) openUserModal(user);
+    });
+  });
+  tbody.querySelectorAll('.toggle-usr').forEach(button=>{
+    button.addEventListener('click',async ()=>{
+      const user = users.find((item)=>item.user_id === button.dataset.id);
+      if(!user || button.dataset.busy==='1') return;
+      button.dataset.busy='1';
+      const next = user.status === 'active' ? 'inactive' : 'active';
+      const result = await usersService.updateStatus(user.user_id, next);
+      delete button.dataset.busy;
+      if(!result.success){ showToast(result.error,'error'); return; }
+      showToast(`${user.full_name} → ${next === 'active' ? 'Active' : 'Inactive'}`);
+      await loadUsers();
+    });
+  });
+  updateUsrCount();
 }
 
-function updateUsrCount(){document.getElementById('usr-selected-count').textContent=`${usrSelected.size} user dipilih`}
-document.getElementById('usr-select-all').addEventListener('change',e=>{document.querySelectorAll('.usr-check').forEach(c=>{c.checked=e.target.checked;const i=parseInt(c.dataset.idx);if(e.target.checked)usrSelected.add(i);else usrSelected.delete(i)});updateUsrCount()});
-document.getElementById('usr-search').addEventListener('input',e=>{usrSearch=e.target.value.toLowerCase();renderUsers()});
-document.getElementById('usr-status-filter').addEventListener('change',e=>{usrStatusFilter=e.target.value;renderUsers()});
-
-// User modal
-const userModal=document.getElementById('user-modal');
-function openUserModal(u=null){
-  editingUserIdx=u?users.indexOf(u):null;
-  document.getElementById('user-modal-title').textContent=u?'Edit user':'Add new user';
-  document.getElementById('um-name').value=u?.name||'';
-  document.getElementById('um-email').value=u?.email||'';
-  document.getElementById('um-phone').value=u?.phone||'';
-  document.getElementById('um-status').value=u?.status||'Active';
-  userModal.classList.add('show');
-}
-function closeUserModal(){userModal.classList.remove('show');editingUserIdx=null}
-document.getElementById('add-user-btn').addEventListener('click',()=>openUserModal());
-document.getElementById('close-user-modal').addEventListener('click',closeUserModal);
-document.getElementById('cancel-user-modal').addEventListener('click',closeUserModal);
-userModal.addEventListener('click',e=>{if(e.target===userModal)closeUserModal()});
-document.getElementById('user-form').addEventListener('submit',e=>{
-  e.preventDefault();
-  const name=document.getElementById('um-name').value.trim();
-  const email=document.getElementById('um-email').value.trim();
-  const phone=document.getElementById('um-phone').value.trim();
-  const status=document.getElementById('um-status').value;
-  if(editingUserIdx!==null){users[editingUserIdx]={...users[editingUserIdx],name,email,phone,status};showToast(`User ${name} diperbarui`)}
-  else{const nid='USR-'+(1000+users.length+1);const d=new Date();const m=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];users.unshift({id:nid,name,email,phone,joinDate:`${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`,status});showToast(`User ${name} ditambahkan`)}
-  closeUserModal();renderUsers();
+function updateUsrCount(){ setText('#usr-selected-count', `${usrSelected.size} user dipilih`); }
+document.getElementById('usr-select-all')?.addEventListener('change',e=>{
+  document.querySelectorAll('.usr-check').forEach((checkbox)=>{
+    checkbox.checked=e.target.checked;
+    if(e.target.checked) usrSelected.add(checkbox.dataset.id);
+    else usrSelected.delete(checkbox.dataset.id);
+  });
+  updateUsrCount();
+});
+let usrSearchTimer;
+document.getElementById('usr-search')?.addEventListener('input',e=>{
+  usrSearch=e.target.value.trim();
+  clearTimeout(usrSearchTimer);
+  usrSearchTimer=setTimeout(loadUsers,300);
+});
+document.getElementById('usr-status-filter')?.addEventListener('change',e=>{
+  usrStatusFilter=e.target.value;
+  void loadUsers();
 });
 
-// Bulk actions
-document.getElementById('usr-activate-btn').addEventListener('click',()=>{if(!usrSelected.size){showToast('Pilih user dulu','info');return}let c=0;usrSelected.forEach(i=>{if(users[i]&&users[i].status!=='Active'){users[i].status='Active';c++}});showToast(`${c} user diaktifkan`);usrSelected.clear();updateUsrCount();renderUsers()});
-document.getElementById('usr-deactivate-btn').addEventListener('click',()=>{if(!usrSelected.size){showToast('Pilih user dulu','info');return}let c=0;usrSelected.forEach(i=>{if(users[i]&&users[i].status!=='Inactive'){users[i].status='Inactive';c++}});showToast(`${c} user dinonaktifkan`);usrSelected.clear();updateUsrCount();renderUsers()});
-document.getElementById('export-users-btn').addEventListener('click',function(){const o=this.innerHTML;this.innerHTML='<iconify-icon icon="lucide:check"></iconify-icon> Export siap!';showToast('Data user diexport');setTimeout(()=>this.innerHTML=o,2000)});
+// User modal (edit only — pembuatan akun baru memerlukan Supabase service role)
+const userModal=document.getElementById('user-modal');
+function openUserModal(user){
+  editingUserId=user.user_id;
+  document.getElementById('user-modal-title').textContent='Edit user';
+  document.getElementById('um-name').value=user.full_name||'';
+  const emailInput=document.getElementById('um-email');
+  emailInput.value=user.email||'';
+  emailInput.readOnly=true;
+  document.getElementById('um-phone').value=user.phone||'';
+  document.getElementById('um-status').value=user.status==='active'?'Active':'Inactive';
+  userModal.classList.add('show');
+}
+function closeUserModal(){userModal.classList.remove('show');editingUserId=null}
+document.getElementById('close-user-modal')?.addEventListener('click',closeUserModal);
+document.getElementById('cancel-user-modal')?.addEventListener('click',closeUserModal);
+userModal?.addEventListener('click',e=>{if(e.target===userModal)closeUserModal()});
+document.getElementById('user-form')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!editingUserId) return;
+  const name=document.getElementById('um-name').value.trim();
+  const phone=document.getElementById('um-phone').value.trim();
+  const status=document.getElementById('um-status').value==='Active'?'active':'inactive';
+  const profileResult=await usersService.updateProfile(editingUserId,{fullName:name,phone});
+  if(!profileResult.success){ showToast(profileResult.error,'error'); return; }
+  const current=users.find((item)=>item.user_id===editingUserId);
+  if(current && current.status!==status){
+    const statusResult=await usersService.updateStatus(editingUserId,status);
+    if(!statusResult.success){ showToast(statusResult.error,'error'); return; }
+  }
+  showToast(`User ${name} diperbarui`);
+  closeUserModal();
+  await loadUsers();
+});
+
+async function setSelectedUsersStatus(status){
+  if(!usrSelected.size){ showToast('Pilih user dulu','info'); return; }
+  const ids=[...usrSelected];
+  const results=await Promise.all(ids.map((id)=>usersService.updateStatus(id,status)));
+  const failed=results.find((result)=>!result.success);
+  if(failed){ showToast(failed.error,'error'); }
+  else { showToast(`${ids.length} user ${status==='active'?'diaktifkan':'dinonaktifkan'}`); }
+  usrSelected.clear();
+  updateUsrCount();
+  await loadUsers();
+}
+document.getElementById('usr-activate-btn')?.addEventListener('click',()=>void setSelectedUsersStatus('active'));
+document.getElementById('usr-deactivate-btn')?.addEventListener('click',()=>void setSelectedUsersStatus('inactive'));
+
+document.getElementById('export-users-btn')?.addEventListener('click',()=>{
+  const fields=['user_id','full_name','email','phone','status','created_at','booking_count','paid_bookings','total_spend'];
+  const escapeCsv=(value)=>`"${String(value??'').replace(/"/g,'""')}"`;
+  const content=[fields.join(','),...users.map((user)=>fields.map((field)=>escapeCsv(user[field])).join(','))].join('\r\n');
+  const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`citraland-users-${todayWita()}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('Data user diexport');
+});
 
 // ===================== CONTENT PAGE =====================
 // Content tabs
@@ -659,7 +901,7 @@ function renderPromotions(){
   })});
   list.querySelectorAll('.del-promo').forEach(b=>{b.addEventListener('click',()=>{
     const p=promotions.find(x=>x.id===b.dataset.id);
-    if(p){deleteTarget={type:'promo',id:p.id};document.getElementById('delete-message').textContent=`Promo ${p.code} akan dinonaktifkan.`;document.getElementById('delete-modal').classList.add('show')}
+    if(p){deleteTarget={type:'promo',id:p.id};document.getElementById('delete-message').textContent=`Promo ${p.code} akan dihapus permanen.`;document.getElementById('delete-modal').classList.add('show')}
   })});
 }
 
@@ -718,7 +960,7 @@ function renderGallery(){
   });
   grid.querySelectorAll('.del-gallery').forEach(b=>{b.addEventListener('click',()=>{
     const item=galleryItems.find((image)=>image.id===b.dataset.id);
-    if(item){deleteTarget={type:'gallery',id:item.id};document.getElementById('delete-message').textContent=`Gambar ${item.title} akan diarsipkan.`;document.getElementById('delete-modal').classList.add('show')}
+    if(item){deleteTarget={type:'gallery',id:item.id};document.getElementById('delete-message').textContent=`Gambar ${item.title} akan dihapus permanen.`;document.getElementById('delete-modal').classList.add('show')}
   })});
   let draggedGalleryId=null;
   grid.querySelectorAll('.gallery-item').forEach((card)=>{
@@ -786,25 +1028,138 @@ function handleGalleryFiles(files){
   });
 }
 
-document.getElementById('preview-site-btn')?.addEventListener('click',()=>showToast('Preview website dibuka','info'));
 
 // ===================== ANALYTICS PAGE =====================
-function renderHeatmap(){
+function renderHeatmap(analytics){
   const grid=document.getElementById('heatmap-grid');
-  if(!grid)return;
-  const data=[{d:'Senin',v:[1,2,3,4,5,3,2,1]},{d:'Selasa',v:[1,2,3,5,4,3,2,1]},{d:'Rabu',v:[2,3,4,5,5,4,2,1]},{d:'Kamis',v:[1,2,3,4,4,3,2,1]},{d:'Jumat',v:[2,3,4,5,5,4,3,2]},{d:'Sabtu',v:[3,4,5,5,5,4,3,2]},{d:'Minggu',v:[3,4,5,5,5,4,3,2]}];
+  if(!grid) return;
+  const dayNames=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+  const buckets=[8,10,12,14,16,18,20];
+  const counts=dayNames.map(()=>buckets.map(()=>0));
+  for(const item of analytics.peak_hours ?? []){
+    const dow=Number(item.dow);
+    const hour=Number(item.hour);
+    if(dow<1 || dow>7) continue;
+    const bucket=Math.min(buckets.length-1, Math.max(0, Math.floor((hour-8)/2)));
+    counts[dow-1][bucket]+=Number(item.count||0);
+  }
+  const max=Math.max(0,...counts.flat());
   const colors=['bg-cyan-50','bg-cyan-100','bg-aqua/40','bg-aqua/50','bg-aqua/70','bg-ocean'];
-  grid.innerHTML='';
-  data.forEach((row,ri)=>{
-    const rd=document.createElement('div');
-    rd.className='grid grid-cols-[70px_repeat(8,1fr)] items-center gap-1';
-    rd.innerHTML=`<span class="text-slate-500 text-[11px]">${row.d}</span>`+row.v.map((val,ci)=>`<i class="heatmap-cell h-8 rounded ${colors[val-1]}" style="animation-delay:${(ri*8+ci)*.02}s"></i>`).join('')+`<span class="text-[10px] text-slate-400 text-center font-semibold">${row.v.reduce((a,b)=>a+b,0)}</span>`;
-    grid.appendChild(rd);
+  grid.replaceChildren();
+  dayNames.forEach((day,dayIndex)=>{
+    const row=document.createElement('div');
+    row.className='grid grid-cols-[70px_repeat(7,1fr)] items-center gap-1';
+    row.innerHTML=`<span class="text-slate-500 text-[11px]">${day}</span>`+counts[dayIndex].map((value)=>{
+      const level=max ? Math.min(colors.length-1, Math.ceil((value/max)*colors.length)-1) : 0;
+      return `<i class="heatmap-cell flex h-8 items-center justify-center rounded text-[10px] font-bold text-slate-600 ${colors[level]}" title="${value} check-in">${value || ''}</i>`;
+    }).join('');
+    grid.appendChild(row);
   });
 }
 
-document.getElementById('analytics-export-btn')?.addEventListener('click',()=>showToast('Laporan sedang disiapkan...','info'));
-document.getElementById('export-report-btn')?.addEventListener('click',function(){const o=this.innerHTML;this.innerHTML='<iconify-icon icon="lucide:check"></iconify-icon> Laporan siap!';showToast('Laporan berhasil diexport');setTimeout(()=>this.innerHTML=o,2000)});
+function renderTicketDonut(analytics){
+  const distribution=analytics.ticket_distribution ?? {};
+  const items=[
+    {key:'weekday',label:'Weekdays',value:Number(distribution.weekday||0)},
+    {key:'weekend',label:'Weekend',value:Number(distribution.weekend||0)},
+  ];
+  const result=donutSegments(items);
+  const donut=document.querySelector('#page-analytics .donut-chart');
+  if(!donut) return;
+  donut.style.background=result.gradient;
+  setText('#an-ticket-total', formatNumber(result.total));
+  const legend=donut.nextElementSibling;
+  if(!legend) return;
+  legend.replaceChildren();
+  if(!result.total){
+    legend.innerHTML='<p class="text-sm text-slate-400">Belum ada tiket terjual pada periode ini.</p>';
+    return;
+  }
+  for(const segment of result.segments){
+    const row=document.createElement('p');
+    row.className='flex items-center gap-3';
+    const dot=document.createElement('i');
+    dot.className='h-3 w-3 rounded-full';
+    dot.style.backgroundColor=segment.color;
+    const label=document.createElement('span');
+    label.className='w-20 text-slate-500';
+    label.textContent=segment.label;
+    const value=document.createElement('b');
+    value.textContent=`${formatNumber(segment.value)} · ${Math.round((segment.value/result.total)*100)}%`;
+    row.append(dot,label,value);
+    legend.appendChild(row);
+  }
+}
+
+async function loadAnalytics(){
+  if(!anFrom || !anTo){ anTo=todayWita(); anFrom=monthStartWita(); }
+  const fromInput=document.getElementById('an-date-from');
+  const toInput=document.getElementById('an-date-to');
+  if(fromInput && !fromInput.value) fromInput.value=anFrom;
+  if(toInput && !toInput.value) toInput.value=anTo;
+
+  const requestId=++analyticsRequest;
+  const result=await analyticsService.getAnalytics(anFrom,anTo);
+  if(requestId!==analyticsRequest) return;
+  if(!result.success){ showToast(result.error,'error'); return; }
+  const a=result.analytics;
+  analyticsCache=a;
+
+  setText('#an-revenue', formatRupiah(a.total_revenue));
+  setText('#an-bookings', formatNumber(a.total_bookings));
+  setText('#an-visitors', formatNumber(a.tickets_sold));
+  setText('#an-price-range', `${formatRupiahShort(a.price_min)} – ${formatRupiahShort(a.price_max)}`);
+  setText('#an-revenue-sub', `vs ${formatRupiah(a.prev_revenue)} periode sebelumnya`);
+  setText('#an-bookings-sub', `vs ${formatNumber(a.prev_bookings)} booking periode sebelumnya`);
+  setText('#an-visitors-sub', `${formatNumber(a.checked_in_total)} check-in pada periode ini`);
+  setText('#an-new-users', `+${formatNumber(a.new_users_this_month)} pengguna baru`);
+  setText('#an-monthly-sub', `Revenue bulanan ${a.year}`);
+
+  const monthly=a.monthly_revenue ?? [];
+  const monthlyChart=document.querySelector('#page-analytics .h-64');
+  if(monthlyChart){
+    monthlyChart.innerHTML=barChart(
+      monthly.map((item)=>Number(item.revenue)),
+      monthly.map((item)=>monthShort(item.month)),
+      { emptyLabel: 'Belum ada revenue pada tahun ini', colors:['#00BCD4'] },
+    );
+  }
+
+  const growth=a.user_growth ?? [];
+  const growthChart=document.querySelector('#page-analytics .h-56');
+  if(growthChart){
+    growthChart.innerHTML=areaChart(growth.map((item)=>Number(item.users)), {
+      labels: growth.map((item)=>monthShort(item.month)),
+      valueFormatter: (value)=>formatNumber(Math.round(value)),
+      emptyLabel: 'Belum ada pengguna terdaftar',
+      gradientId: 'userGrowthFill',
+    });
+  }
+
+  renderTicketDonut(a);
+  renderHeatmap(a);
+  setText('#an-heatmap-badge', `${formatNumber(a.peak_hours_total)} check-in`);
+}
+
+document.getElementById('analytics-export-btn')?.addEventListener('click',exportAnalytics);
+
+function exportAnalytics(){
+  const rows=[['month','revenue']];
+  for(const item of analyticsCache.monthly_revenue ?? []) rows.push([item.month, Math.round(Number(item.revenue||0))]);
+  rows.push([]);
+  rows.push(['total_revenue', Math.round(Number(analyticsCache.total_revenue||0))]);
+  rows.push(['total_bookings', analyticsCache.total_bookings ?? 0]);
+  rows.push(['tickets_sold', analyticsCache.tickets_sold ?? 0]);
+  rows.push(['checked_in_total', analyticsCache.checked_in_total ?? 0]);
+  const content=rows.map((row)=>row.join(',')).join('\r\n');
+  const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`citraland-analytics-${anFrom}-${anTo}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('Laporan analytics diexport');
+}
 
 // ===================== DELETE MODAL =====================
 document.getElementById('delete-cancel-btn').addEventListener('click',()=>{document.getElementById('delete-modal').classList.remove('show');deleteTarget=null});
@@ -823,12 +1178,12 @@ document.getElementById('delete-confirm-btn').addEventListener('click',async ()=
       result=await facilitiesService.deleteFacility(target.id);
       if(result.success){await loadContent();showToast('Fasilitas dinonaktifkan')}
     }else if(target.type==='promo'){
-      result=await promotionService.updatePromotionStatus(target.id,'inactive');
-      if(result.success){await loadContent();showToast('Promo dinonaktifkan')}
+      result=await promotionService.deletePromotion(target.id);
+      if(result.success){await loadContent();showToast('Promo dihapus')}
     }else if(target.type==='gallery'){
       result=await galleryService.deleteImage(target.id);
       await loadContent();
-      if(result.success)showToast('Gambar diarsipkan')
+      if(result.success)showToast('Gambar dihapus')
     }
     if(result&&!result.success)showToast(result.error,'error');
   }finally{
@@ -839,20 +1194,118 @@ document.getElementById('delete-confirm-btn').addEventListener('click',async ()=
 });
 
 // ===================== INIT =====================
+// Buang markup chart/booking contoh sebelum data asli dimuat agar tidak ada
+// angka mock yang sempat tampil.
+document.querySelectorAll('#page-dashboard .h-64, #page-analytics .h-64, #page-analytics .h-56').forEach((el)=>el.replaceChildren());
+const initialRecent=document.querySelector('#page-dashboard table tbody');
+if(initialRecent) initialRecent.innerHTML='<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">Memuat pemesanan…</td></tr>';
+
+// Periode default: awal bulan berjalan sampai hari ini (WITA).
+dashFrom=monthStartWita();
+dashTo=todayWita();
+anFrom=dashFrom;
+anTo=dashTo;
+for(const [id,value] of [
+  ['dash-date-from',dashFrom],['dash-date-to',dashTo],
+  ['an-date-from',anFrom],['an-date-to',anTo],
+]){
+  const input=document.getElementById(id);
+  if(input) input.value=value;
+}
+function updateRange(which){
+  const fromId=which==='dash'?'dash-date-from':'an-date-from';
+  const toId=which==='dash'?'dash-date-to':'an-date-to';
+  const from=document.getElementById(fromId)?.value;
+  const to=document.getElementById(toId)?.value;
+  if(!from||!to) return;
+  if(from>to){ showToast('Tanggal mulai tidak boleh melebihi tanggal akhir.','error'); return; }
+  if(which==='dash'){ dashFrom=from; dashTo=to; void loadDashboard(); }
+  else { anFrom=from; anTo=to; void loadAnalytics(); }
+}
+document.getElementById('dash-date-from')?.addEventListener('change',()=>updateRange('dash'));
+document.getElementById('dash-date-to')?.addEventListener('change',()=>updateRange('dash'));
+document.getElementById('an-date-from')?.addEventListener('change',()=>updateRange('an'));
+document.getElementById('an-date-to')?.addEventListener('change',()=>updateRange('an'));
+
+// ===================== SETTINGS =====================
+document.getElementById('save-admin-profile-btn')?.addEventListener('click',async ()=>{
+  const button=document.getElementById('save-admin-profile-btn');
+  setBusy(button,true);
+  const fullName=document.getElementById('admin-profile-name')?.value.trim();
+  const phone=document.getElementById('admin-profile-phone')?.value.trim();
+  const result=await authService.updateAdminProfile({fullName,phone});
+  setBusy(button,false);
+  if(!result.success){ showToast(result.error,'error'); return; }
+  currentAdminProfile=result.admin;
+  setText('#admin-profile-status','Profil tersimpan di database.');
+  showToast('Profil admin diperbarui');
+  await loadAdminProfile();
+});
+
+document.getElementById('update-admin-password-btn')?.addEventListener('click',async ()=>{
+  const button=document.getElementById('update-admin-password-btn');
+  const current=document.getElementById('admin-current-password')?.value||'';
+  const next=document.getElementById('admin-new-password')?.value||'';
+  if(!current||!next){ showToast('Lengkapi password lama dan password baru.','error'); return; }
+  setBusy(button,true);
+  const result=await authService.updatePassword(current,next);
+  setBusy(button,false);
+  if(!result.success){ showToast(result.error,'error'); return; }
+  document.getElementById('admin-current-password').value='';
+  document.getElementById('admin-new-password').value='';
+  showToast('Password admin berhasil diperbarui');
+});
+
+// ===================== REALTIME & FALLBACK =====================
+function currentPage(){
+  return window.location.hash.replace('#','')||'dashboard';
+}
+function refreshCurrentPage(){
+  const page=currentPage();
+  if(page==='dashboard') void loadDashboard();
+  if(page==='bookings'){ void loadBookings(); void loadDashboard(); }
+  if(page==='users') void loadUsers();
+  if(page==='analytics') void loadAnalytics();
+  if(page==='content') void loadContent();
+  if(page==='settings') void loadAdminProfile();
+}
+window.addEventListener('admin:refresh',refreshCurrentPage);
+
+const scheduleBookingsRefresh=debounce(()=>{
+  void loadBookings();
+  void loadDashboard();
+  if(currentPage()==='users') void loadUsers();
+},450);
+const scheduleUsersRefresh=debounce(()=>void loadUsers(),600);
+const scheduleContentRefresh=debounce(()=>void loadContent(),500);
+
 handleHash();
 void loadBookings();
 void loadDashboard();
-const unsubscribeBookings=realtimeManager.subscribeToBookings(()=>{
-  void loadBookings();
-  void loadDashboard();
+void loadUsers();
+
+const unsubscribeBookings=realtimeManager.subscribeToBookings(scheduleBookingsRefresh);
+const unsubscribeUsers=realtimeManager.subscribeToUsers(scheduleUsersRefresh);
+const unsubscribePricing=realtimeManager.subscribeToTicketPricing(scheduleContentRefresh,'admin_ticket_pricing_changes');
+const unsubscribeFacilities=realtimeManager.subscribeToFacilities(scheduleContentRefresh);
+const unsubscribePromotions=realtimeManager.subscribeToPromotions(scheduleContentRefresh);
+const unsubscribeGallery=realtimeManager.subscribeToGallery(scheduleContentRefresh);
+
+// Fallback: jika realtime belum tersambung, muat ulang tiap 60 detik.
+pollTimer=window.setInterval(()=>{
+  if(document.hidden) return;
+  refreshCurrentPage();
+},60000);
+onDocument('visibilitychange',()=>{
+  if(!document.hidden) refreshCurrentPage();
 });
-const unsubscribePricing=realtimeManager.subscribeToTicketPricing(()=>void loadContent(),'admin_ticket_pricing_changes');
-const unsubscribeFacilities=realtimeManager.subscribeToFacilities(()=>void loadContent());
-const unsubscribePromotions=realtimeManager.subscribeToPromotions(()=>void loadContent());
-const unsubscribeGallery=realtimeManager.subscribeToGallery(()=>void loadContent());
+
 return ()=>{
   documentListeners.forEach(off=>off());
+  window.removeEventListener('admin:refresh',refreshCurrentPage);
+  if(pollTimer) window.clearInterval(pollTimer);
   unsubscribeBookings();
+  unsubscribeUsers();
   unsubscribePricing();
   unsubscribeFacilities();
   unsubscribePromotions();

@@ -29,41 +29,43 @@ onBeforeUnmount(() => cleanup?.());
       <main id="page-dashboard" class="page-view active p-5 sm:p-8">
         <div class="mx-auto max-w-[1500px]">
           <div
-            class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
+            class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end animate-fade-in-up"
           >
             <div>
-              <p
-                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
-              >
+              <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
                 Ringkasan bisnis
               </p>
-              <h1
-                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-              >
+              <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 Dashboard
               </h1>
               <p class="mt-2 text-sm text-slate-500">
-                Pantau performa Citraland Waterpark hari ini.
+                Pantau performa Citraland Waterpark. Data diperbarui otomatis.
               </p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <button
                 id="export-report-btn"
                 class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"
               >
-                <iconify-icon icon="lucide:download"></iconify-icon
-                ><span class="hidden sm:inline">Export laporan</span>
+                <iconify-icon icon="lucide:download"></iconify-icon>
+                <span class="hidden sm:inline">Export laporan</span>
               </button>
-              <button
-                class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 transition hover:border-aqua hover:text-ocean"
-              >
-                <iconify-icon
-                  icon="lucide:calendar-days"
-                  class="text-ocean"
-                ></iconify-icon>
-                01–30 Des 2026
-                <iconify-icon icon="lucide:chevron-down"></iconify-icon>
-              </button>
+              <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon>
+                <input
+                  id="dash-date-from"
+                  type="date"
+                  aria-label="Tanggal mulai dashboard"
+                  class="h-7 rounded-lg bg-transparent text-xs font-semibold text-slate-600 outline-none"
+                />
+                <span class="text-xs text-slate-400">–</span>
+                <input
+                  id="dash-date-to"
+                  type="date"
+                  aria-label="Tanggal akhir dashboard"
+                  class="h-7 rounded-lg bg-transparent text-xs font-semibold text-slate-600 outline-none"
+                />
+              </div>
             </div>
           </div>
           <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -71,230 +73,90 @@ onBeforeUnmount(() => cleanup?.());
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
-                  ><iconify-icon
-                    icon="lucide:wallet"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  8.4%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean">
+                  <iconify-icon icon="lucide:wallet" class="text-xl"></iconify-icon>
+                </span>
               </div>
-              <p class="mt-5 text-sm font-medium text-slate-500">
-                Total Revenue
-              </p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                Rp2.450.000
-              </p>
-              <p class="mt-2 text-xs text-slate-400">
-                vs. Rp2.260.000 bulan lalu
-              </p>
+              <p class="mt-5 text-sm font-medium text-slate-500">Total Revenue</p>
+              <p id="dash-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-revenue-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
-                  ><iconify-icon
-                    icon="lucide:ticket"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  6.8%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                  <iconify-icon icon="lucide:ticket" class="text-xl"></iconify-icon>
+                </span>
               </div>
-              <p class="mt-5 text-sm font-medium text-slate-500">
-                Total Bookings
-              </p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                156
-              </p>
-              <p class="mt-2 text-xs text-slate-400">
-                12 booking baru minggu ini
-              </p>
+              <p class="mt-5 text-sm font-medium text-slate-500">Total Bookings</p>
+              <p id="dash-bookings" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-bookings-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
-                  ><iconify-icon
-                    icon="lucide:users"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  10.2%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                  <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
+                </span>
               </div>
-              <p class="mt-5 text-sm font-medium text-slate-500">
-                Total Visitors
-              </p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                487
-              </p>
-              <p class="mt-2 text-xs text-slate-400">Pengunjung bulan ini</p>
+              <p class="mt-5 text-sm font-medium text-slate-500">Tiket Terjual</p>
+              <p id="dash-visitors" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-visitors-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
-                  ><iconify-icon
-                    icon="lucide:chart-no-axes-combined"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  12.5%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                  <iconify-icon icon="lucide:badge-check" class="text-xl"></iconify-icon>
+                </span>
               </div>
-              <p class="mt-5 text-sm font-medium text-slate-500">
-                This Month Growth
-              </p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                +12,5%
-              </p>
-              <p class="mt-2 text-xs text-slate-400">Pertumbuhan positif</p>
+              <p class="mt-5 text-sm font-medium text-slate-500">Check-in Hari Ini</p>
+              <p id="dash-checkin" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-checkin-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
           </section>
           <section class="mt-6 grid gap-6 xl:grid-cols-[1.55fr_1fr]">
             <article
               class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
             >
-              <div
-                class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
-              >
+              <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <h2 class="font-display text-lg font-bold text-slate-900">
-                    Revenue Trend
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Performa pendapatan 30 hari terakhir
+                  <h2 class="font-display text-lg font-bold text-slate-900">Revenue Trend</h2>
+                  <p id="dash-trend-sub" class="mt-1 text-sm text-slate-500">
+                    Pendapatan per hari pada periode terpilih
                   </p>
                 </div>
-                <div
-                  class="flex items-center gap-4 text-xs font-semibold text-slate-500"
-                >
-                  <span class="flex items-center gap-2"
-                    ><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span
-                  >
+                <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
+                  <span class="flex items-center gap-2">
+                    <i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue
+                  </span>
                 </div>
               </div>
-              <div class="mt-6 h-64">
-                <svg
-                  viewBox="0 0 760 250"
-                  preserveAspectRatio="none"
-                  class="h-full w-full"
-                >
-                  <defs>
-                    <linearGradient id="revFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop
-                        offset="0"
-                        stop-color="#00BCD4"
-                        stop-opacity=".25"
-                      ></stop>
-                      <stop
-                        offset="1"
-                        stop-color="#00BCD4"
-                        stop-opacity="0"
-                      ></stop>
-                    </linearGradient>
-                  </defs>
-                  <g stroke="#e2e8f0" stroke-dasharray="3 5">
-                    <line x1="50" y1="30" x2="740" y2="30"></line>
-                    <line x1="50" y1="82" x2="740" y2="82"></line>
-                    <line x1="50" y1="134" x2="740" y2="134"></line>
-                    <line x1="50" y1="186" x2="740" y2="186"></line>
-                  </g>
-                  <path
-                    class="chart-fill"
-                    d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36 L740 210 L50 210Z"
-                    fill="url(#revFill)"
-                  ></path>
-                  <path
-                    class="chart-line"
-                    d="M50 186 C82 175,92 150,116 160 S156 122,181 142 S220 102,247 125 S282 108,310 114 S350 72,375 105 S410 85,438 91 S475 45,501 78 S540 70,566 81 S605 34,633 59 S680 44,710 52 S730 31,740 36"
-                    fill="none"
-                    stroke="#00BCD4"
-                    stroke-linecap="round"
-                    stroke-width="4"
-                  ></path>
-                  <g fill="#94a3b8" font-size="11">
-                    <text x="48" y="235">1 Des</text>
-                    <text x="210" y="235">7 Des</text>
-                    <text x="370" y="235">14 Des</text>
-                    <text x="530" y="235">21 Des</text>
-                    <text x="700" y="235">30 Des</text>
-                  </g>
-                </svg>
-              </div>
+              <div id="dash-revenue-chart" class="mt-6 h-64"></div>
             </article>
             <article
               class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"
             >
               <div>
-                <h2 class="font-display text-lg font-bold text-slate-900">
-                  Booking Status
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                  Distribusi status pemesanan
-                </p>
+                <h2 class="font-display text-lg font-bold text-slate-900">Booking Status</h2>
+                <p class="mt-1 text-sm text-slate-500">Distribusi status pemesanan</p>
               </div>
-              <div class="mt-6 flex items-center justify-center gap-8">
+              <div class="mt-6 flex flex-col items-center justify-center gap-8 sm:flex-row">
                 <div
-                  class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full"
-                  style="
-                    background: conic-gradient(
-                      #00bcd4 0 77%,
-                      #94a3b8 77% 95%,
-                      #f43f5e 95% 100%
-                    );
-                  "
+                  id="dash-status-donut"
+                  class="donut-chart relative flex h-44 w-44 shrink-0 items-center justify-center rounded-full"
+                  style="background: conic-gradient(#e2e8f0 0 100%)"
                 >
-                  <div
-                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
-                  >
-                    <span
-                      class="font-display text-2xl font-extrabold text-slate-900"
-                      >156</span
-                    ><span class="text-xs text-slate-400">Total</span>
+                  <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
+                    <span id="dash-status-total" class="font-display text-2xl font-extrabold text-slate-900">—</span>
+                    <span class="text-xs text-slate-400">Total</span>
                   </div>
                 </div>
-                <div class="space-y-4 text-sm">
-                  <p class="flex items-center gap-3">
-                    <i class="h-3 w-3 rounded-full bg-aqua"></i
-                    ><span class="w-20 text-slate-500">Confirmed</span
-                    ><b class="text-slate-800">120</b>
-                  </p>
-                  <p class="flex items-center gap-3">
-                    <i class="h-3 w-3 rounded-full bg-slate-400"></i
-                    ><span class="w-20 text-slate-500">Completed</span
-                    ><b class="text-slate-800">28</b>
-                  </p>
-                  <p class="flex items-center gap-3">
-                    <i class="h-3 w-3 rounded-full bg-rose-500"></i
-                    ><span class="w-20 text-slate-500">Cancelled</span
-                    ><b class="text-slate-800">8</b>
-                  </p>
+                <div id="dash-status-legend" class="w-full space-y-3 text-sm">
+                  <p class="text-sm text-slate-400">Memuat status…</p>
                 </div>
               </div>
             </article>
@@ -303,95 +165,35 @@ onBeforeUnmount(() => cleanup?.());
             <article
               class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
             >
-              <div
-                class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
-              >
+              <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
                 <div>
-                  <h2 class="font-display text-lg font-bold text-slate-900">
-                    Recent Bookings
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Pemesanan terbaru hari ini
-                  </p>
+                  <h2 class="font-display text-lg font-bold text-slate-900">Recent Bookings</h2>
+                  <p class="mt-1 text-sm text-slate-500">Pemesanan terbaru pada periode ini</p>
                 </div>
                 <a
                   href="#bookings"
                   class="nav-trigger flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
                   data-page="bookings"
-                  >Lihat semua
-                  <iconify-icon icon="lucide:arrow-up-right"></iconify-icon
-                ></a>
+                >
+                  Lihat semua <iconify-icon icon="lucide:arrow-up-right"></iconify-icon>
+                </a>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full min-w-[760px] text-left text-sm">
-                  <thead
-                    class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
-                  >
+                  <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400">
                     <tr>
                       <th class="px-6 py-4 font-bold">Booking ID</th>
                       <th class="px-4 py-4 font-bold">Guest</th>
                       <th class="px-4 py-4 font-bold">Type</th>
-                      <th class="px-4 py-4 font-bold">Date</th>
+                      <th class="px-4 py-4 font-bold">Visit Date</th>
                       <th class="px-4 py-4 font-bold">Status</th>
                       <th class="px-6 py-4 text-right font-bold">Amount</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-6 py-4 font-bold text-ocean">BH-7K4P9X</td>
-                      <td class="px-4 py-4 font-semibold text-slate-700">
-                        Dimas Pratama
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">
-                        Weekend - 1 tiket
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">27 Des 2026</td>
-                      <td class="px-4 py-4">
-                        <span
-                          class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                          >Confirmed</span
-                        >
-                      </td>
-                      <td class="px-6 py-4 text-right font-bold text-slate-800">
-                        Rp50.000
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-6 py-4 font-bold text-ocean">BH-8A2M1Q</td>
-                      <td class="px-4 py-4 font-semibold text-slate-700">
-                        Rina Pratiwi
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">
-                        Weekdays - 1 tiket
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">29 Des 2026</td>
-                      <td class="px-4 py-4">
-                        <span
-                          class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                          >Confirmed</span
-                        >
-                      </td>
-                      <td class="px-6 py-4 text-right font-bold text-slate-800">
-                        Rp35.000
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50">
-                      <td class="px-6 py-4 font-bold text-ocean">BH-5D8L3C</td>
-                      <td class="px-4 py-4 font-semibold text-slate-700">
-                        Andi Saputra
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">
-                        Weekdays - 2 tiket
-                      </td>
-                      <td class="px-4 py-4 text-slate-500">30 Des 2026</td>
-                      <td class="px-4 py-4">
-                        <span
-                          class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600"
-                          >Completed</span
-                        >
-                      </td>
-                      <td class="px-6 py-4 text-right font-bold text-slate-800">
-                        Rp70.000
+                  <tbody id="dash-recent-body" class="divide-y divide-slate-100">
+                    <tr>
+                      <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">
+                        Memuat pemesanan…
                       </td>
                     </tr>
                   </tbody>
@@ -442,9 +244,6 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:ticket"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+6.8%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
@@ -452,7 +251,7 @@ onBeforeUnmount(() => cleanup?.());
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
                 id="bk-stat-total"
               >
-                156
+                —
               </p>
               <p class="mt-2 text-xs text-slate-400">Semua pemesanan</p>
             </article>
@@ -466,19 +265,16 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:badge-check"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+8.4%</span
                 >
               </div>
-              <p class="mt-5 text-sm text-slate-500">Confirmed</p>
+              <p class="mt-5 text-sm text-slate-500">Paid</p>
               <p
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
                 id="bk-stat-confirmed"
               >
-                97
+                —
               </p>
-              <p class="mt-2 text-xs text-slate-400">Terverifikasi</p>
+              <p class="mt-2 text-xs text-slate-400">Pembayaran terverifikasi</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
@@ -490,9 +286,6 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:circle-x"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >-2.1%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Cancelled</p>
@@ -500,7 +293,7 @@ onBeforeUnmount(() => cleanup?.());
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
                 id="bk-stat-cancelled"
               >
-                8
+                —
               </p>
               <p class="mt-2 text-xs text-slate-400">Dibatalkan</p>
             </article>
@@ -516,7 +309,7 @@ onBeforeUnmount(() => cleanup?.());
                   data-status="all"
                   class="bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white"
                 >
-                  All <span class="ml-1 text-cyan-100" id="bk-c-all">156</span>
+                  All <span class="ml-1 text-cyan-100" id="bk-c-all">—</span>
                 </button>
                 <button
                   data-status="paid"
@@ -571,12 +364,12 @@ onBeforeUnmount(() => cleanup?.());
                   Semua Booking
                 </h2>
                 <p id="bk-result-count" class="mt-1 text-sm text-slate-500">
-                  Menampilkan 5 dari 156 pemesanan
+                  Memuat pemesanan…
                 </p>
               </div>
             </div>
             <div class="overflow-x-auto">
-              <table class="w-full min-w-[1050px] text-left text-sm">
+              <table class="w-full min-w-[1150px] text-left text-sm">
                 <thead
                   class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
                 >
@@ -584,8 +377,9 @@ onBeforeUnmount(() => cleanup?.());
                     <th class="px-6 py-4 font-bold">Booking ID</th>
                     <th class="px-4 py-4 font-bold">Guest Name</th>
                     <th class="px-4 py-4 font-bold">Ticket Type</th>
-                    <th class="px-4 py-4 font-bold">Date</th>
+                    <th class="px-4 py-4 font-bold">Visit Date</th>
                     <th class="px-4 py-4 font-bold">Status</th>
+                    <th class="px-4 py-4 font-bold">Check-in</th>
                     <th class="px-4 py-4 text-right font-bold">Amount</th>
                     <th class="px-6 py-4 text-center font-bold">Actions</th>
                   </tr>
@@ -593,7 +387,13 @@ onBeforeUnmount(() => cleanup?.());
                 <tbody
                   id="bk-table-body"
                   class="divide-y divide-slate-100"
-                ></tbody>
+                >
+                  <tr>
+                    <td colspan="8" class="px-6 py-14 text-center text-sm text-slate-400">
+                      Memuat pemesanan…
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </div>
             <div
@@ -601,8 +401,8 @@ onBeforeUnmount(() => cleanup?.());
             >
               <p class="text-sm text-slate-500">
                 Menampilkan
-                <b class="text-slate-700" id="bk-page-range">1–5</b> dari
-                <b class="text-slate-700" id="bk-page-total">156</b>
+                <b class="text-slate-700" id="bk-page-range">—</b> dari
+                <b class="text-slate-700" id="bk-page-total">—</b>
               </p>
               <div class="flex items-center gap-1" id="bk-pagination"></div>
             </div>
@@ -636,13 +436,7 @@ onBeforeUnmount(() => cleanup?.());
                 id="export-users-btn"
                 class="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
               >
-                <iconify-icon icon="lucide:download"></iconify-icon> Export data</button
-              ><button
-                id="add-user-btn"
-                class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white shadow-sm hover:bg-ocean/90"
-              >
-                <iconify-icon icon="lucide:user-plus"></iconify-icon> Add new
-                user
+                <iconify-icon icon="lucide:download"></iconify-icon> Export data
               </button>
             </div>
           </div>
@@ -657,17 +451,14 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:users"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  8.2%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Users</p>
               <p
+                id="usr-stat-total"
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
               >
-                2.458
+                —
               </p>
               <p class="mt-2 text-xs text-slate-400">Semua akun terdaftar</p>
             </article>
@@ -681,9 +472,6 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:user-check"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >92.4%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Active Users</p>
@@ -691,9 +479,9 @@ onBeforeUnmount(() => cleanup?.());
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
                 id="usr-stat-active"
               >
-                8
+                —
               </p>
-              <p class="mt-2 text-xs text-slate-400">Aktif dalam 30 hari</p>
+              <p class="mt-2 text-xs text-slate-400">Status akun aktif</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
@@ -705,9 +493,6 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:user-round-x"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600"
-                  >7.6%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Inactive Users</p>
@@ -715,7 +500,7 @@ onBeforeUnmount(() => cleanup?.());
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
                 id="usr-stat-inactive"
               >
-                3
+                —
               </p>
               <p class="mt-2 text-xs text-slate-400">Perlu ditinjau</p>
             </article>
@@ -729,19 +514,16 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:user-round-plus"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  14.8%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">New This Month</p>
               <p
+                id="usr-stat-new"
                 class="mt-1 font-display text-2xl font-extrabold text-slate-900"
               >
-                184
+                —
               </p>
-              <p class="mt-2 text-xs text-slate-400">+24 dari bulan lalu</p>
+              <p id="usr-stat-new-sub" class="mt-2 text-xs text-slate-400">Bulan berjalan</p>
             </article>
           </section>
           <section
@@ -768,8 +550,8 @@ onBeforeUnmount(() => cleanup?.());
                   class="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 outline-none focus:border-aqua cursor-pointer"
                 >
                   <option value="all">All status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
                 </select>
               </div>
             </div>
@@ -808,12 +590,12 @@ onBeforeUnmount(() => cleanup?.());
                   Registered Users
                 </h2>
                 <p id="usr-result-count" class="mt-1 text-sm text-slate-500">
-                  Menampilkan 11 pengguna
+                  Memuat pengguna…
                 </p>
               </div>
             </div>
             <div class="overflow-x-auto">
-              <table class="w-full min-w-[900px] text-left text-sm">
+              <table class="w-full min-w-[1100px] text-left text-sm">
                 <thead
                   class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
                 >
@@ -829,6 +611,8 @@ onBeforeUnmount(() => cleanup?.());
                     <th class="px-4 py-4 font-bold">Email</th>
                     <th class="px-4 py-4 font-bold">Phone</th>
                     <th class="px-4 py-4 font-bold">Join Date</th>
+                    <th class="px-4 py-4 font-bold">Bookings</th>
+                    <th class="px-4 py-4 text-right font-bold">Spend</th>
                     <th class="px-4 py-4 font-bold">Status</th>
                     <th class="px-5 py-4 text-right font-bold">Actions</th>
                   </tr>
@@ -836,7 +620,13 @@ onBeforeUnmount(() => cleanup?.());
                 <tbody
                   id="usr-table-body"
                   class="divide-y divide-slate-100"
-                ></tbody>
+                >
+                  <tr>
+                    <td colspan="9" class="px-6 py-14 text-center text-sm text-slate-400">
+                      Memuat pengguna…
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </section>
@@ -907,8 +697,9 @@ onBeforeUnmount(() => cleanup?.());
                 </p>
               </div>
               <span
+                id="pricing-count-badge"
                 class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                >3 Published</span
+                >— Published</span
               >
             </div>
             <div class="grid gap-5 xl:grid-cols-3" id="pricing-cards"></div>
@@ -1026,7 +817,7 @@ onBeforeUnmount(() => cleanup?.());
                   <span
                     id="promo-active-count"
                     class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                    >2 Active</span
+                    >— Active</span
                   >
                 </div>
                 <div id="promo-list" class="mt-6 space-y-3"></div>
@@ -1047,7 +838,7 @@ onBeforeUnmount(() => cleanup?.());
               <span
                 id="gallery-count-badge"
                 class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                >4 Published</span
+                >— Published</span
               >
             </div>
             <div
@@ -1119,16 +910,22 @@ onBeforeUnmount(() => cleanup?.());
                   <iconify-icon icon="lucide:download"></iconify-icon> Export
                 </button>
               </div>
-              <button
-                class="flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean"
-              >
-                <iconify-icon
-                  icon="lucide:calendar-days"
-                  class="text-ocean"
-                ></iconify-icon>
-                01–30 Des 2026
-                <iconify-icon icon="lucide:chevron-down"></iconify-icon>
-              </button>
+              <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+                <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon>
+                <input
+                  id="an-date-from"
+                  type="date"
+                  aria-label="Tanggal mulai analytics"
+                  class="h-7 rounded-lg bg-transparent text-xs font-semibold text-slate-600 outline-none"
+                />
+                <span class="text-xs text-slate-400">–</span>
+                <input
+                  id="an-date-to"
+                  type="date"
+                  aria-label="Tanggal akhir analytics"
+                  class="h-7 rounded-lg bg-transparent text-xs font-semibold text-slate-600 outline-none"
+                />
+              </div>
             </div>
           </div>
           <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -1142,404 +939,84 @@ onBeforeUnmount(() => cleanup?.());
                     icon="lucide:wallet"
                     class="text-xl"
                   ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+8,4%</span
                 >
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Revenue</p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                Rp2.450.000
-              </p>
-              <p class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
+              <p id="an-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="an-revenue-sub" class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
-                  ><iconify-icon
-                    icon="lucide:ticket-check"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+6,8%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                  <iconify-icon icon="lucide:ticket-check" class="text-xl"></iconify-icon>
+                </span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                156
-              </p>
-              <p class="mt-2 text-xs text-slate-400">
-                12 booking baru minggu ini
-              </p>
+              <p id="an-bookings" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="an-bookings-sub" class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
-                  ><iconify-icon
-                    icon="lucide:users-round"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+10,2%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                  <iconify-icon icon="lucide:users-round" class="text-xl"></iconify-icon>
+                </span>
               </div>
-              <p class="mt-5 text-sm text-slate-500">Total Visitors</p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                487
-              </p>
-              <p class="mt-2 text-xs text-slate-400">
-                Pengunjung dalam periode
-              </p>
+              <p class="mt-5 text-sm text-slate-500">Tiket Terjual</p>
+              <p id="an-visitors" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="an-visitors-sub" class="mt-2 text-xs text-slate-400">Termasuk semua qty tiket lunas</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
             >
               <div class="flex items-start justify-between">
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
-                  ><iconify-icon
-                    icon="lucide:badge-dollar-sign"
-                    class="text-xl"
-                  ></iconify-icon></span
-                ><span
-                  class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-600"
-                  >+4,1%</span
-                >
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                  <iconify-icon icon="lucide:badge-dollar-sign" class="text-xl"></iconify-icon>
+                </span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Rentang Harga Tiket</p>
-              <p
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
-                Rp35?50 rb
-              </p>
-              <p class="mt-2 text-xs text-slate-400">Weekdays hingga Weekend</p>
+              <p id="an-price-range" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p class="mt-2 text-xs text-slate-400">Harga aktif di database</p>
             </article>
           </section>
           <section class="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]">
             <article
               class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
             >
-              <div
-                class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
-              >
+              <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
-                  <h2 class="font-display text-lg font-bold text-slate-900">
-                    Revenue by Month
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Perbandingan revenue bulanan 2026
-                  </p>
+                  <h2 class="font-display text-lg font-bold text-slate-900">Revenue by Month</h2>
+                  <p id="an-monthly-sub" class="mt-1 text-sm text-slate-500">Revenue bulanan</p>
                 </div>
-                <div
-                  class="flex items-center gap-4 text-xs font-semibold text-slate-500"
-                >
-                  <span class="flex items-center gap-2"
-                    ><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span
-                  ><span class="flex items-center gap-2"
-                    ><i class="h-2 w-2 rounded-full bg-cyan-100"></i
-                    >Target</span
-                  >
+                <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
+                  <span class="flex items-center gap-2"><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span>
                 </div>
               </div>
-              <div class="mt-6 h-64">
-                <svg
-                  viewBox="0 0 760 250"
-                  preserveAspectRatio="none"
-                  class="h-full w-full"
-                >
-                  <g stroke="#e2e8f0" stroke-dasharray="3 5">
-                    <line x1="50" y1="25" x2="740" y2="25" />
-                    <line x1="50" y1="75" x2="740" y2="75" />
-                    <line x1="50" y1="125" x2="740" y2="125" />
-                    <line x1="50" y1="175" x2="740" y2="175" />
-                  </g>
-                  <g fill="#d9f7fa">
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.1s"
-                      x="73"
-                      y="105"
-                      width="28"
-                      height="105"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.15s"
-                      x="127"
-                      y="92"
-                      width="28"
-                      height="118"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.2s"
-                      x="181"
-                      y="116"
-                      width="28"
-                      height="94"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.25s"
-                      x="235"
-                      y="80"
-                      width="28"
-                      height="130"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.3s"
-                      x="289"
-                      y="90"
-                      width="28"
-                      height="120"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.35s"
-                      x="343"
-                      y="63"
-                      width="28"
-                      height="147"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.4s"
-                      x="397"
-                      y="72"
-                      width="28"
-                      height="138"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.45s"
-                      x="451"
-                      y="49"
-                      width="28"
-                      height="161"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.5s"
-                      x="505"
-                      y="57"
-                      width="28"
-                      height="153"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.55s"
-                      x="559"
-                      y="38"
-                      width="28"
-                      height="172"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.6s"
-                      x="613"
-                      y="45"
-                      width="28"
-                      height="165"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate"
-                      style="animation-delay: 0.65s"
-                      x="667"
-                      y="26"
-                      width="28"
-                      height="184"
-                      rx="5"
-                    />
-                  </g>
-                  <g fill="#00BCD4">
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.15s"
-                      x="73"
-                      y="123"
-                      width="28"
-                      height="87"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.2s"
-                      x="127"
-                      y="111"
-                      width="28"
-                      height="99"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.25s"
-                      x="181"
-                      y="131"
-                      width="28"
-                      height="79"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.3s"
-                      x="235"
-                      y="95"
-                      width="28"
-                      height="115"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.35s"
-                      x="289"
-                      y="106"
-                      width="28"
-                      height="104"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.4s"
-                      x="343"
-                      y="79"
-                      width="28"
-                      height="131"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.45s"
-                      x="397"
-                      y="84"
-                      width="28"
-                      height="126"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.5s"
-                      x="451"
-                      y="64"
-                      width="28"
-                      height="146"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.55s"
-                      x="505"
-                      y="71"
-                      width="28"
-                      height="139"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.6s"
-                      x="559"
-                      y="54"
-                      width="28"
-                      height="156"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.65s"
-                      x="613"
-                      y="59"
-                      width="28"
-                      height="151"
-                      rx="5"
-                    />
-                    <rect
-                      class="bar-animate bar-hover"
-                      style="animation-delay: 0.7s"
-                      x="667"
-                      y="40"
-                      width="28"
-                      height="170"
-                      rx="5"
-                    />
-                  </g>
-                  <g fill="#94a3b8" font-size="11" text-anchor="middle">
-                    <text x="87" y="232">Jan</text>
-                    <text x="141" y="232">Feb</text>
-                    <text x="195" y="232">Mar</text>
-                    <text x="249" y="232">Apr</text>
-                    <text x="303" y="232">Mei</text>
-                    <text x="357" y="232">Jun</text>
-                    <text x="411" y="232">Jul</text>
-                    <text x="465" y="232">Agu</text>
-                    <text x="519" y="232">Sep</text>
-                    <text x="573" y="232">Okt</text>
-                    <text x="627" y="232">Nov</text>
-                    <text x="681" y="232">Des</text>
-                  </g>
-                </svg>
-              </div>
+              <div id="an-monthly-chart" class="mt-6 h-64"></div>
             </article>
             <article
               class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-5"
             >
               <div>
-                <h2 class="font-display text-lg font-bold text-slate-900">
-                  Ticket Distribution
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                  Komposisi tiket terjual
-                </p>
+                <h2 class="font-display text-lg font-bold text-slate-900">Ticket Distribution</h2>
+                <p class="mt-1 text-sm text-slate-500">Komposisi tiket terjual</p>
               </div>
-              <div class="mt-6 flex items-center justify-center gap-7">
+              <div class="mt-6 flex flex-col items-center justify-center gap-7 sm:flex-row">
                 <div
-                  class="donut-chart relative flex h-44 w-44 items-center justify-center rounded-full"
-                  style="
-                    background: conic-gradient(#00bcd4 0 46%, #0097a7 46% 100%);
-                  "
+                  id="an-ticket-donut"
+                  class="donut-chart relative flex h-44 w-44 shrink-0 items-center justify-center rounded-full"
+                  style="background: conic-gradient(#e2e8f0 0 100%)"
                 >
-                  <div
-                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
-                  >
-                    <span
-                      class="font-display text-2xl font-extrabold text-slate-900"
-                      >487</span
-                    ><span class="text-xs text-slate-400">Tiket</span>
+                  <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
+                    <span id="an-ticket-total" class="font-display text-2xl font-extrabold text-slate-900">—</span>
+                    <span class="text-xs text-slate-400">Tiket</span>
                   </div>
                 </div>
-                <div class="space-y-4 text-sm">
-                  <p class="flex items-center gap-3">
-                    <i class="h-3 w-3 rounded-full bg-aqua"></i
-                    ><span class="w-16 text-slate-500">Weekdays</span><b>46%</b>
-                  </p>
-                  <p class="flex items-center gap-3">
-                    <i class="h-3 w-3 rounded-full bg-ocean"></i
-                    ><span class="w-16 text-slate-500">Weekend</span><b>54%</b>
-                  </p>
+                <div id="an-ticket-legend" class="w-full space-y-4 text-sm">
+                  <p class="text-sm text-slate-400">Memuat komposisi…</p>
                 </div>
               </div>
             </article>
@@ -1558,14 +1035,15 @@ onBeforeUnmount(() => cleanup?.());
                   </p>
                 </div>
                 <span
+                  id="an-heatmap-badge"
                   class="rounded-lg bg-lagoon px-3 py-2 text-xs font-bold text-ocean"
-                  >Desember</span
+                  >—</span
                 >
               </div>
               <div class="mt-6 overflow-x-auto">
                 <div class="min-w-[560px]">
                   <div
-                    class="mb-2 grid grid-cols-[70px_repeat(8,1fr)] gap-1 text-[10px] text-slate-400"
+                    class="mb-2 grid grid-cols-[70px_repeat(7,1fr)] gap-1 text-[10px] text-slate-400"
                   >
                     <span></span><span class="text-center">08</span
                     ><span class="text-center">10</span
@@ -1573,7 +1051,7 @@ onBeforeUnmount(() => cleanup?.());
                     ><span class="text-center">14</span
                     ><span class="text-center">16</span
                     ><span class="text-center">18</span
-                    ><span class="text-center">20</span><span></span>
+                    ><span class="text-center">20</span>
                   </div>
                   <div id="heatmap-grid" class="space-y-1 text-[11px]"></div>
                   <div
@@ -1601,9 +1079,9 @@ onBeforeUnmount(() => cleanup?.());
                   </p>
                 </div>
                 <span
-                  class="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
-                  ><iconify-icon icon="lucide:trending-up"></iconify-icon>
-                  18,6%</span
+                  id="an-new-users"
+                  class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"
+                  >— pengguna baru</span
                 >
               </div>
               <div class="mt-6 h-56">
@@ -1721,29 +1199,39 @@ onBeforeUnmount(() => cleanup?.());
               <h2 class="font-display text-lg font-bold text-slate-900">
                 Profil Administrator
               </h2>
+              <p id="admin-profile-status" class="mt-1 text-sm text-slate-500">
+                Memuat profil dari database…
+              </p>
               <div class="mt-5 grid gap-4 sm:grid-cols-2">
                 <label class="block text-sm font-bold text-slate-700"
                   >Nama lengkap<input
-                    value="Alya Rahma"
+                    id="admin-profile-name"
+                    autocomplete="name"
                     class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
                 ><label class="block text-sm font-bold text-slate-700"
                   >Email<input
-                    value="alya@bluehaven.id"
-                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
+                    id="admin-profile-email"
+                    type="email"
+                    readonly
+                    class="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 outline-none" /></label
                 ><label class="block text-sm font-bold text-slate-700"
                   >Role<input
-                    value="Super Administrator"
+                    id="admin-profile-role"
                     disabled
                     class="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 outline-none" /></label
                 ><label class="block text-sm font-bold text-slate-700"
                   >Telepon<input
-                    value="+62 812-3456-7890"
+                    id="admin-profile-phone"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="08xxxxxxxxxx"
                     class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"
                 /></label>
               </div>
               <div class="mt-5 flex justify-end">
                 <button
-                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"
+                  id="save-admin-profile-btn"
+                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90 disabled:opacity-60"
                 >
                   <iconify-icon icon="lucide:save"></iconify-icon> Simpan
                   perubahan
@@ -1759,19 +1247,24 @@ onBeforeUnmount(() => cleanup?.());
               <div class="mt-5 space-y-4">
                 <label class="block text-sm font-bold text-slate-700"
                   >Password lama<input
+                    id="admin-current-password"
                     type="password"
+                    autocomplete="current-password"
                     placeholder="••••••••"
                     class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50" /></label
                 ><label class="block text-sm font-bold text-slate-700"
                   >Password baru<input
+                    id="admin-new-password"
                     type="password"
-                    placeholder="••••••••"
+                    autocomplete="new-password"
+                    placeholder="Minimal 8 karakter"
                     class="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-50"
                 /></label>
               </div>
               <div class="mt-5 flex justify-end">
                 <button
-                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90"
+                  id="update-admin-password-btn"
+                  class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90 disabled:opacity-60"
                 >
                   <iconify-icon icon="lucide:shield-check"></iconify-icon>
                   Update password
@@ -1979,7 +1472,7 @@ onBeforeUnmount(() => cleanup?.());
               id="user-modal-title"
               class="mt-2 font-display text-2xl font-bold text-slate-900"
             >
-              Add new user
+              Edit user
             </h2>
           </div>
           <button

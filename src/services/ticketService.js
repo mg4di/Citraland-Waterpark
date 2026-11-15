@@ -65,8 +65,18 @@ export function getPaymentStatusMeta(status) {
 }
 
 export function getBookingDisplayStatus(booking) {
-  if (booking?.cancelled_at && !booking?.checked_in_at) return 'cancelled'
-  return booking?.payment_status ?? 'pending'
+  if (!booking) return 'pending'
+  const paymentStatus = booking.payment_status ?? 'pending'
+  if (booking.checked_in_at) return paymentStatus
+  if (booking.cancelled_at) return 'cancelled'
+  // Tiket paid/pending yang tanggal kunjungannya sudah lewat dianggap
+  // dibatalkan/kedaluwarsa, meskipun job pembersihan database belum berjalan.
+  if (['paid', 'pending'].includes(paymentStatus)
+    && booking.visit_date
+    && booking.visit_date < localDateString()) {
+    return 'cancelled'
+  }
+  return paymentStatus
 }
 
 export function getUsageStatusMeta(booking) {
