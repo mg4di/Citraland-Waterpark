@@ -92,6 +92,24 @@ export const promotionService = {
     }
   },
 
+  async deletePromotion(promoId) {
+    if (!promoId) return { success: false, error: 'Promo tidak valid.' }
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('promotions')
+        .delete()
+        .eq('promo_id', promoId)
+        .select('promo_id')
+      if (error) return failure(error, 'Delete promotion')
+      if (!data?.length) {
+        return { success: false, error: 'Promo tidak ditemukan atau tidak dapat dihapus.' }
+      }
+      return { success: true }
+    } catch (error) {
+      return failure(error, 'Delete promotion')
+    }
+  },
+
   async updatePromotionStatus(promoId, status) {
     if (!['active', 'inactive', 'expired'].includes(status)) {
       return { success: false, error: 'Status promosi tidak valid.' }

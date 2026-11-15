@@ -175,6 +175,29 @@ export const bookingService = {
     }
   },
 
+  async adminCheckIn(bookingCode) {
+    if (!bookingCode) return { success: false, error: 'Kode booking tidak valid.' }
+    try {
+      const { data, error } = await getSupabaseClient().rpc('admin_check_in_booking', {
+        p_booking_code: bookingCode,
+      })
+      if (error) {
+        logError('Admin check-in booking', error)
+        const message = String(error.message ?? '').toLowerCase()
+        if (message.includes('not found')) return { success: false, error: 'Booking tidak ditemukan.' }
+        if (message.includes('already used')) return { success: false, error: 'Tiket ini sudah dipakai.' }
+        if (message.includes('not paid')) return { success: false, error: 'Tiket belum dibayar, tidak dapat check-in.' }
+        if (message.includes('cancelled')) return { success: false, error: 'Booking sudah dibatalkan.' }
+        if (message.includes('not today')) return { success: false, error: 'Check-in hanya dapat dilakukan pada tanggal kunjungan.' }
+        if (message.includes('admin access')) return { success: false, error: 'Akses admin diperlukan.' }
+        return { success: false, error: mapSupabaseError(error).message }
+      }
+      return { success: true, booking: data }
+    } catch (error) {
+      return failure(error, 'Admin check-in booking')
+    }
+  },
+
   async getBookingByCode(bookingCode) {
     try {
       const { data, error } = await getSupabaseClient()

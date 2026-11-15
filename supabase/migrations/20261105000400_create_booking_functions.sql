@@ -1,35 +1,9 @@
--- Tiket yang tidak pernah dipakai dan tanggal kunjungannya sudah lewat
--- otomatis ditandai dibatalkan (kedaluwarsa).
---
--- Catatan finance: booking 'paid' yang kedaluwarsa TETAP 'paid' agar revenue
--- historis tidak hilang; status batal disimpan di `cancelled_at` +
--- `cancellation_reason` dan frontend menampilkan status efektif 'cancelled'.
--- Booking 'pending' yang kedaluwarsa ikut diubah ke 'cancelled' agar tidak
--- bisa dilanjutkan pembayarannya lagi.
+-- Fungsi RPC dan fungsi sistem untuk booking: pembatalan oleh pengunjung, pembaruan status
+-- dari notifikasi Midtrans, kedaluwarsa tiket yang tidak dipakai, dan statistik dashboard admin.
+-- Tiket yang tidak pernah dipakai dan tanggal kunjungannya sudah lewat otomatis ditandai
+-- dibatalkan (kedaluwarsa). Booking 'pending' yang kedaluwarsa ikut dibatalkan agar tidak
+-- bisa dibayar lagi.
 
-ALTER TABLE public.bookings
-  ADD COLUMN IF NOT EXISTS checked_in_at timestamptz,
-  ADD COLUMN IF NOT EXISTS cancelled_at timestamptz,
-  ADD COLUMN IF NOT EXISTS cancellation_reason text;
-
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'bookings_cancellation_reason_check'
-  ) THEN
-    ALTER TABLE public.bookings
-      ADD CONSTRAINT bookings_cancellation_reason_check
-      CHECK (cancellation_reason IS NULL OR cancellation_reason IN ('user', 'admin', 'expired'));
-  END IF;
-END;
-$$;
-
-CREATE INDEX IF NOT EXISTS idx_bookings_cancelled_at ON public.bookings(cancelled_at);
-CREATE INDEX IF NOT EXISTS idx_bookings_visit_date_open
-  ON public.bookings(visit_date) WHERE cancelled_at IS NULL;
-
--- Menandai tiket kedaluwarsa: belum dipakai, tanggal kunjungan lewat,
--- dan belum pernah dibatalkan. Aman dipanggil berulang kali.
 CREATE OR REPLACE FUNCTION public.expire_unused_bookings()
 RETURNS integer
 LANGUAGE plpgsql
@@ -57,10 +31,9 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.expire_unused_bookings() FROM PUBLIC, anon;
+
 GRANT EXECUTE ON FUNCTION public.expire_unused_bookings() TO authenticated, service_role;
 
--- Pembatalan oleh pengunjung: hanya booking miliknya yang masih pending
--- dan belum dipakai. Sekarang ikut mengisi cancelled_at / reason.
 CREATE OR REPLACE FUNCTION public.cancel_own_booking(p_booking_code text)
 RETURNS public.bookings
 LANGUAGE plpgsql
@@ -111,10 +84,9 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.cancel_own_booking(text) FROM PUBLIC, anon;
+
 GRANT EXECUTE ON FUNCTION public.cancel_own_booking(text) TO authenticated;
 
--- Notifikasi Midtrans tidak boleh menghidupkan kembali booking yang sudah
--- dibatalkan/kedaluwarsa.
 CREATE OR REPLACE FUNCTION public.apply_midtrans_notification(
   p_order_id text,
   p_transaction_id text,
@@ -163,11 +135,10 @@ $$;
 
 REVOKE ALL ON FUNCTION public.apply_midtrans_notification(text, text, text, text)
   FROM PUBLIC, anon, authenticated;
+
 GRANT EXECUTE ON FUNCTION public.apply_midtrans_notification(text, text, text, text)
   TO service_role;
 
--- Statistik dashboard: sertakan status efektif + alasan pembatalan agar
--- UI admin bisa menampilkan "Dibatalkan".
 CREATE OR REPLACE FUNCTION public.admin_booking_statistics(
   p_date_from date DEFAULT NULL,
   p_date_to date DEFAULT NULL
@@ -233,9 +204,9 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.admin_booking_statistics(date, date) FROM PUBLIC, anon;
+
 GRANT EXECUTE ON FUNCTION public.admin_booking_statistics(date, date) TO authenticated;
 
--- Jadwalkan harian bila pg_cron tersedia (opsional).
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN

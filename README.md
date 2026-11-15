@@ -60,6 +60,23 @@ npm run preview
 
    Login admin hanya diberikan kepada pengguna Auth yang emailnya terdaftar di `admin_users`. Jangan menyimpan kata sandi admin pada seed atau repository.
 
+## Dashboard admin realtime
+
+Migrasi `20261115000000_admin_realtime_analytics.sql` menambahkan:
+
+- Publikasi Supabase Realtime untuk `bookings`, `users`, `ticket_pricing`, `facilities`, `promotions`, dan `gallery_images`.
+- RPC `admin_dashboard_summary`, `admin_analytics`, dan `admin_users_overview`.
+- Kolom `admin_users.phone`, kebijakan update profil admin sendiri, dan grant update status pengguna.
+- RPC `admin_check_in_booking` untuk check-in manual (tiket harus `paid`, belum dipakai, dan tanggal kunjungan hari ini WITA).
+
+Terapkan dengan:
+
+```sh
+npx supabase db push --remote
+```
+
+Dashboard, Booking, Users, Analytics, dan Settings memuat data dari database dan mendengarkan event realtime. Jika realtime terputus, halaman tetap menyegarkan data setiap 60 detik. Tombol **Add new user** dihapus karena pembuatan akun Auth memerlukan service role; pengguna mendaftar melalui halaman registrasi. Check-in manual tersedia di Booking Management sebagai fallback sebelum perangkat IoT dipasang.
+
 ## Menyiapkan pembayaran Midtrans
 
 1. Buat akun Midtrans dan gunakan kredensial Sandbox selama pengembangan.
@@ -117,7 +134,6 @@ File foto default website menggunakan path lokal. Foto tambahan yang diunggah le
 - `src/lib/` dan `src/services/` — konfigurasi Supabase serta antarmuka akses data.
 - `supabase/migrations/` — skema database, RLS, dan fungsi database.
 - `supabase/functions/` — Edge Functions pembayaran dan pemeriksaan status booking.
-- `.kiro/specs/supabase-backend-integration/` — requirement, design, dan checklist implementasi.
 
 ## Validasi dan pemecahan masalah
 

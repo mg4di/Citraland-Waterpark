@@ -1012,7 +1012,10 @@ export function initializeUserPage() {
 
     function createHistoryCard(booking) {
       const status = getBookingDisplayStatus(booking);
-      const payment = getPaymentStatusMeta(status);
+      // Badge pembayaran mengikuti status pembayaran asli: tiket yang sudah
+      // lunas tetap "Lunas" walau kedaluwarsa. Status pemakaian ditampilkan
+      // terpisah lewat badge "Kedaluwarsa"/"Sudah digunakan".
+      const payment = getPaymentStatusMeta(booking.payment_status);
       const usage = getUsageStatusMeta(booking);
       const article = document.createElement('article');
       article.className = 'scroll-reveal visible flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md';
@@ -1053,7 +1056,15 @@ export function initializeUserPage() {
 
       const actions = document.createElement('div');
       actions.className = 'mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5';
-      if (status === 'paid') {
+      if (booking.checked_in_at) {
+        const note = document.createElement('p');
+        note.className = 'w-full text-xs font-semibold text-slate-500';
+        const usedAt = new Date(booking.checked_in_at).toLocaleString('id-ID', {
+          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+        });
+        note.textContent = `Tiket sudah digunakan pada ${usedAt} dan tidak dapat dipakai lagi.`;
+        actions.append(note);
+      } else if (status === 'paid') {
         const view = document.createElement('button');
         view.type = 'button';
         view.className = 'inline-flex min-h-10 items-center gap-2 rounded-full bg-ocean px-4 text-xs font-bold text-white transition hover:bg-aqua';
@@ -1090,7 +1101,7 @@ export function initializeUserPage() {
       } else if (status === 'cancelled') {
         const note = document.createElement('p');
         note.className = 'w-full text-xs font-semibold text-slate-500';
-        note.textContent = booking.cancellation_reason === 'expired'
+        note.textContent = usage.label === 'Kedaluwarsa'
           ? 'Tiket tidak dipakai dan tanggal kunjungan sudah lewat, sehingga otomatis dibatalkan.'
           : 'Pesanan ini telah dibatalkan.';
         const retry = document.createElement('button');
@@ -1120,6 +1131,13 @@ export function initializeUserPage() {
           const usage = getUsageStatusMeta(booking);
           return usage.label === 'Sudah digunakan' || usage.label === 'Kedaluwarsa';
         });
+      }
+      if (filter === 'cancelled') {
+        // Tiket yang pembayarannya dibatalkan dan belum pernah aktif/dipakai.
+        return appState.ticketHistory.filter((booking) =>
+          booking.payment_status === 'cancelled'
+          && getUsageStatusMeta(booking).label === 'Belum aktif',
+        );
       }
       return appState.ticketHistory.filter((booking) => getBookingDisplayStatus(booking) === filter);
     }
@@ -1195,6 +1213,10 @@ export function initializeUserPage() {
       }
       if (getBookingDisplayStatus(booking) === 'cancelled') {
         showToast('Tiket ini sudah dibatalkan dan tidak dapat digunakan.', 'error');
+        return;
+      }
+      if (booking.checked_in_at) {
+        showToast('Tiket ini sudah digunakan dan tidak dapat dipakai lagi.', 'error');
         return;
       }
       appState.confirmationBooking = booking;
@@ -1337,6 +1359,10 @@ export function initializeUserPage() {
       }
       if (getBookingDisplayStatus(booking) === 'cancelled') {
         showToast('Tiket ini sudah dibatalkan sehingga tidak dapat diunduh.', 'error');
+        return;
+      }
+      if (booking.checked_in_at) {
+        showToast('Tiket ini sudah digunakan sehingga tidak dapat diunduh lagi.', 'error');
         return;
       }
       try {

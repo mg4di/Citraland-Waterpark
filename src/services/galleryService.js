@@ -89,15 +89,21 @@ export const galleryService = {
         .single()
       if (lookupError) return failure(lookupError, 'Find gallery image')
 
-      const { error: archiveError } = await supabase
+      const { data: deleted, error: deleteError } = await supabase
         .from('gallery_images')
-        .update({ status: 'archived' })
+        .delete()
         .eq('image_id', imageId)
-      if (archiveError) return failure(archiveError, 'Archive gallery image')
+        .select('image_id')
+      if (deleteError) return failure(deleteError, 'Delete gallery image')
+      if (!deleted?.length) {
+        return { success: false, error: 'Gambar tidak ditemukan atau tidak dapat dihapus.' }
+      }
 
+      // File storage dihapus setelah baris database terhapus. Jika gagal,
+      // data galeri tetap sudah bersih; file yatim bisa dibersihkan terpisah.
       if (image.storage_path) {
         const { error: removeError } = await supabase.storage.from('gallery').remove([image.storage_path])
-        if (removeError) return failure(removeError, 'Remove gallery storage file')
+        if (removeError) logError('Remove gallery storage file', removeError)
       }
       return { success: true }
     } catch (error) {

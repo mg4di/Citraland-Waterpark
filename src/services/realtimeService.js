@@ -64,6 +64,10 @@ export class RealtimeManager {
     return this.subscribe('gallery_changes', 'gallery_images', callback)
   }
 
+  subscribeToUsers(callback) {
+    return this.subscribe('users_changes', 'users', callback)
+  }
+
   subscribeToPromotions(callback) {
     return this.subscribe('promotions_changes', 'promotions', callback)
   }

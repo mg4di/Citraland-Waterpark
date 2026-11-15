@@ -130,7 +130,7 @@ export const authService = {
 
       const { data, error } = await supabase
         .from('admin_users')
-        .select('full_name, role')
+        .select('full_name, phone, role')
         .eq('email', authData.user.email.toLowerCase())
         .maybeSingle()
       if (error) return failure(error, 'Get admin profile')
@@ -138,6 +138,53 @@ export const authService = {
       return { success: true, admin: data }
     } catch (error) {
       return failure(error, 'Get admin profile')
+    }
+  },
+
+  async updateAdminProfile({ fullName, phone }) {
+    const name = validators.sanitize(fullName)
+    if (!name) return { success: false, error: 'Nama lengkap wajib diisi.' }
+    const normalizedPhone = String(phone ?? '').replace(/[^\d+\-\s()]/g, '').trim()
+    try {
+      const supabase = getSupabaseClient()
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData.user?.email) {
+        return { success: false, error: 'Sesi admin tidak ditemukan. Silakan masuk kembali.' }
+      }
+      const { data, error } = await supabase
+        .from('admin_users')
+        .update({ full_name: name, phone: normalizedPhone || null })
+        .eq('email', authData.user.email.toLowerCase())
+        .select('full_name, phone, role')
+        .single()
+      if (error) return failure(error, 'Update admin profile')
+      return { success: true, admin: data }
+    } catch (error) {
+      return failure(error, 'Update admin profile')
+    }
+  },
+
+  async updatePassword(currentPassword, newPassword) {
+    const passwordValidation = validators.password(newPassword)
+    if (!passwordValidation.valid) return { success: false, error: passwordValidation.error }
+    if (!currentPassword) return { success: false, error: 'Password lama wajib diisi.' }
+    try {
+      const supabase = getSupabaseClient()
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData.user?.email) {
+        return { success: false, error: 'Sesi admin tidak ditemukan. Silakan masuk kembali.' }
+      }
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: authData.user.email,
+        password: currentPassword,
+      })
+      if (reauthError) return { success: false, error: 'Password lama tidak sesuai.' }
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+      if (updateError) return failure(updateError, 'Update admin password')
+      return { success: true }
+    } catch (error) {
+      return failure(error, 'Update admin password')
     }
   },
 

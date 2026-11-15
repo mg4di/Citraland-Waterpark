@@ -503,7 +503,7 @@ onMounted(initializeUserPage)
             <button type="button" data-filter="all" class="history-filter rounded-full bg-ocean px-4 py-2 text-xs font-bold text-white transition">Semua</button>
             <button type="button" data-filter="paid" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Sudah dibayar</button>
             <button type="button" data-filter="pending" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Menunggu</button>
-            <button type="button" data-filter="failed" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Gagal</button>
+            <button type="button" data-filter="cancelled" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Dibatalkan</button>
             <button type="button" data-filter="used" class="history-filter rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean">Sudah digunakan</button>
           </div>
         </div>
