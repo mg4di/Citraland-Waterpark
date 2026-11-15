@@ -14,8 +14,8 @@ INSERT INTO public.facilities (facility_name, description, icon, display_order, 
 VALUES
   ('Kolam Ombak', 'Rasakan suasana bermain air dengan ombak buatan.', 'lucide:waves', 1, 'active'),
   ('Area Bajak Laut', 'Area bermain air bertema bajak laut untuk keluarga.', 'lucide:ship', 2, 'active'),
-  ('Kolam Arus', 'Santai menyusuri kolam arus dan menikmati suasana waterpark.', 'lucide:move-horizontal', 3, 'active'),
-  ('Wahana Seluncur', 'Pilihan seluncuran air untuk menambah keseruan bermain.', 'lucide:life-buoy', 4, 'active')
+  ('Kolam Arus', 'Santai menyusuri kolam arus dan menikmati suasana waterpark.', 'lucide:dam', 3, 'active'),
+  ('Wahana Seluncur', 'Pilihan seluncuran air untuk menambah keseruan bermain.', 'lucide:waves-ladder', 4, 'active')
 ON CONFLICT (display_order) DO UPDATE
   SET facility_name = EXCLUDED.facility_name,
       description = EXCLUDED.description,
