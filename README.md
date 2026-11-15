@@ -134,7 +134,6 @@ File foto default website menggunakan path lokal. Foto tambahan yang diunggah le
 - `src/lib/` dan `src/services/` — konfigurasi Supabase serta antarmuka akses data.
 - `supabase/migrations/` — skema database, RLS, dan fungsi database.
 - `supabase/functions/` — Edge Functions pembayaran dan pemeriksaan status booking.
-- `.kiro/specs/supabase-backend-integration/` — requirement, design, dan checklist implementasi.
 
 ## Validasi dan pemecahan masalah
 
