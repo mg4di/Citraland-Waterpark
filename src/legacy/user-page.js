@@ -205,11 +205,11 @@ export function initializeUserPage() {
         page = 'booking-details';
       }
       if (protectedPages.has(page)) {
-        const result = await authService.getUser();
+        const result = await authService.ensureActiveSession();
         if (!result.success) {
           currentUser = null;
           appState.pendingPage = page;
-          showToast('Sesi tidak dapat diverifikasi. Silakan masuk kembali untuk melanjutkan.', 'error');
+          showToast(result.error || 'Sesi tidak dapat diverifikasi. Silakan masuk kembali untuk melanjutkan.', 'error');
           renderPage('login');
           return;
         }
@@ -488,7 +488,7 @@ export function initializeUserPage() {
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const authResult = await authService.getUser();
+        const authResult = await authService.ensureActiveSession();
         if (!authResult.success) {
           showToast(authResult.error, 'error');
           return;
@@ -1543,7 +1543,7 @@ export function initializeUserPage() {
     }
 
     // ===== INIT =====
-    (() => {
+    (async () => {
       // Show initial page
       const hash = location.hash.replace('#','') || 'home';
       const initialPage = ['home','login','register','select-ticket','booking-details','payment','confirmation','ticket-history'].includes(hash) ? hash : 'home';
@@ -1555,6 +1555,20 @@ export function initializeUserPage() {
       initTicketHistoryPage();
       initScrollReveal();
       setTimeout(animateCounters, 500);
+
+      // Cek status akun untuk sesi yang tersimpan (mis. akun dinonaktifkan
+      // admin saat pengunjung masih memiliki sesi login).
+      const sessionGuard = await authService.ensureActiveSession();
+      if (!sessionGuard.success) {
+        currentUser = null;
+        updateNavbarAuth(null);
+        showToast(sessionGuard.error || 'Akun Anda tidak dapat digunakan.', 'error');
+        if (protectedPages.has(initialPage)) {
+          appState.pendingPage = initialPage;
+          navigateTo('login');
+          return;
+        }
+      }
       navigateTo(initialPage);
     })()
 

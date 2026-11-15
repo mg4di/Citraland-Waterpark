@@ -46,16 +46,38 @@ export const authService = {
       })
       if (error) {
         logError(isAdmin ? 'Admin authentication' : 'User authentication', error)
-        if (error.code === 'email_not_confirmed' || error.message?.toLowerCase().includes('email not confirmed')) {
+        if (
+          error.code === 'email_not_confirmed' ||
+          error.message?.toLowerCase().includes('email not confirmed')
+        ) {
           return {
             success: false,
-            error: 'Email akun belum dikonfirmasi. Konfirmasi email di Supabase Auth sebelum masuk.',
+            error:
+              'Email akun belum dikonfirmasi. Konfirmasi email di Supabase Auth sebelum masuk.',
           }
         }
-        return { success: false, error: 'Email atau password salah. Pastikan akun dibuat di proyek Supabase yang sama dengan aplikasi.' }
+        return {
+          success: false,
+          error:
+            'Email atau password salah. Pastikan akun dibuat di proyek Supabase yang sama dengan aplikasi.',
+        }
       }
       if (!data.user || !data.session) {
         return { success: false, error: 'Gagal masuk. Silakan coba lagi.' }
+      }
+
+      // Akun pengunjung yang dinonaktifkan admin tidak boleh tetap masuk.
+      // Admin dashboard tetap memakai tabel admin_users sebagai sumber akses.
+      if (!isAdmin) {
+        const accountStatus = await this.getAccountStatus(data.user.id)
+        if (accountStatus === 'inactive') {
+          const { error: signOutError } = await supabase.auth.signOut()
+          if (signOutError) logError('Inactive login cleanup', signOutError)
+          return {
+            success: false,
+            error: 'Akun Anda dinonaktifkan. Hubungi administrator Citraland Waterpark.',
+          }
+        }
       }
 
       if (isAdmin) {
@@ -70,7 +92,8 @@ export const authService = {
           if (signOutError) logError('Admin login cleanup', signOutError)
           return {
             success: false,
-            error: 'Login berhasil, tetapi akses admin gagal diverifikasi. Periksa migrasi dan kebijakan RLS tabel admin_users.',
+            error:
+              'Login berhasil, tetapi akses admin gagal diverifikasi. Periksa migrasi dan kebijakan RLS tabel admin_users.',
           }
         }
         if (!admin) {
@@ -78,7 +101,8 @@ export const authService = {
           if (signOutError) logError('Admin login cleanup', signOutError)
           return {
             success: false,
-            error: 'Email dan password benar, tetapi email ini belum terdaftar sebagai admin di public.admin_users.',
+            error:
+              'Email dan password benar, tetapi email ini belum terdaftar sebagai admin di public.admin_users.',
           }
         }
         return { success: true, user: data.user, session: data.session, admin }
@@ -119,6 +143,50 @@ export const authService = {
     }
   },
 
+  async getAccountStatus(userId) {
+    try {
+      const { data, error } = await getSupabaseClient()
+        .from('users')
+        .select('status')
+        .eq('user_id', userId)
+        .maybeSingle()
+      if (error) {
+        logError('Get account status', error)
+        return null
+      }
+      return data?.status ?? null
+    } catch (error) {
+      logError('Get account status', error)
+      return null
+    }
+  },
+
+  async ensureActiveSession() {
+    try {
+      const supabase = getSupabaseClient()
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) return failure(sessionError, 'Get session for active check')
+      if (!sessionData.session?.user) return { success: true, user: null }
+
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError) return failure(userError, 'Get user for active check')
+      if (!userData.user) return { success: true, user: null }
+
+      const accountStatus = await this.getAccountStatus(userData.user.id)
+      if (accountStatus === 'inactive') {
+        const { error: signOutError } = await supabase.auth.signOut()
+        if (signOutError) logError('Inactive session sign out', signOutError)
+        return {
+          success: false,
+          error: 'Akun Anda dinonaktifkan. Hubungi administrator Citraland Waterpark.',
+        }
+      }
+      return { success: true, user: userData.user }
+    } catch (error) {
+      return failure(error, 'Ensure active session')
+    }
+  },
+
   async getAdminProfile() {
     try {
       const supabase = getSupabaseClient()
@@ -144,7 +212,9 @@ export const authService = {
   async updateAdminProfile({ fullName, phone }) {
     const name = validators.sanitize(fullName)
     if (!name) return { success: false, error: 'Nama lengkap wajib diisi.' }
-    const normalizedPhone = String(phone ?? '').replace(/[^\d+\-\s()]/g, '').trim()
+    const normalizedPhone = String(phone ?? '')
+      .replace(/[^\d+\-\s()]/g, '')
+      .trim()
     try {
       const supabase = getSupabaseClient()
       const { data: authData, error: authError } = await supabase.auth.getUser()
