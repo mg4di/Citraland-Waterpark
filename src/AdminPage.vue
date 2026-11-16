@@ -1,24 +1,21 @@
 <script setup>
-import { onBeforeUnmount, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { initializeAdminPage } from "./legacy/admin-page.js";
-import AdminHeader from "./components/admin/AdminHeader.vue";
-import AdminSidebar from "./components/admin/AdminSidebar.vue";
+import { onBeforeUnmount, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { initializeAdminPage } from './legacy/admin-page.js';
+import AdminHeader from './components/admin/AdminHeader.vue';
+import AdminSidebar from './components/admin/AdminSidebar.vue';
 
 const window = globalThis.window;
 const router = useRouter();
 let cleanup;
 onMounted(() => {
-  cleanup = initializeAdminPage(() => router.push({ name: "admin-login" }));
+  cleanup = initializeAdminPage(() => router.push({ name: 'admin-login' }));
 });
 onBeforeUnmount(() => cleanup?.());
 </script>
 
 <template>
-  <div
-    id="admin-root"
-    class="min-h-screen bg-slate-50 font-sans text-slate-800"
-  >
+  <div id="admin-root" class="min-h-screen bg-slate-50 font-sans text-slate-800">
     <AdminSidebar />
 
     <!-- MAIN SHELL -->
@@ -50,7 +47,9 @@ onBeforeUnmount(() => cleanup?.());
                 <iconify-icon icon="lucide:download"></iconify-icon>
                 <span class="hidden sm:inline">Export laporan</span>
               </button>
-              <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <div
+                class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2"
+              >
                 <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon>
                 <input
                   id="dash-date-from"
@@ -73,48 +72,70 @@ onBeforeUnmount(() => cleanup?.());
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-1"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
+                >
                   <iconify-icon icon="lucide:wallet" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm font-medium text-slate-500">Total Revenue</p>
-              <p id="dash-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
+                —
+              </p>
               <p id="dash-revenue-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                >
                   <iconify-icon icon="lucide:ticket" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm font-medium text-slate-500">Total Bookings</p>
-              <p id="dash-bookings" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p
+                id="dash-bookings"
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                —
+              </p>
               <p id="dash-bookings-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                >
                   <iconify-icon icon="lucide:users" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm font-medium text-slate-500">Tiket Terjual</p>
-              <p id="dash-visitors" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p
+                id="dash-visitors"
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                —
+              </p>
               <p id="dash-visitors-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+                >
                   <iconify-icon icon="lucide:badge-check" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm font-medium text-slate-500">Check-in Hari Ini</p>
-              <p id="dash-checkin" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="dash-checkin" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
+                —
+              </p>
               <p id="dash-checkin-sub" class="mt-2 text-xs text-slate-400">Menunggu data…</p>
             </article>
           </section>
@@ -150,8 +171,14 @@ onBeforeUnmount(() => cleanup?.());
                   class="donut-chart relative flex h-44 w-44 shrink-0 items-center justify-center rounded-full"
                   style="background: conic-gradient(#e2e8f0 0 100%)"
                 >
-                  <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
-                    <span id="dash-status-total" class="font-display text-2xl font-extrabold text-slate-900">—</span>
+                  <div
+                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
+                  >
+                    <span
+                      id="dash-status-total"
+                      class="font-display text-2xl font-extrabold text-slate-900"
+                      >—</span
+                    >
                     <span class="text-xs text-slate-400">Total</span>
                   </div>
                 </div>
@@ -211,14 +238,8 @@ onBeforeUnmount(() => cleanup?.());
             class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
           >
             <div>
-              <p
-                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
-              >
-                Workspace
-              </p>
-              <h1
-                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-              >
+              <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p>
+              <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 Booking Management
               </h1>
               <p class="mt-2 text-sm text-slate-500">
@@ -229,8 +250,7 @@ onBeforeUnmount(() => cleanup?.());
               id="export-bookings-btn"
               class="flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600 hover:border-aqua hover:text-ocean sm:self-auto"
             >
-              <iconify-icon icon="lucide:download"></iconify-icon> Export
-              booking
+              <iconify-icon icon="lucide:download"></iconify-icon> Export booking
             </button>
           </div>
           <section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -240,11 +260,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
-                  ><iconify-icon
-                    icon="lucide:ticket"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:ticket" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
               <p
@@ -261,11 +278,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
-                  ><iconify-icon
-                    icon="lucide:badge-check"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:badge-check" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Paid</p>
               <p
@@ -282,11 +296,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-500"
-                  ><iconify-icon
-                    icon="lucide:circle-x"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:circle-x" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Cancelled</p>
               <p
@@ -301,9 +312,7 @@ onBeforeUnmount(() => cleanup?.());
           <section
             class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 animate-fade-in-up delay-4"
           >
-            <div
-              class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
-            >
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div class="flex flex-wrap gap-2" id="bk-status-filters">
                 <button
                   data-status="all"
@@ -356,23 +365,15 @@ onBeforeUnmount(() => cleanup?.());
           <section
             class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
           >
-            <div
-              class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
-            >
+            <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
               <div>
-                <h2 class="font-display text-lg font-bold text-slate-900">
-                  Semua Booking
-                </h2>
-                <p id="bk-result-count" class="mt-1 text-sm text-slate-500">
-                  Memuat pemesanan…
-                </p>
+                <h2 class="font-display text-lg font-bold text-slate-900">Semua Booking</h2>
+                <p id="bk-result-count" class="mt-1 text-sm text-slate-500">Memuat pemesanan…</p>
               </div>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full min-w-[1150px] text-left text-sm">
-                <thead
-                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
-                >
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400">
                   <tr>
                     <th class="px-6 py-4 font-bold">Booking ID</th>
                     <th class="px-4 py-4 font-bold">Guest Name</th>
@@ -384,10 +385,7 @@ onBeforeUnmount(() => cleanup?.());
                     <th class="px-6 py-4 text-center font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody
-                  id="bk-table-body"
-                  class="divide-y divide-slate-100"
-                >
+                <tbody id="bk-table-body" class="divide-y divide-slate-100">
                   <tr>
                     <td colspan="8" class="px-6 py-14 text-center text-sm text-slate-400">
                       Memuat pemesanan…
@@ -417,14 +415,8 @@ onBeforeUnmount(() => cleanup?.());
             class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
           >
             <div>
-              <p
-                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
-              >
-                Workspace
-              </p>
-              <h1
-                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-              >
+              <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p>
+              <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 User Management
               </h1>
               <p class="mt-2 text-sm text-slate-500">
@@ -447,11 +439,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
-                  ><iconify-icon
-                    icon="lucide:users"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:users" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Users</p>
               <p
@@ -468,11 +457,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"
-                  ><iconify-icon
-                    icon="lucide:user-check"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:user-check" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Active Users</p>
               <p
@@ -489,11 +475,8 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500"
-                  ><iconify-icon
-                    icon="lucide:user-round-x"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:user-round-x" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Inactive Users</p>
               <p
@@ -510,17 +493,11 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
-                  ><iconify-icon
-                    icon="lucide:user-round-plus"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:user-round-plus" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">New This Month</p>
-              <p
-                id="usr-stat-new"
-                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
-              >
+              <p id="usr-stat-new" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
                 —
               </p>
               <p id="usr-stat-new-sub" class="mt-2 text-xs text-slate-400">Bulan berjalan</p>
@@ -529,9 +506,7 @@ onBeforeUnmount(() => cleanup?.());
           <section
             class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
           >
-            <div
-              class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between"
-            >
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div class="relative w-full xl:max-w-sm">
                 <iconify-icon
                   icon="lucide:search"
@@ -558,9 +533,7 @@ onBeforeUnmount(() => cleanup?.());
             <div
               class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"
             >
-              <p id="usr-selected-count" class="text-sm text-slate-500">
-                0 user dipilih
-              </p>
+              <p id="usr-selected-count" class="text-sm text-slate-500">0 user dipilih</p>
               <div class="flex items-center gap-2">
                 <button
                   id="usr-activate-btn"
@@ -582,23 +555,15 @@ onBeforeUnmount(() => cleanup?.());
           <section
             class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm animate-fade-in-up delay-5"
           >
-            <div
-              class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6"
-            >
+            <div class="flex items-center justify-between border-b border-slate-100 p-5 sm:p-6">
               <div>
-                <h2 class="font-display text-lg font-bold text-slate-900">
-                  Registered Users
-                </h2>
-                <p id="usr-result-count" class="mt-1 text-sm text-slate-500">
-                  Memuat pengguna…
-                </p>
+                <h2 class="font-display text-lg font-bold text-slate-900">Registered Users</h2>
+                <p id="usr-result-count" class="mt-1 text-sm text-slate-500">Memuat pengguna…</p>
               </div>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full min-w-[1100px] text-left text-sm">
-                <thead
-                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
-                >
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400">
                   <tr>
                     <th class="w-12 px-5 py-4">
                       <input
@@ -617,10 +582,7 @@ onBeforeUnmount(() => cleanup?.());
                     <th class="px-5 py-4 text-right font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody
-                  id="usr-table-body"
-                  class="divide-y divide-slate-100"
-                >
+                <tbody id="usr-table-body" class="divide-y divide-slate-100">
                   <tr>
                     <td colspan="9" class="px-6 py-14 text-center text-sm text-slate-400">
                       Memuat pengguna…
@@ -640,19 +602,12 @@ onBeforeUnmount(() => cleanup?.());
             class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end animate-fade-in-up"
           >
             <div>
-              <p
-                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
-              >
-                Workspace
-              </p>
-              <h1
-                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-              >
+              <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Workspace</p>
+              <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 Content Management
               </h1>
               <p class="mt-2 text-sm text-slate-500">
-                Kelola harga tiket, fasilitas, promosi, dan galeri Citraland
-                Waterpark.
+                Kelola harga tiket, fasilitas, promosi, dan galeri Citraland Waterpark.
               </p>
             </div>
           </div>
@@ -689,12 +644,8 @@ onBeforeUnmount(() => cleanup?.());
           <section id="ctab-pricing" class="tab-panel active mt-6">
             <div class="mb-5 flex items-center justify-between">
               <div>
-                <h2 class="font-display text-xl font-bold text-slate-900">
-                  Ticket Pricing
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                  Atur harga dan tampilan tiket.
-                </p>
+                <h2 class="font-display text-xl font-bold text-slate-900">Ticket Pricing</h2>
+                <p class="mt-1 text-sm text-slate-500">Atur harga dan tampilan tiket.</p>
               </div>
               <span
                 id="pricing-count-badge"
@@ -708,28 +659,21 @@ onBeforeUnmount(() => cleanup?.());
           <section id="ctab-facilities" class="tab-panel mt-6">
             <div class="flex items-center justify-between">
               <div>
-                <h2 class="font-display text-xl font-bold text-slate-900">
-                  Facilities
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                  Kelola fasilitas landing page.
-                </p>
+                <h2 class="font-display text-xl font-bold text-slate-900">Facilities</h2>
+                <p class="mt-1 text-sm text-slate-500">Kelola fasilitas landing page.</p>
               </div>
               <button
                 id="add-facility-btn"
                 class="flex min-h-11 items-center gap-2 rounded-xl bg-ocean px-4 text-sm font-bold text-white hover:bg-ocean/90"
               >
-                <iconify-icon icon="lucide:plus"></iconify-icon> Tambah
-                fasilitas
+                <iconify-icon icon="lucide:plus"></iconify-icon> Tambah fasilitas
               </button>
             </div>
             <div
               class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
             >
               <table class="w-full text-left text-sm">
-                <thead
-                  class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400"
-                >
+                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-400">
                   <tr>
                     <th class="px-6 py-4 font-bold">Nama</th>
                     <th class="px-4 py-4 font-bold">Deskripsi</th>
@@ -738,22 +682,15 @@ onBeforeUnmount(() => cleanup?.());
                     <th class="px-6 py-4 text-right font-bold">Aksi</th>
                   </tr>
                 </thead>
-                <tbody
-                  id="fac-table-body"
-                  class="divide-y divide-slate-100"
-                ></tbody>
+                <tbody id="fac-table-body" class="divide-y divide-slate-100"></tbody>
               </table>
             </div>
           </section>
           <!-- Promotions Tab -->
           <section id="ctab-promotions" class="tab-panel mt-6">
             <div class="grid gap-6 xl:grid-cols-[.9fr_1.1fr]">
-              <div
-                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <h2 class="font-display text-xl font-bold text-slate-900">
-                  Create Promotion
-                </h2>
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="font-display text-xl font-bold text-slate-900">Create Promotion</h2>
                 <p class="mt-1 text-sm text-slate-500">Buat kode promo baru.</p>
                 <div class="mt-6 space-y-4">
                   <label class="block text-sm font-bold text-slate-700"
@@ -802,17 +739,11 @@ onBeforeUnmount(() => cleanup?.());
                   </button>
                 </div>
               </div>
-              <div
-                class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex items-center justify-between">
                   <div>
-                    <h2 class="font-display text-xl font-bold text-slate-900">
-                      Active Promotions
-                    </h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                      Promo yang sedang berjalan.
-                    </p>
+                    <h2 class="font-display text-xl font-bold text-slate-900">Active Promotions</h2>
+                    <p class="mt-1 text-sm text-slate-500">Promo yang sedang berjalan.</p>
                   </div>
                   <span
                     id="promo-active-count"
@@ -828,12 +759,8 @@ onBeforeUnmount(() => cleanup?.());
           <section id="ctab-gallery" class="tab-panel mt-6">
             <div class="flex items-center justify-between">
               <div>
-                <h2 class="font-display text-xl font-bold text-slate-900">
-                  Gallery
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                  Kelola foto galeri website.
-                </p>
+                <h2 class="font-display text-xl font-bold text-slate-900">Gallery</h2>
+                <p class="mt-1 text-sm text-slate-500">Kelola foto galeri website.</p>
               </div>
               <span
                 id="gallery-count-badge"
@@ -847,14 +774,9 @@ onBeforeUnmount(() => cleanup?.());
             >
               <span
                 class="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-ocean shadow-sm"
-                ><iconify-icon
-                  icon="lucide:cloud-upload"
-                  class="text-2xl"
-                ></iconify-icon
+                ><iconify-icon icon="lucide:cloud-upload" class="text-2xl"></iconify-icon
               ></span>
-              <h3 class="mt-4 font-display font-bold">
-                Drag & drop images here
-              </h3>
+              <h3 class="mt-4 font-display font-bold">Drag & drop images here</h3>
               <p class="mt-1 text-sm text-slate-500">
                 atau klik untuk memilih file · JPG, PNG, WebP maks 5MB
               </p>
@@ -872,10 +794,7 @@ onBeforeUnmount(() => cleanup?.());
                 Choose files
               </button>
             </div>
-            <div
-              id="gallery-grid"
-              class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-            ></div>
+            <div id="gallery-grid" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"></div>
           </section>
         </div>
       </main>
@@ -887,14 +806,10 @@ onBeforeUnmount(() => cleanup?.());
             class="flex flex-col justify-between gap-5 lg:flex-row lg:items-end animate-fade-in-up"
           >
             <div>
-              <p
-                class="text-sm font-bold uppercase tracking-[.18em] text-ocean"
-              >
+              <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
                 Business intelligence
               </p>
-              <h1
-                class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-              >
+              <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 Analytics & Reports
               </h1>
               <p class="mt-2 text-sm text-slate-500">
@@ -910,7 +825,9 @@ onBeforeUnmount(() => cleanup?.());
                   <iconify-icon icon="lucide:download"></iconify-icon> Export
                 </button>
               </div>
-              <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <div
+                class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2"
+              >
                 <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon>
                 <input
                   id="an-date-from"
@@ -935,50 +852,66 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start justify-between">
                 <span
                   class="flex h-11 w-11 items-center justify-center rounded-xl bg-lagoon text-ocean"
-                  ><iconify-icon
-                    icon="lucide:wallet"
-                    class="text-xl"
-                  ></iconify-icon></span
-                >
+                  ><iconify-icon icon="lucide:wallet" class="text-xl"></iconify-icon
+                ></span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Revenue</p>
-              <p id="an-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="an-revenue" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
+                —
+              </p>
               <p id="an-revenue-sub" class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-2"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
+                >
                   <iconify-icon icon="lucide:ticket-check" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Total Bookings</p>
-              <p id="an-bookings" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p id="an-bookings" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
+                —
+              </p>
               <p id="an-bookings-sub" class="mt-2 text-xs text-slate-400">vs. periode sebelumnya</p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-3"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
+                >
                   <iconify-icon icon="lucide:users-round" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Tiket Terjual</p>
-              <p id="an-visitors" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
-              <p id="an-visitors-sub" class="mt-2 text-xs text-slate-400">Termasuk semua qty tiket lunas</p>
+              <p id="an-visitors" class="mt-1 font-display text-2xl font-extrabold text-slate-900">
+                —
+              </p>
+              <p id="an-visitors-sub" class="mt-2 text-xs text-slate-400">
+                Termasuk semua qty tiket lunas
+              </p>
             </article>
             <article
               class="stat-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm animate-fade-in-up delay-4"
             >
               <div class="flex items-start justify-between">
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                <span
+                  class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600"
+                >
                   <iconify-icon icon="lucide:badge-dollar-sign" class="text-xl"></iconify-icon>
                 </span>
               </div>
               <p class="mt-5 text-sm text-slate-500">Rentang Harga Tiket</p>
-              <p id="an-price-range" class="mt-1 font-display text-2xl font-extrabold text-slate-900">—</p>
+              <p
+                id="an-price-range"
+                class="mt-1 font-display text-2xl font-extrabold text-slate-900"
+              >
+                —
+              </p>
               <p class="mt-2 text-xs text-slate-400">Harga aktif di database</p>
             </article>
           </section>
@@ -992,7 +925,9 @@ onBeforeUnmount(() => cleanup?.());
                   <p id="an-monthly-sub" class="mt-1 text-sm text-slate-500">Revenue bulanan</p>
                 </div>
                 <div class="flex items-center gap-4 text-xs font-semibold text-slate-500">
-                  <span class="flex items-center gap-2"><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span>
+                  <span class="flex items-center gap-2"
+                    ><i class="h-2 w-2 rounded-full bg-aqua"></i>Revenue</span
+                  >
                 </div>
               </div>
               <div id="an-monthly-chart" class="mt-6 h-64"></div>
@@ -1010,8 +945,14 @@ onBeforeUnmount(() => cleanup?.());
                   class="donut-chart relative flex h-44 w-44 shrink-0 items-center justify-center rounded-full"
                   style="background: conic-gradient(#e2e8f0 0 100%)"
                 >
-                  <div class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white">
-                    <span id="an-ticket-total" class="font-display text-2xl font-extrabold text-slate-900">—</span>
+                  <div
+                    class="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-white"
+                  >
+                    <span
+                      id="an-ticket-total"
+                      class="font-display text-2xl font-extrabold text-slate-900"
+                      >—</span
+                    >
                     <span class="text-xs text-slate-400">Tiket</span>
                   </div>
                 </div>
@@ -1027,12 +968,8 @@ onBeforeUnmount(() => cleanup?.());
             >
               <div class="flex items-center justify-between">
                 <div>
-                  <h2 class="font-display text-lg font-bold text-slate-900">
-                    Peak Hours Heatmap
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Pola kunjungan berdasarkan hari & jam
-                  </p>
+                  <h2 class="font-display text-lg font-bold text-slate-900">Peak Hours Heatmap</h2>
+                  <p class="mt-1 text-sm text-slate-500">Pola kunjungan berdasarkan hari & jam</p>
                 </div>
                 <span
                   id="an-heatmap-badge"
@@ -1046,17 +983,12 @@ onBeforeUnmount(() => cleanup?.());
                     class="mb-2 grid grid-cols-[70px_repeat(7,1fr)] gap-1 text-[10px] text-slate-400"
                   >
                     <span></span><span class="text-center">08</span
-                    ><span class="text-center">10</span
-                    ><span class="text-center">12</span
-                    ><span class="text-center">14</span
-                    ><span class="text-center">16</span
-                    ><span class="text-center">18</span
-                    ><span class="text-center">20</span>
+                    ><span class="text-center">10</span><span class="text-center">12</span
+                    ><span class="text-center">14</span><span class="text-center">16</span
+                    ><span class="text-center">18</span><span class="text-center">20</span>
                   </div>
                   <div id="heatmap-grid" class="space-y-1 text-[11px]"></div>
-                  <div
-                    class="mt-4 flex items-center justify-end gap-2 text-[10px] text-slate-400"
-                  >
+                  <div class="mt-4 flex items-center justify-end gap-2 text-[10px] text-slate-400">
                     <span>Sepi</span><i class="h-3 w-3 rounded bg-cyan-50"></i
                     ><i class="h-3 w-3 rounded bg-cyan-100"></i
                     ><i class="h-3 w-3 rounded bg-aqua/50"></i
@@ -1071,12 +1003,8 @@ onBeforeUnmount(() => cleanup?.());
             >
               <div class="flex items-center justify-between">
                 <div>
-                  <h2 class="font-display text-lg font-bold text-slate-900">
-                    User Growth
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Pertumbuhan member terdaftar
-                  </p>
+                  <h2 class="font-display text-lg font-bold text-slate-900">User Growth</h2>
+                  <p class="mt-1 text-sm text-slate-500">Pertumbuhan member terdaftar</p>
                 </div>
                 <span
                   id="an-new-users"
@@ -1085,18 +1013,10 @@ onBeforeUnmount(() => cleanup?.());
                 >
               </div>
               <div class="mt-6 h-56">
-                <svg
-                  viewBox="0 0 720 220"
-                  preserveAspectRatio="none"
-                  class="h-full w-full"
-                >
+                <svg viewBox="0 0 720 220" preserveAspectRatio="none" class="h-full w-full">
                   <defs>
                     <linearGradient id="ugFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop
-                        offset="0"
-                        stop-color="#0097A7"
-                        stop-opacity=".22"
-                      />
+                      <stop offset="0" stop-color="#0097A7" stop-opacity=".22" />
                       <stop offset="1" stop-color="#0097A7" stop-opacity="0" />
                     </linearGradient>
                   </defs>
@@ -1144,22 +1064,8 @@ onBeforeUnmount(() => cleanup?.());
                       stroke="white"
                       stroke-width="2"
                     />
-                    <circle
-                      cx="585"
-                      cy="76"
-                      r="4"
-                      fill="#0097A7"
-                      stroke="white"
-                      stroke-width="2"
-                    />
-                    <circle
-                      cx="700"
-                      cy="32"
-                      r="5"
-                      fill="#00BCD4"
-                      stroke="white"
-                      stroke-width="3"
-                    />
+                    <circle cx="585" cy="76" r="4" fill="#0097A7" stroke="white" stroke-width="2" />
+                    <circle cx="700" cy="32" r="5" fill="#00BCD4" stroke="white" stroke-width="3" />
                   </g>
                   <g fill="#94a3b8" font-size="11">
                     <text x="45" y="212">Jan</text>
@@ -1180,25 +1086,17 @@ onBeforeUnmount(() => cleanup?.());
       <main id="page-settings" class="page-view p-5 sm:p-8">
         <div class="mx-auto max-w-3xl">
           <div class="animate-fade-in-up">
-            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
-              System
-            </p>
-            <h1
-              class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-            >
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">System</p>
+            <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
               Pengaturan
             </h1>
-            <p class="mt-2 text-sm text-slate-500">
-              Konfigurasi sistem dan preferensi admin.
-            </p>
+            <p class="mt-2 text-sm text-slate-500">Konfigurasi sistem dan preferensi admin.</p>
           </div>
           <div class="mt-8 space-y-6">
             <div
               class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-1"
             >
-              <h2 class="font-display text-lg font-bold text-slate-900">
-                Profil Administrator
-              </h2>
+              <h2 class="font-display text-lg font-bold text-slate-900">Profil Administrator</h2>
               <p id="admin-profile-status" class="mt-1 text-sm text-slate-500">
                 Memuat profil dari database…
               </p>
@@ -1233,17 +1131,14 @@ onBeforeUnmount(() => cleanup?.());
                   id="save-admin-profile-btn"
                   class="flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-5 text-sm font-bold text-white hover:bg-ocean/90 disabled:opacity-60"
                 >
-                  <iconify-icon icon="lucide:save"></iconify-icon> Simpan
-                  perubahan
+                  <iconify-icon icon="lucide:save"></iconify-icon> Simpan perubahan
                 </button>
               </div>
             </div>
             <div
               class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-3"
             >
-              <h2 class="font-display text-lg font-bold text-slate-900">
-                Keamanan
-              </h2>
+              <h2 class="font-display text-lg font-bold text-slate-900">Keamanan</h2>
               <div class="mt-5 space-y-4">
                 <label class="block text-sm font-bold text-slate-700"
                   >Password lama<input
@@ -1279,12 +1174,8 @@ onBeforeUnmount(() => cleanup?.());
       <main id="page-help" class="page-view p-5 sm:p-8">
         <div class="mx-auto max-w-3xl">
           <div class="animate-fade-in-up">
-            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
-              System
-            </p>
-            <h1
-              class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900"
-            >
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">System</p>
+            <h1 class="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900">
               Pusat Bantuan
             </h1>
             <p class="mt-2 text-sm text-slate-500">
@@ -1298,24 +1189,19 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start gap-4">
                 <span
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lagoon text-ocean"
-                  ><iconify-icon
-                    icon="lucide:book-open"
-                    class="text-xl"
-                  ></iconify-icon
+                  ><iconify-icon icon="lucide:book-open" class="text-xl"></iconify-icon
                 ></span>
                 <div>
                   <h3 class="font-display text-base font-bold text-slate-900">
                     Panduan Penggunaan
                   </h3>
                   <p class="mt-1 text-sm text-slate-500">
-                    Pelajari cara menggunakan semua fitur admin panel Citraland
-                    Waterpark.
+                    Pelajari cara menggunakan semua fitur admin panel Citraland Waterpark.
                   </p>
                   <a
                     href="#"
                     class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
-                    >Baca panduan
-                    <iconify-icon icon="lucide:arrow-right"></iconify-icon
+                    >Baca panduan <iconify-icon icon="lucide:arrow-right"></iconify-icon
                   ></a>
                 </div>
               </div>
@@ -1326,23 +1212,17 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start gap-4">
                 <span
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600"
-                  ><iconify-icon
-                    icon="lucide:video"
-                    class="text-xl"
-                  ></iconify-icon
+                  ><iconify-icon icon="lucide:video" class="text-xl"></iconify-icon
                 ></span>
                 <div>
-                  <h3 class="font-display text-base font-bold text-slate-900">
-                    Video Tutorial
-                  </h3>
+                  <h3 class="font-display text-base font-bold text-slate-900">Video Tutorial</h3>
                   <p class="mt-1 text-sm text-slate-500">
                     Tonton video tutorial untuk pemahaman yang lebih baik.
                   </p>
                   <a
                     href="#"
                     class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
-                    >Lihat video
-                    <iconify-icon icon="lucide:arrow-right"></iconify-icon
+                    >Lihat video <iconify-icon icon="lucide:arrow-right"></iconify-icon
                   ></a>
                 </div>
               </div>
@@ -1353,18 +1233,11 @@ onBeforeUnmount(() => cleanup?.());
               <div class="flex items-start gap-4">
                 <span
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-500"
-                  ><iconify-icon
-                    icon="lucide:message-circle"
-                    class="text-xl"
-                  ></iconify-icon
+                  ><iconify-icon icon="lucide:message-circle" class="text-xl"></iconify-icon
                 ></span>
                 <div>
-                  <h3 class="font-display text-base font-bold text-slate-900">
-                    Hubungi Support
-                  </h3>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Tim support kami siap membantu 24/7.
-                  </p>
+                  <h3 class="font-display text-base font-bold text-slate-900">Hubungi Support</h3>
+                  <p class="mt-1 text-sm text-slate-500">Tim support kami siap membantu 24/7.</p>
                   <div class="mt-3 flex gap-3">
                     <a
                       href="#"
@@ -1373,8 +1246,7 @@ onBeforeUnmount(() => cleanup?.());
                     ><a
                       href="#"
                       class="inline-flex items-center gap-1 text-sm font-bold text-ocean hover:text-aqua"
-                      ><iconify-icon icon="lucide:phone"></iconify-icon>
-                      Telepon</a
+                      ><iconify-icon icon="lucide:phone"></iconify-icon> Telepon</a
                     >
                   </div>
                 </div>
@@ -1384,9 +1256,7 @@ onBeforeUnmount(() => cleanup?.());
               class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in-up delay-4"
             >
               <div>
-                <h3 class="font-display text-base font-bold text-slate-900">
-                  FAQ
-                </h3>
+                <h3 class="font-display text-base font-bold text-slate-900">FAQ</h3>
                 <div class="mt-4 space-y-3">
                   <details class="group rounded-xl border border-slate-100">
                     <summary
@@ -1398,11 +1268,9 @@ onBeforeUnmount(() => cleanup?.());
                         class="transition group-open:rotate-180"
                       ></iconify-icon>
                     </summary>
-                    <div
-                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
-                    >
-                      Buka Content Management → Harga Tiket, ubah harga pada
-                      jenis tiket yang ingin disesuaikan, lalu klik Simpan.
+                    <div class="border-t border-slate-100 p-4 text-sm text-slate-500">
+                      Buka Content Management → Harga Tiket, ubah harga pada jenis tiket yang ingin
+                      disesuaikan, lalu klik Simpan.
                     </div>
                   </details>
                   <details class="group rounded-xl border border-slate-100">
@@ -1415,11 +1283,8 @@ onBeforeUnmount(() => cleanup?.());
                         class="transition group-open:rotate-180"
                       ></iconify-icon>
                     </summary>
-                    <div
-                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
-                    >
-                      Buka Analytics ? klik tombol Export ? pilih format CSV
-                      atau PDF.
+                    <div class="border-t border-slate-100 p-4 text-sm text-slate-500">
+                      Buka Analytics ? klik tombol Export ? pilih format CSV atau PDF.
                     </div>
                   </details>
                   <details class="group rounded-xl border border-slate-100">
@@ -1432,11 +1297,8 @@ onBeforeUnmount(() => cleanup?.());
                         class="transition group-open:rotate-180"
                       ></iconify-icon>
                     </summary>
-                    <div
-                      class="border-t border-slate-100 p-4 text-sm text-slate-500"
-                    >
-                      Buka Content Management ? Promotions ? isi form dan klik
-                      Publish.
+                    <div class="border-t border-slate-100 p-4 text-sm text-slate-500">
+                      Buka Content Management ? Promotions ? isi form dan klik Publish.
                     </div>
                   </details>
                 </div>
@@ -1448,10 +1310,7 @@ onBeforeUnmount(() => cleanup?.());
     </div>
 
     <!-- OVERLAYS & MODALS -->
-    <div
-      id="mobile-overlay"
-      class="fixed inset-0 z-30 hidden bg-slate-950/30 md:hidden"
-    ></div>
+    <div id="mobile-overlay" class="fixed inset-0 z-30 hidden bg-slate-950/30 md:hidden"></div>
 
     <!-- User Modal -->
     <div
@@ -1461,17 +1320,10 @@ onBeforeUnmount(() => cleanup?.());
       <div
         class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
       >
-        <div
-          class="flex items-start justify-between border-b border-slate-100 px-6 py-5"
-        >
+        <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
-              User profile
-            </p>
-            <h2
-              id="user-modal-title"
-              class="mt-2 font-display text-2xl font-bold text-slate-900"
-            >
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">User profile</p>
+            <h2 id="user-modal-title" class="mt-2 font-display text-2xl font-bold text-slate-900">
               Edit user
             </h2>
           </div>
@@ -1533,17 +1385,10 @@ onBeforeUnmount(() => cleanup?.());
       <div
         class="modal-panel w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
       >
-        <div
-          class="flex items-center justify-between border-b border-slate-100 px-6 py-5"
-        >
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">
-              Facility editor
-            </p>
-            <h2
-              id="fac-modal-title"
-              class="mt-2 font-display text-2xl font-bold text-slate-900"
-            >
+            <p class="text-sm font-bold uppercase tracking-[.18em] text-ocean">Facility editor</p>
+            <h2 id="fac-modal-title" class="mt-2 font-display text-2xl font-bold text-slate-900">
               Tambah fasilitas
             </h2>
           </div>
@@ -1611,21 +1456,14 @@ onBeforeUnmount(() => cleanup?.());
         <div class="p-6 text-center">
           <span
             class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-rose-500"
-            ><iconify-icon
-              icon="lucide:alert-triangle"
-              class="text-2xl"
-            ></iconify-icon
+            ><iconify-icon icon="lucide:alert-triangle" class="text-2xl"></iconify-icon
           ></span>
-          <h3 class="mt-4 font-display text-lg font-bold text-slate-900">
-            Hapus item?
-          </h3>
+          <h3 class="mt-4 font-display text-lg font-bold text-slate-900">Hapus item?</h3>
           <p class="mt-2 text-sm text-slate-500" id="delete-message">
             Item ini akan dihapus permanen.
           </p>
         </div>
-        <div
-          class="flex items-center gap-3 border-t border-slate-100 px-6 py-4"
-        >
+        <div class="flex items-center gap-3 border-t border-slate-100 px-6 py-4">
           <button
             id="delete-cancel-btn"
             class="flex-1 flex h-10 items-center justify-center rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50"

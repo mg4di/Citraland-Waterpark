@@ -1,18 +1,18 @@
-import { getSupabaseClient } from '../lib/supabase.js'
-import { logError, mapSupabaseError } from '../utils/errorHandler.js'
+import { getSupabaseClient } from '../lib/supabase.js';
+import { logError, mapSupabaseError } from '../utils/errorHandler.js';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024
-const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 function failure(error, context) {
-  logError(context, error)
-  return { success: false, error: mapSupabaseError(error).message }
+  logError(context, error);
+  return { success: false, error: mapSupabaseError(error).message };
 }
 
 function extensionFor(file) {
-  if (file.type === 'image/jpeg') return 'jpg'
-  if (file.type === 'image/png') return 'png'
-  return 'webp'
+  if (file.type === 'image/jpeg') return 'jpg';
+  if (file.type === 'image/png') return 'png';
+  return 'webp';
 }
 
 export const galleryService = {
@@ -22,11 +22,11 @@ export const galleryService = {
         .from('gallery_images')
         .select('*')
         .eq('status', 'published')
-        .order('display_order', { ascending: true })
-      if (error) return failure(error, 'Get published gallery')
-      return { success: true, images: data ?? [] }
+        .order('display_order', { ascending: true });
+      if (error) return failure(error, 'Get published gallery');
+      return { success: true, images: data ?? [] };
     } catch (error) {
-      return failure(error, 'Get published gallery')
+      return failure(error, 'Get published gallery');
     }
   },
 
@@ -36,27 +36,27 @@ export const galleryService = {
         .from('gallery_images')
         .select('*')
         .order('display_order', { ascending: true })
-        .limit(500)
-      if (error) return failure(error, 'Get gallery')
-      return { success: true, images: data ?? [] }
+        .limit(500);
+      if (error) return failure(error, 'Get gallery');
+      return { success: true, images: data ?? [] };
     } catch (error) {
-      return failure(error, 'Get gallery')
+      return failure(error, 'Get gallery');
     }
   },
 
   async uploadImage(file, caption = '', displayOrder = 0) {
     if (!(file instanceof File) || !ALLOWED_TYPES.has(file.type) || file.size > MAX_FILE_SIZE) {
-      return { success: false, error: 'Pilih gambar JPG, PNG, atau WebP berukuran maksimal 5 MB.' }
+      return { success: false, error: 'Pilih gambar JPG, PNG, atau WebP berukuran maksimal 5 MB.' };
     }
     try {
-      const supabase = getSupabaseClient()
-      const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extensionFor(file)}`
+      const supabase = getSupabaseClient();
+      const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extensionFor(file)}`;
       const { error: uploadError } = await supabase.storage
         .from('gallery')
-        .upload(path, file, { contentType: file.type, upsert: false })
-      if (uploadError) return failure(uploadError, 'Upload gallery image')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) return failure(uploadError, 'Upload gallery image');
 
-      const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(path)
+      const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(path);
       const { data, error } = await supabase
         .from('gallery_images')
         .insert({
@@ -67,53 +67,55 @@ export const galleryService = {
           storage_path: path,
         })
         .select('*')
-        .single()
+        .single();
       if (error) {
-        const { error: removeError } = await supabase.storage.from('gallery').remove([path])
-        if (removeError) logError('Remove unreferenced gallery upload', removeError)
-        return failure(error, 'Save gallery image')
+        const { error: removeError } = await supabase.storage.from('gallery').remove([path]);
+        if (removeError) logError('Remove unreferenced gallery upload', removeError);
+        return failure(error, 'Save gallery image');
       }
-      return { success: true, image: data }
+      return { success: true, image: data };
     } catch (error) {
-      return failure(error, 'Upload gallery image')
+      return failure(error, 'Upload gallery image');
     }
   },
 
   async deleteImage(imageId) {
     try {
-      const supabase = getSupabaseClient()
+      const supabase = getSupabaseClient();
       const { data: image, error: lookupError } = await supabase
         .from('gallery_images')
         .select('image_id, storage_path')
         .eq('image_id', imageId)
-        .single()
-      if (lookupError) return failure(lookupError, 'Find gallery image')
+        .single();
+      if (lookupError) return failure(lookupError, 'Find gallery image');
 
       const { data: deleted, error: deleteError } = await supabase
         .from('gallery_images')
         .delete()
         .eq('image_id', imageId)
-        .select('image_id')
-      if (deleteError) return failure(deleteError, 'Delete gallery image')
+        .select('image_id');
+      if (deleteError) return failure(deleteError, 'Delete gallery image');
       if (!deleted?.length) {
-        return { success: false, error: 'Gambar tidak ditemukan atau tidak dapat dihapus.' }
+        return { success: false, error: 'Gambar tidak ditemukan atau tidak dapat dihapus.' };
       }
 
       // File storage dihapus setelah baris database terhapus. Jika gagal,
       // data galeri tetap sudah bersih; file yatim bisa dibersihkan terpisah.
       if (image.storage_path) {
-        const { error: removeError } = await supabase.storage.from('gallery').remove([image.storage_path])
-        if (removeError) logError('Remove gallery storage file', removeError)
+        const { error: removeError } = await supabase.storage
+          .from('gallery')
+          .remove([image.storage_path]);
+        if (removeError) logError('Remove gallery storage file', removeError);
       }
-      return { success: true }
+      return { success: true };
     } catch (error) {
-      return failure(error, 'Delete gallery image')
+      return failure(error, 'Delete gallery image');
     }
   },
 
   async updateImageOrder(imageId, displayOrder) {
     if (!Number.isInteger(Number(displayOrder))) {
-      return { success: false, error: 'Urutan gambar tidak valid.' }
+      return { success: false, error: 'Urutan gambar tidak valid.' };
     }
     try {
       const { data, error } = await getSupabaseClient()
@@ -121,11 +123,11 @@ export const galleryService = {
         .update({ display_order: Number(displayOrder) })
         .eq('image_id', imageId)
         .select('*')
-        .single()
-      if (error) return failure(error, 'Update gallery order')
-      return { success: true, image: data }
+        .single();
+      if (error) return failure(error, 'Update gallery order');
+      return { success: true, image: data };
     } catch (error) {
-      return failure(error, 'Update gallery order')
+      return failure(error, 'Update gallery order');
     }
   },
-}
+};
