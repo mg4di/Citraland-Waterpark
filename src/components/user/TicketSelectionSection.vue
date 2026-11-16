@@ -64,7 +64,7 @@ onBeforeUnmount(() => unsubscribe?.());
       <span
         v-if="ticket.featured"
         class="absolute right-6 top-6 rounded-full bg-cyan-200 px-3 py-1 text-xs font-bold text-ocean"
-        >Akhir pekan</span
+        >Terpopuler</span
       >
       <span
         class="flex h-14 w-14 items-center justify-center rounded-2xl"

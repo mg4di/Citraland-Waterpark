@@ -536,14 +536,6 @@ export function initializeUserPage() {
 
   function initBookingPage() {
     const form = document.getElementById('booking-form');
-    const promoPanel = document
-      .getElementById('promo-input')
-      ?.closest('.rounded-2xl.bg-slate-50.p-5');
-    const actionRow = form?.querySelector('button[type="submit"]')?.parentElement;
-    if (form && promoPanel && promoPanel.parentElement !== form && actionRow) {
-      form.insertBefore(promoPanel, actionRow);
-    }
-
     const dateInput = document.getElementById('bf-date');
     initBookingCalendar();
     dateInput.addEventListener('change', updateBookingSummary);

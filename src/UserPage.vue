@@ -1261,6 +1261,32 @@ onMounted(initializeUserPage);
                   </p>
                 </div>
               </div>
+              <div class="rounded-2xl bg-slate-50 p-5 md:col-span-2">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p class="font-bold text-slate-900">Punya kode promo?</p>
+                    <p class="mt-1 text-sm text-slate-500">Masukkan kode untuk mendapatkan potongan harga.</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <input
+                      id="promo-input"
+                      type="text"
+                      placeholder="CITRALAND"
+                      class="h-11 w-32 rounded-xl border border-slate-200 bg-white px-3 text-xs uppercase outline-none focus:border-ocean sm:w-40"
+                    /><button
+                      id="promo-btn"
+                      @click.prevent="window.applyPromo()"
+                      class="h-11 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition hover:bg-ocean"
+                    >
+                      Pakai
+                    </button>
+                  </div>
+                </div>
+                <div id="promo-success" class="mt-3 hidden items-center gap-2 text-sm text-emerald-600">
+                  <iconify-icon icon="lucide:check-circle" class="text-lg"></iconify-icon>
+                  <span>Kode promo berhasil diterapkan! Diskon Rp10.000</span>
+                </div>
+              </div>
             </div>
             <div
               class="mt-8 flex flex-col-reverse gap-3 border-t border-slate-100 pt-7 sm:flex-row sm:justify-between"
@@ -1491,173 +1517,131 @@ onMounted(initializeUserPage);
               berhasil dikonfirmasi.
             </p>
           </div>
-          <div class="grid gap-7 lg:grid-cols-[1.2fr_.8fr]">
-            <section
-              class="scroll-reveal rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8"
-              style="transition-delay: 0.2s"
-            >
-              <div class="flex items-center justify-between border-b border-slate-100 pb-6">
-                <div>
-                  <h2 class="font-display text-xl font-bold text-slate-900">
-                    Pembayaran melalui Midtrans
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-500">
-                    Pilih metode pembayaran dengan aman di jendela Midtrans.
-                  </p>
-                </div>
-                <span
-                  class="flex h-11 w-11 items-center justify-center rounded-2xl bg-lagoon text-ocean"
-                  ><iconify-icon icon="lucide:shield-check" class="text-xl"></iconify-icon
-                ></span>
+          <section
+            class="scroll-reveal mx-auto max-w-3xl overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-100"
+            style="transition-delay: 0.2s"
+          >
+            <div class="flex items-start justify-between gap-4 border-b border-slate-100 p-6 md:p-8">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-[.2em] text-ocean">Pembayaran aman</p>
+                <h2 class="mt-2 font-display text-2xl font-bold text-slate-900">
+                  Pembayaran melalui Midtrans
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                  Pilih metode pembayaran di jendela aman Midtrans.
+                </p>
               </div>
-              <div class="mt-6 rounded-2xl border border-cyan-100 bg-lagoon p-5">
-                <div class="flex items-start gap-4">
-                  <span
-                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-ocean"
-                    ><iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon
-                  ></span>
-                  <div>
-                    <p class="font-bold text-slate-900">Metode pembayaran tersedia di Snap</p>
-                    <p class="mt-1 text-sm leading-6 text-slate-600">
-                      Klik "Bayar Sekarang" untuk membuka popup Midtrans. Detail kartu dan
-                      pembayaran hanya dimasukkan di halaman aman Midtrans.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-8 rounded-2xl bg-slate-50 p-5">
-                <div class="flex items-center justify-between gap-4">
-                  <div>
-                    <p class="font-bold text-slate-900">Punya kode promo?</p>
-                    <p class="mt-1 text-sm text-slate-500">
-                      Masukkan kode untuk mendapatkan potongan harga.
-                    </p>
-                  </div>
-                  <div class="flex gap-2">
-                    <input
-                      id="promo-input"
-                      type="text"
-                      placeholder="CITRALAND"
-                      class="h-11 w-32 rounded-xl border border-slate-200 bg-white px-3 text-xs uppercase outline-none focus:border-ocean sm:w-40"
-                    /><button
-                      id="promo-btn"
-                      @click.prevent="window.applyPromo()"
-                      class="h-11 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition hover:bg-ocean"
-                    >
-                      Pakai
-                    </button>
-                  </div>
-                </div>
-                <div
-                  id="promo-success"
-                  class="mt-3 hidden items-center gap-2 text-sm text-emerald-600"
-                >
-                  <iconify-icon icon="lucide:check-circle" class="text-lg"></iconify-icon
-                  ><span>Kode promo berhasil diterapkan! Diskon Rp10.000</span>
-                </div>
-              </div>
-            </section>
-            <aside
-              class="scroll-reveal summary-card h-fit rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100 md:p-8 lg:sticky lg:top-8"
-              style="transition-delay: 0.3s"
-            >
-              <div class="flex items-center justify-between">
-                <h2 class="font-display text-xl font-bold text-slate-900">Ringkasan pesanan</h2>
-                <span
-                  id="pay-booking-code"
-                  class="rounded-full bg-lagoon px-3 py-1 text-xs font-bold text-ocean"
-                  >Kode booking</span
-                >
-              </div>
-              <div class="mt-6 rounded-2xl bg-lagoon p-5">
-                <div class="flex items-start justify-between gap-4">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lagoon text-ocean">
+                <iconify-icon icon="lucide:shield-check" class="text-xl"></iconify-icon>
+              </span>
+            </div>
+
+            <div class="space-y-6 p-6 md:p-8">
+              <div class="rounded-2xl bg-lagoon p-5">
+                <div class="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p class="font-bold text-slate-900">Citraland Waterpark Denpasar</p>
-                    <p class="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                      <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon
-                      ><span id="pay-date">Pilih tanggal kunjungan</span>
+                    <p class="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                      <iconify-icon icon="lucide:calendar-days" class="text-ocean"></iconify-icon>
+                      <span id="pay-date">Pilih tanggal kunjungan</span>
                     </p>
-                    <p class="mt-3 text-sm font-semibold text-slate-700" id="pay-customer-name">
-                      Nama pemesan
-                    </p>
+                  </div>
+                  <span id="pay-booking-code" class="rounded-full bg-white px-3 py-1 text-xs font-bold text-ocean">
+                    Kode booking
+                  </span>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-cyan-100 pt-4">
+                  <div>
+                    <p class="text-xs text-slate-500">Pemesan</p>
+                    <p class="text-sm font-semibold text-slate-800" id="pay-customer-name">Nama pemesan</p>
                     <p class="text-xs text-slate-500" id="pay-customer-email">Email pemesan</p>
                   </div>
-                  <iconify-icon
-                    icon="lucide:waves"
-                    class="text-2xl text-ocean animate-float"
-                  ></iconify-icon>
+                  <div class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <div class="countdown-timer flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                      <iconify-icon icon="lucide:clock" class="text-amber-600"></iconify-icon>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-amber-800">Selesaikan dalam</p>
+                      <p class="text-sm font-bold text-amber-700" id="countdown">23:59:45</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div
-                class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3"
-              >
-                <div
-                  class="countdown-timer flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
+
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <h3 class="font-display text-base font-bold text-slate-900">Rincian pesanan</h3>
+                  <span class="text-xs text-slate-400">Termasuk biaya layanan</span>
+                </div>
+                <div class="mt-4 space-y-3 text-sm">
+                  <div id="pay-lines" class="space-y-3"></div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Biaya layanan</span>
+                    <span class="font-semibold text-slate-800" id="pay-service-fee">Rp0</span>
+                  </div>
+                  <div id="discount-row" class="hidden flex justify-between text-emerald-600">
+                    <span>Diskon promo</span>
+                    <span class="font-semibold" id="pay-discount">-Rp10.000</span>
+                  </div>
+                </div>
+                <div class="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
+                  <span class="font-bold text-slate-700">Total pembayaran</span>
+                  <span class="font-display text-2xl font-extrabold text-ocean" id="pay-total">Rp0</span>
+                </div>
+              </div>
+
+
+
+              <div class="rounded-2xl border border-cyan-100 bg-lagoon p-5">
+                <div class="flex items-start gap-4">
+                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-ocean">
+                    <iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon>
+                  </span>
+                  <div>
+                    <p class="font-bold text-slate-900">Metode pembayaran di Snap</p>
+                    <p class="mt-1 text-sm leading-6 text-slate-600">
+                      Klik "Bayar Sekarang" untuk membuka popup Midtrans. Detail kartu dan pembayaran
+                      hanya dimasukkan di halaman aman Midtrans.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <button
+                  id="pay-btn"
+                  @click.prevent="window.processPayment()"
+                  class="btn-primary flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 font-bold text-white shadow-xl shadow-cyan-200 transition-all hover:bg-ocean active:scale-[0.98]"
                 >
-                  <iconify-icon icon="lucide:clock" class="text-amber-600"></iconify-icon>
-                </div>
-                <div>
-                  <p class="text-xs font-bold text-amber-800">Selesaikan dalam</p>
-                  <p class="text-sm font-bold text-amber-700" id="countdown">23:59:45</p>
-                </div>
-              </div>
-              <div class="mt-6 space-y-4 text-sm">
-                <div id="pay-lines" class="space-y-3"></div>
-                <div class="flex justify-between">
-                  <span class="text-slate-500">Biaya layanan</span
-                  ><span class="font-semibold text-slate-800" id="pay-service-fee">Rp0</span>
-                </div>
-                <div id="discount-row" class="hidden flex justify-between text-emerald-600">
-                  <span>Diskon promo</span
-                  ><span class="font-semibold" id="pay-discount">-Rp10.000</span>
-                </div>
-              </div>
-              <div class="my-6 h-px bg-slate-100"></div>
-              <div class="flex items-end justify-between">
-                <span class="font-bold text-slate-700">Total pembayaran</span
-                ><span class="font-display text-2xl font-extrabold text-ocean" id="pay-total"
-                  >Rp0</span
+                  <span id="pay-btn-text">Bayar Sekarang</span>
+                  <iconify-icon icon="lucide:arrow-right" class="text-lg" id="pay-btn-icon"></iconify-icon>
+                  <div class="loading-spinner hidden" id="pay-btn-spinner"></div>
+                </button>
+                <button
+                  id="check-payment-btn"
+                  @click.prevent="window.checkPaymentStatus()"
+                  class="min-h-11 w-full rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-600 transition hover:border-ocean hover:text-ocean"
                 >
+                  Sudah membayar? Periksa status
+                </button>
+                <p class="flex items-center justify-center gap-2 text-center text-xs text-slate-400">
+                  <iconify-icon icon="lucide:lock-keyhole" class="text-emerald-500"></iconify-icon>
+                  Pembayaran aman dan terenkripsi
+                </p>
               </div>
-              <button
-                id="pay-btn"
-                @click.prevent="window.processPayment()"
-                class="btn-primary mt-7 flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 font-bold text-white shadow-xl shadow-cyan-200 transition-all hover:bg-ocean active:scale-[0.98]"
-              >
-                <span id="pay-btn-text">Bayar Sekarang</span
-                ><iconify-icon
-                  icon="lucide:arrow-right"
-                  class="text-lg"
-                  id="pay-btn-icon"
-                ></iconify-icon>
-                <div class="loading-spinner hidden" id="pay-btn-spinner"></div>
-              </button>
-              <button
-                id="check-payment-btn"
-                @click.prevent="window.checkPaymentStatus()"
-                class="mt-3 min-h-11 w-full rounded-full border border-slate-200 px-5 text-sm font-semibold text-slate-600 transition hover:border-ocean hover:text-ocean"
-              >
-                Sudah membayar? Periksa status
-              </button>
-              <p
-                class="mt-4 flex items-center justify-center gap-2 text-center text-xs text-slate-400"
-              >
-                <iconify-icon icon="lucide:lock-keyhole" class="text-emerald-500"></iconify-icon>
-                Pembayaran aman dan terenkripsi
-              </p>
-              <div
-                class="mt-6 flex items-center justify-center gap-5 border-t border-slate-100 pt-5 text-slate-400"
-              >
-                <span class="flex items-center gap-1 text-xs"
-                  ><iconify-icon icon="lucide:shield-check" class="text-emerald-500"></iconify-icon>
-                  SSL Secure</span
-                ><span class="flex items-center gap-1 text-xs"
-                  ><iconify-icon icon="lucide:badge-check" class="text-ocean"></iconify-icon>
-                  Terpercaya</span
-                >
+
+              <div class="flex items-center justify-center gap-5 border-t border-slate-100 pt-5 text-slate-400">
+                <span class="flex items-center gap-1 text-xs">
+                  <iconify-icon icon="lucide:shield-check" class="text-emerald-500"></iconify-icon>
+                  SSL Secure
+                </span>
+                <span class="flex items-center gap-1 text-xs">
+                  <iconify-icon icon="lucide:badge-check" class="text-ocean"></iconify-icon>
+                  Terpercaya
+                </span>
               </div>
-            </aside>
-          </div>
+            </div>
+          </section>
         </div>
       </main>
       <UserFooter />
