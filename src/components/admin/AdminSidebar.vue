@@ -5,9 +5,8 @@
     <div class="flex h-20 items-center border-b border-slate-100 px-5">
       <a href="#dashboard" class="brand-link flex items-center gap-3">
         <span
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ocean text-white shadow-sm"
-          ><iconify-icon icon="lucide:waves" class="text-xl"></iconify-icon
-        ></span>
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-transparent text-white"
+          ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
         <span class="brand-label font-display text-sm font-extrabold tracking-tight text-slate-900"
           >CITRALAND<span class="text-aqua">.</span
           ><small

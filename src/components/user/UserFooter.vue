@@ -12,9 +12,9 @@ const window = globalThis.window;
           class="group flex items-center gap-3"
         >
           <span
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-aqua transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-transparent transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
           >
-            <iconify-icon icon="lucide:waves" class="text-xl"></iconify-icon>
+            <img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" />
           </span>
           <span class="font-display text-lg font-extrabold"
             >CITRALAND<span class="text-cyan-300">.</span></span

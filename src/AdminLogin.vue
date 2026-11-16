@@ -7,6 +7,7 @@ const router = useRouter();
 const route = useRoute();
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const errorMessage = ref(
   route.query.expired ? 'Sesi Anda telah berakhir. Silakan masuk kembali.' : '',
 );
@@ -55,9 +56,9 @@ async function enterAdmin() {
           <div class="relative z-10 animate-slide-in-left">
             <a
               href="/"
-              class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-cyan-100 transition hover:bg-white/25"
+              class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
             >
-              <iconify-icon icon="lucide:waves" class="text-3xl"></iconify-icon>
+              <iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon>
             </a>
             <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
               Citraland Waterpark Admin
@@ -159,11 +160,19 @@ async function enterAdmin() {
                 <input
                   id="admin-password"
                   v-model="password"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
                   placeholder="Masukkan kata sandi"
-                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
+                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
                 />
+                <button
+                  type="button"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+                  :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                  @click="showPassword = !showPassword"
+                >
+                  <iconify-icon :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'"></iconify-icon>
+                </button>
               </div>
             </div>
             <div class="mt-5 flex items-center justify-between animate-fade-in-up delay-400">

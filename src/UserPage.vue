@@ -29,9 +29,9 @@ onMounted(initializeUserPage);
             class="flex items-center gap-3 text-white group"
           >
             <span
-              class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+              class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
             >
-              <iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon>
+              <img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" />
             </span>
             <span class="font-display text-lg font-extrabold tracking-tight"
               >CITRALAND<span class="text-cyan-200">.</span></span
@@ -283,9 +283,8 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
             >
               <span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon
-              ></span>
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -347,9 +346,8 @@ onMounted(initializeUserPage);
               ></div>
               <div class="relative z-10 animate-slide-in-left">
                 <span
-                  class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-cyan-100"
-                  ><iconify-icon icon="lucide:waves" class="text-3xl"></iconify-icon
-                ></span>
+                  class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
+                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon></span>
                 <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
                   Selamat datang kembali
                 </p>
@@ -545,9 +543,8 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
             >
               <span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon
-              ></span>
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -575,9 +572,8 @@ onMounted(initializeUserPage);
               ></div>
               <div class="relative z-10 animate-slide-in-left">
                 <span
-                  class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-cyan-100"
-                  ><iconify-icon icon="lucide:waves" class="text-3xl"></iconify-icon
-                ></span>
+                  class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
+                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon></span>
                 <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
                   Mulai petualanganmu
                 </p>
@@ -682,8 +678,16 @@ onMounted(initializeUserPage);
                       type="password"
                       autocomplete="new-password"
                       placeholder="Minimal 8 karakter"
-                      class="input-field h-[50px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
+                      class="input-field h-[50px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
                     />
+                    <button
+                      type="button"
+                      @click.prevent="window.togglePassword($event.currentTarget)"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+                      aria-label="Tampilkan atau sembunyikan kata sandi"
+                    >
+                      <iconify-icon icon="lucide:eye"></iconify-icon>
+                    </button>
                   </div>
                 </div>
                 <div class="mt-4 animate-fade-in-up delay-400">
@@ -702,8 +706,16 @@ onMounted(initializeUserPage);
                       type="password"
                       autocomplete="new-password"
                       placeholder="Ulangi kata sandi"
-                      class="input-field h-[50px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
+                      class="input-field h-[50px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
                     />
+                    <button
+                      type="button"
+                      @click.prevent="window.togglePassword($event.currentTarget)"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+                      aria-label="Tampilkan atau sembunyikan kata sandi"
+                    >
+                      <iconify-icon icon="lucide:eye"></iconify-icon>
+                    </button>
                   </div>
                 </div>
                 <button
@@ -770,9 +782,8 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
             >
               <span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon
-              ></span>
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -977,9 +988,8 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
             >
               <span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon
-              ></span>
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -1380,8 +1390,8 @@ onMounted(initializeUserPage);
               @click.prevent="window.navigateTo('home')"
               class="flex items-center gap-3 text-white group"
               ><span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
               ><span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               ></a
@@ -1666,8 +1676,8 @@ onMounted(initializeUserPage);
               @click.prevent="window.navigateTo('home')"
               class="flex items-center gap-3 text-white group"
               ><span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
               ><span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               ></a
@@ -2050,9 +2060,8 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
             >
               <span
-                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon
-              ></span>
+                class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
+                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -2205,8 +2214,8 @@ onMounted(initializeUserPage);
         "
         class="flex items-center gap-3 text-white"
         ><span
-          class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-ocean shadow-lg"
-          ><iconify-icon icon="lucide:waves" class="text-2xl"></iconify-icon></span
+          class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
+          ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
         ><span class="font-display text-lg font-extrabold tracking-tight"
           >CITRALAND<span class="text-cyan-200">.</span></span
         ></a
