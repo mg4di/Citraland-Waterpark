@@ -864,8 +864,7 @@ export function initializeUserPage() {
     if (booking) {
       appState.bookingCode = booking.booking_code;
       if (appState.paymentStatus !== 'paid') appState.paymentStatus = booking.payment_status;
-      appState.paymentType =
-        booking.payment_method || booking.midtrans_payment_type || appState.paymentType;
+      appState.paymentType = booking.payment_method || appState.paymentType;
       appState.booking = {
         name: booking.user_name,
         email: booking.user_email,
@@ -1363,7 +1362,7 @@ export function initializeUserPage() {
     appState.confirmationBooking = booking;
     appState.bookingCode = booking.booking_code;
     appState.paymentStatus = booking.payment_status;
-    appState.paymentType = booking.payment_method || booking.midtrans_payment_type || '';
+    appState.paymentType = booking.payment_method || '';
     appState.booking = {
       name: booking.user_name,
       email: booking.user_email,
@@ -1411,7 +1410,7 @@ export function initializeUserPage() {
     appState.bookingCode = result.booking_code;
     appState.snapToken = result.snap_token;
     appState.paymentStatus = 'pending';
-    appState.paymentType = booking.payment_method || booking.midtrans_payment_type || '';
+    appState.paymentType = booking.payment_method || '';
     appState.confirmationBooking = null;
     appState.qrDataUrl = '';
     appState.promo = null;

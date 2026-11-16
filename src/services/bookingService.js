@@ -109,7 +109,6 @@ export const bookingService = {
         .update({
           payment_status: status,
           midtrans_transaction_id: midtrans.transactionId ?? null,
-          midtrans_payment_type: midtrans.paymentType ?? null,
           payment_method: midtrans.paymentType ?? null,
         })
         .eq('booking_id', bookingId)
