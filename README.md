@@ -39,6 +39,7 @@ npm run preview
    ```
 
    Semua variabel `VITE_*` tersedia di browser. Jangan pernah memasukkan Supabase service-role key atau Midtrans server key ke dalam file tersebut.
+
 3. Terapkan migrasi database dari root repository menggunakan Supabase CLI:
 
    ```sh
@@ -48,6 +49,7 @@ npm run preview
    ```
 
    Migrasi membuat tabel, indeks, trigger, fungsi database, kebijakan Row Level Security (RLS), serta bucket Storage `gallery`. Alternatifnya, jalankan isi `supabase/migrations/20261105000100_initial_schema.sql` melalui SQL Editor Supabase.
+
 4. Jalankan `supabase/seed.sql` melalui SQL Editor untuk membuat harga tiket, fasilitas, promo awal, dan daftar foto galeri. Foto galeri bawaan menggunakan path lokal `/images/...`; tambahkan file-file tersebut ke `public/images/` di bawah.
 5. Di Supabase Authentication, aktifkan metode Email, atur URL aplikasi pada Site URL dan Redirect URLs, serta buat akun admin dengan alamat email yang akan didaftarkan pada tabel `admin_users`.
 6. Setelah akun admin dibuat, daftarkan perannya melalui SQL Editor:
@@ -88,6 +90,7 @@ Dashboard, Booking, Users, Analytics, dan Settings memuat data dari database dan
    ```
 
    Untuk deployment, ubah `FRONTEND_URL` ke origin website. `MIDTRANS_ALLOWED_IPS` bersifat opsional dan menerima daftar alamat IP notifikasi resmi yang dipisahkan koma.
+
 4. Deploy fungsi:
 
    ```sh

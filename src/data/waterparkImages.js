@@ -1,7 +1,7 @@
 export const waterparkHeroImage = {
   src: '/images/waterpark-hero.webp',
   alt: 'Citraland Waterpark Denpasar',
-}
+};
 
 export const waterparkGalleryImages = [
   {
@@ -24,4 +24,4 @@ export const waterparkGalleryImages = [
     alt: 'Dekorasi patung bajak laut di Citraland Waterpark',
     caption: 'Dekorasi bajak laut di area waterpark',
   },
-]
+];

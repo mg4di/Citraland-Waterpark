@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
-import { getPublicEnvironment } from './env.js'
+import { createClient } from '@supabase/supabase-js';
+import { getPublicEnvironment } from './env.js';
 
-let client
+let client;
 
 export function getSupabaseClient() {
-  if (client) return client
+  if (client) return client;
 
-  const { supabaseUrl, supabaseAnonKey } = getPublicEnvironment()
+  const { supabaseUrl, supabaseAnonKey } = getPublicEnvironment();
   client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
@@ -19,6 +19,6 @@ export function getSupabaseClient() {
       params: { eventsPerSecond: 10 },
     },
     db: { schema: 'public' },
-  })
-  return client
+  });
+  return client;
 }
