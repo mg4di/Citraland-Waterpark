@@ -124,7 +124,6 @@ BEGIN
   UPDATE public.bookings
   SET payment_status = p_payment_status,
       midtrans_transaction_id = p_transaction_id,
-      midtrans_payment_type = p_payment_type,
       payment_method = p_payment_type
   WHERE booking_id = current_booking.booking_id
   RETURNING * INTO current_booking;
@@ -182,7 +181,7 @@ BEGIN
         FROM (
           SELECT booking_id, booking_code, user_name, user_email, user_phone,
             visit_date, ticket_types, total_amount, payment_status, payment_method,
-            midtrans_transaction_id, midtrans_payment_type, created_at, updated_at,
+            midtrans_transaction_id, created_at, updated_at,
             checked_in_at, cancelled_at, cancellation_reason,
             CASE
               WHEN cancelled_at IS NOT NULL AND checked_in_at IS NULL THEN 'cancelled'

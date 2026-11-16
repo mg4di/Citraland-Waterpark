@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     CHECK (payment_status IN ('pending', 'paid', 'failed', 'cancelled', 'refunded')),
   payment_method text,
   midtrans_transaction_id text,
-  midtrans_payment_type text,
   midtrans_order_id text UNIQUE,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),

@@ -814,7 +814,6 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
       'payment_status',
       'payment_method',
       'midtrans_transaction_id',
-      'midtrans_payment_type',
       'created_at',
       'checked_in_at',
       'cancelled_at',

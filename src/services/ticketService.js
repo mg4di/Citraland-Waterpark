@@ -129,7 +129,7 @@ export async function generateQrDataUrl(booking) {
 }
 
 export function getPaymentMethodLabel(booking) {
-  const method = booking?.payment_method || booking?.midtrans_payment_type || '';
+  const method = booking?.payment_method || '';
   const names = {
     bank_transfer: 'Transfer bank',
     credit_card: 'Kartu kredit',

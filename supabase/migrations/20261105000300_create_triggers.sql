@@ -30,7 +30,6 @@ BEGIN
     OR lower(NEW.user_email) <> lower(auth.jwt() ->> 'email')
     OR NEW.payment_status <> 'pending'
     OR NEW.midtrans_transaction_id IS NOT NULL
-    OR NEW.midtrans_payment_type IS NOT NULL
     OR NEW.midtrans_order_id IS NOT NULL THEN
     RAISE EXCEPTION 'Invalid booking insert';
   END IF;
