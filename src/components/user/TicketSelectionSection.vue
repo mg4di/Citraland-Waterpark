@@ -77,12 +77,7 @@ onBeforeUnmount(() => unsubscribe?.());
         {{ ticket.days }}
       </p>
       <p class="mt-6 font-display text-4xl font-extrabold">
-        Rp{{ ticket.price.toLocaleString('id-ID')
-        }}<span
-          class="text-lg font-semibold"
-          :class="ticket.featured ? 'text-cyan-200' : 'text-slate-400'"
-          >.000</span
-        >
+        Rp{{ ticket.price.toLocaleString('id-ID') }}
         <span class="text-sm font-semibold"> / orang</span>
       </p>
       <div class="my-6 h-px" :class="ticket.featured ? 'bg-white/20' : 'bg-slate-100'"></div>

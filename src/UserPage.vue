@@ -911,7 +911,7 @@ onMounted(initializeUserPage);
           style="transition-delay: 0.4s"
         >
           <iconify-icon icon="lucide:shield-check" class="text-lg text-ocean"></iconify-icon
-          >Pembayaran aman dan e-ticket dikirim langsung ke email kamu.
+          >Pembayaran aman dan e-ticket akan langsung dicetak ke akun kamu.
         </div>
       </main>
       <div
