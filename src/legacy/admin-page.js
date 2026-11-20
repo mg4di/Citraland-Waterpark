@@ -1447,18 +1447,26 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   }
 
   // ===================== ANALYTICS PAGE =====================
+  // Jam kunjungan 08.00–16.00 WITA. Setiap check-in dihitung berdasarkan angka
+  // depan jamnya (mis. 08.30 -> jam 08, 09.45 -> jam 09).
+  const VISIT_START_HOUR = 8;
+  const VISIT_END_HOUR = 16;
+
   function renderHeatmap(analytics) {
     const grid = document.getElementById('heatmap-grid');
-    if (!grid) return;
+    if (!grid) return 0;
     const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-    const buckets = [8, 10, 12, 14, 16, 18, 20];
-    const counts = dayNames.map(() => buckets.map(() => 0));
+    const hours = [];
+    for (let hour = VISIT_START_HOUR; hour <= VISIT_END_HOUR; hour += 1) hours.push(hour);
+    const counts = dayNames.map(() => hours.map(() => 0));
     for (const item of analytics.peak_hours ?? []) {
       const dow = Number(item.dow);
-      const hour = Number(item.hour);
-      if (dow < 1 || dow > 7) continue;
-      const bucket = Math.min(buckets.length - 1, Math.max(0, Math.floor((hour - 8) / 2)));
-      counts[dow - 1][bucket] += Number(item.count || 0);
+      const hour = Math.floor(Number(item.hour));
+      if (!Number.isFinite(dow) || dow < 1 || dow > 7) continue;
+      if (!Number.isFinite(hour)) continue;
+      // Check-in di luar jam kunjungan tetap dimasukkan ke jam terdekat.
+      const clamped = Math.min(VISIT_END_HOUR, Math.max(VISIT_START_HOUR, hour));
+      counts[dow - 1][clamped - VISIT_START_HOUR] += Number(item.count || 0);
     }
     const max = Math.max(0, ...counts.flat());
     const colors = [
@@ -1472,19 +1480,22 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     grid.replaceChildren();
     dayNames.forEach((day, dayIndex) => {
       const row = document.createElement('div');
-      row.className = 'grid grid-cols-[70px_repeat(7,1fr)] items-center gap-1';
+      row.className = 'grid grid-cols-[70px_repeat(9,1fr)] items-center gap-1';
       row.innerHTML =
         `<span class="text-slate-500 text-[11px]">${day}</span>` +
         counts[dayIndex]
-          .map((value) => {
+          .map((value, hourIndex) => {
             const level = max
               ? Math.min(colors.length - 1, Math.ceil((value / max) * colors.length) - 1)
               : 0;
-            return `<i class="heatmap-cell flex h-8 items-center justify-center rounded text-[10px] font-bold text-slate-600 ${colors[level]}" title="${value} check-in">${value || ''}</i>`;
+            const hour = hours[hourIndex];
+            const label = `${String(hour).padStart(2, '0')}.00–${String(hour).padStart(2, '0')}.59`;
+            return `<i class="heatmap-cell flex h-8 items-center justify-center rounded text-[10px] font-bold text-slate-600 ${colors[level]}" title="${day} ${label} WITA · ${value} check-in">${value || ''}</i>`;
           })
           .join('');
       grid.appendChild(row);
     });
+    return counts.flat().reduce((total, value) => total + value, 0);
   }
 
   function renderTicketDonut(analytics) {
@@ -1580,8 +1591,8 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     }
 
     renderTicketDonut(a);
-    renderHeatmap(a);
-    setText('#an-heatmap-badge', `${formatNumber(a.peak_hours_total)} check-in`);
+    const heatmapTotal = renderHeatmap(a);
+    setText('#an-heatmap-badge', `${formatNumber(heatmapTotal)} check-in`);
   }
 
   document.getElementById('analytics-export-btn')?.addEventListener('click', exportAnalytics);
