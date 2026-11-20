@@ -2482,7 +2482,11 @@ onMounted(initializeUserPage);
     aria-modal="true"
     aria-labelledby="reset-password-title"
   >
-    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+    <div
+      data-dialog-focus
+      tabindex="-1"
+      class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl outline-none sm:p-7"
+    >
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 id="reset-password-title" class="font-display text-xl font-bold text-slate-900">
@@ -2512,9 +2516,14 @@ onMounted(initializeUserPage);
           ></iconify-icon
           ><input
             id="reset-new-password"
-            name="new-password"
+            name="reset-password"
             type="password"
-            autocomplete="new-password"
+            autocomplete="off"
+            readonly
+            data-autofill-guard
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
             placeholder="Minimal 8 karakter"
             class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
           /><button
@@ -2526,9 +2535,7 @@ onMounted(initializeUserPage);
             <iconify-icon icon="lucide:eye"></iconify-icon>
           </button>
         </div>
-        <label
-          for="reset-confirm-password"
-          class="mb-2 mt-4 block text-sm font-bold text-slate-700"
+        <label for="reset-confirm-password" class="mb-2 mt-4 block text-sm font-bold text-slate-700"
           >Ulangi kata sandi baru</label
         >
         <div class="relative">
@@ -2538,9 +2545,14 @@ onMounted(initializeUserPage);
           ></iconify-icon
           ><input
             id="reset-confirm-password"
-            name="confirm-password"
+            name="reset-confirm-password"
             type="password"
-            autocomplete="new-password"
+            autocomplete="off"
+            readonly
+            data-autofill-guard
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
             placeholder="Ulangi kata sandi baru"
             class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
           /><button

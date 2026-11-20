@@ -1761,9 +1761,20 @@ export function initializeUserPage() {
     element.classList.toggle('text-emerald-600', type === 'success');
   }
 
+  // Password manager sering menyisipkan kata sandi acak ke input password baru.
+  // Input dikunci (readonly) sampai pengunjung fokus, lalu dikunci lagi saat
+  // dialog dibuka supaya kolom selalu mulai kosong.
+  function armPasswordAutofillGuard() {
+    for (const input of document.querySelectorAll('#reset-password-form [data-autofill-guard]')) {
+      input.setAttribute('readonly', 'readonly');
+      input.value = '';
+    }
+  }
+
   function toggleResetModal(modalId, open) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
+    const wasOpen = !modal.classList.contains('hidden');
     modal.classList.toggle('hidden', !open);
     modal.classList.toggle('flex', open);
     const anyOpen = ['reset-request-modal', 'reset-password-modal'].some(
@@ -1771,11 +1782,18 @@ export function initializeUserPage() {
     );
     document.body.style.overflow = anyOpen ? 'hidden' : '';
     if (open) {
-      setTimeout(() => modal.querySelector('input')?.focus({ preventScroll: true }), 50);
-      if (modalId === 'reset-password-modal') {
+      if (modalId === 'reset-password-modal' && !wasOpen) {
         document.getElementById('reset-password-form')?.reset();
+        armPasswordAutofillGuard();
         setResetMessage('reset-password-error', '');
       }
+      // Fokus ke kartu dialog, bukan ke input password, agar kolom tetap
+      // readonly (bebas autofill) sampai pengunjung menyentuhnya sendiri.
+      const focusTarget =
+        modalId === 'reset-password-modal'
+          ? (modal.querySelector('[data-dialog-focus]') ?? modal)
+          : modal.querySelector('input');
+      setTimeout(() => focusTarget?.focus({ preventScroll: true }), 50);
     }
   }
 
@@ -1826,6 +1844,15 @@ export function initializeUserPage() {
     document.querySelectorAll('[data-reset-close]').forEach((button) => {
       button.addEventListener('click', () => toggleResetModal(button.dataset.resetClose, false));
     });
+
+    for (const input of document.querySelectorAll('#reset-password-form [data-autofill-guard]')) {
+      // pointerdown/touchstart lebih dulu dari focus supaya keyboard iOS tetap muncul.
+      const unlock = () => input.removeAttribute('readonly');
+      input.addEventListener('pointerdown', unlock);
+      input.addEventListener('touchstart', unlock, { passive: true });
+      input.addEventListener('focus', unlock);
+    }
+    armPasswordAutofillGuard();
 
     for (const modalId of ['reset-request-modal', 'reset-password-modal']) {
       document.getElementById(modalId)?.addEventListener('click', (event) => {
@@ -1911,7 +1938,7 @@ export function initializeUserPage() {
       updateNavbarAuth(null);
       const loginEmail = document.getElementById('login-email');
       if (loginEmail && email) loginEmail.value = email;
-      if (location.hash === '#reset-password') history.replaceState(null, '', '#login');
+      if (location.hash !== '#login') history.replaceState(null, '', '#login');
       navigateTo('login');
       showToast('Kata sandi diperbarui. Silakan masuk dengan kata sandi baru.', 'success');
     });
@@ -1921,6 +1948,15 @@ export function initializeUserPage() {
   (async () => {
     // Show initial page
     const hash = location.hash.replace('#', '') || 'home';
+    const landingParams = new URLSearchParams(window.location.search);
+    const landingHashParams = new URLSearchParams(window.location.hash.slice(1));
+    // Tautan reset bisa datang sebagai penanda ?recovery=1 (implicit flow),
+    // token #...&type=recovery, atau rute #reset-password (tautan PKCE lama).
+    const isRecoveryLanding =
+      hash === 'reset-password' ||
+      landingParams.get('recovery') === '1' ||
+      landingParams.get('type') === 'recovery' ||
+      landingHashParams.get('type') === 'recovery';
     const initialPage = [
       'home',
       'login',
@@ -1957,9 +1993,19 @@ export function initializeUserPage() {
       }
     }
 
-    // Mendarat dari tautan reset email: supabase-js sudah menukar kode di URL
+    // Mendarat dari tautan reset email: supabase-js sudah menukar token di URL
     // menjadi sesi recovery saat client dibuat.
-    if (hash === 'reset-password') {
+    if (isRecoveryLanding) {
+      // Bersihkan token/penanda di URL agar muat ulang tidak mengulang proses.
+      const currentUrl = window.location.href;
+      const cleanedUrl = new URL(currentUrl);
+      for (const key of ['code', 'sb_flow_id', 'recovery', 'type', 'error', 'error_description']) {
+        cleanedUrl.searchParams.delete(key);
+      }
+      if (cleanedUrl.toString() !== currentUrl) {
+        history.replaceState(null, '', cleanedUrl.toString());
+      }
+
       if (sessionGuard.success && sessionGuard.user) {
         currentUser = sessionGuard.user;
         updateNavbarAuth(currentUser);
@@ -1967,20 +2013,14 @@ export function initializeUserPage() {
         openSetNewPasswordDialog();
         return;
       }
+
       navigateTo('login');
       showToast(
-        'Tautan reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.',
+        landingParams.has('code')
+          ? 'Tautan reset hanya berlaku di browser tempat Anda meminta reset. Silakan minta tautan baru lewat "Lupa kata sandi?".'
+          : 'Tautan reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.',
         'error',
       );
-      // Bersihkan sisa parameter PKCE agar muat ulang tidak mengulang penukaran kode.
-      const currentUrl = window.location.href;
-      const url = new URL(currentUrl);
-      for (const key of ['code', 'sb_flow_id', 'error', 'error_description']) {
-        url.searchParams.delete(key);
-      }
-      if (url.toString() !== currentUrl) {
-        history.replaceState(null, '', url.toString());
-      }
       return;
     }
 

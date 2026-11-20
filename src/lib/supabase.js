@@ -13,7 +13,10 @@ export function getSupabaseClient() {
       persistSession: true,
       detectSessionInUrl: true,
       storage: window.localStorage,
-      flowType: 'pkce',
+      // Implicit: tautan reset dari email berisi token di URL, bukan kode PKCE
+      // yang butuh verifier di browser peminta. Dengan begitu tautan tetap
+      // berlaku saat dibuka dari aplikasi Gmail atau browser/perangkat lain.
+      flowType: 'implicit',
     },
     realtime: {
       params: { eventsPerSecond: 10 },

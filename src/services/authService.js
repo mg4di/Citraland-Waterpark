@@ -7,10 +7,11 @@ function failure(error, context) {
   return { success: false, error: mapSupabaseError(error).message };
 }
 
-// Halaman tujuan tautan reset: rute hash dipakai aplikasi untuk berpindah page.
+// Halaman tujuan tautan reset. Penanda di query tetap terbaca walau
+// supabase-js menghapus token dari URL, dan tidak bentrok dengan rute hash.
 function passwordRecoveryRedirectUrl() {
   const { origin, pathname } = window.location;
-  return `${origin}${pathname}#reset-password`;
+  return `${origin}${pathname}?recovery=1`;
 }
 
 export const authService = {
