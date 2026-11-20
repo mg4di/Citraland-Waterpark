@@ -1,10 +1,31 @@
 import { getSupabaseClient } from '../lib/supabase.js';
+import { getPublicEnvironment } from '../lib/env.js';
 import { logError, mapSupabaseError } from '../utils/errorHandler.js';
 import { validators } from '../utils/validation.js';
+
+const AUTH_REQUEST_TIMEOUT_MS = 15000;
 
 function failure(error, context) {
   logError(context, error);
   return { success: false, error: mapSupabaseError(error).message };
+}
+
+function timeoutError() {
+  return Object.assign(new Error('Permintaan melebihi batas waktu'), { isTimeout: true });
+}
+
+async function withTimeout(promise, timeoutMs = AUTH_REQUEST_TIMEOUT_MS) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(timeoutError()), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // Halaman tujuan tautan reset. Penanda di query tetap terbaca walau
@@ -126,14 +147,49 @@ export const authService = {
     const emailValidation = validators.email(normalizedEmail);
     if (!emailValidation.valid) return { success: false, error: emailValidation.error };
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT_MS);
     try {
-      const { error } = await getSupabaseClient().auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: passwordRecoveryRedirectUrl(),
+      const { supabaseUrl, supabaseAnonKey } = getPublicEnvironment();
+      const endpoint = `${supabaseUrl}/auth/v1/recover?redirect_to=${encodeURIComponent(
+        passwordRecoveryRedirectUrl(),
+      )}`;
+      // Panggil endpoint GoTrue langsung agar tidak ikut menunggu lock/refresh
+      // sesi client supabase-js (penyebab spinner berputar tanpa pernah selesai).
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: normalizedEmail }),
+        signal: controller.signal,
       });
-      if (error) return failure(error, 'Request password reset');
+
+      if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw Object.assign(
+          new Error(
+            details.msg ||
+              details.error_description ||
+              details.message ||
+              `Permintaan reset gagal (HTTP ${response.status})`,
+          ),
+          { status: response.status, code: details.error_code ?? details.code },
+        );
+      }
       return { success: true, email: normalizedEmail };
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Permintaan reset timeout. Periksa koneksi internet lalu coba lagi.',
+        };
+      }
       return failure(error, 'Request password reset');
+    } finally {
+      clearTimeout(timer);
     }
   },
 
@@ -144,7 +200,7 @@ export const authService = {
 
     try {
       const supabase = getSupabaseClient();
-      const { data, error } = await supabase.auth.getSession();
+      const { data, error } = await withTimeout(supabase.auth.getSession());
       if (error) return failure(error, 'Get recovery session');
       if (!data.session) {
         return {
@@ -153,10 +209,18 @@ export const authService = {
         };
       }
 
-      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      const { error: updateError } = await withTimeout(
+        supabase.auth.updateUser({ password: newPassword }),
+      );
       if (updateError) return failure(updateError, 'Update password via recovery');
       return { success: true, email: data.session.user?.email ?? null };
     } catch (error) {
+      if (error?.isTimeout) {
+        return {
+          success: false,
+          error: 'Proses terlalu lama. Periksa koneksi lalu coba simpan lagi.',
+        };
+      }
       return failure(error, 'Update password via recovery');
     }
   },

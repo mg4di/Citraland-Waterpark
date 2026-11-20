@@ -14,6 +14,7 @@ import {
   getTicketSummary,
   getUsageStatusMeta,
 } from '../services/ticketService.js';
+import { logError } from '../utils/errorHandler.js';
 import { validateBookingForm } from '../utils/validation.js';
 
 export function initializeUserPage() {
@@ -1865,8 +1866,10 @@ export function initializeUserPage() {
     });
 
     // Langkah 1: minta tautan reset.
+    let isRequestingReset = false;
     document.getElementById('reset-request-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isRequestingReset) return;
       const emailInput = document.getElementById('reset-email');
       const submitLabel = document.getElementById('reset-request-submit-text');
       const email = emailInput?.value?.trim() ?? '';
@@ -1880,25 +1883,40 @@ export function initializeUserPage() {
         return;
       }
 
+      isRequestingReset = true;
       if (submitLabel) submitLabel.textContent = 'Mengirim...';
       void setBusy('reset-request', true);
-      const result = await authService.requestPasswordReset(email);
-      void setBusy('reset-request', false);
-      if (submitLabel) submitLabel.textContent = 'Kirim ulang tautan';
-      if (!result.success) {
-        setResetMessage('reset-request-error', result.error);
-        return;
+      try {
+        const result = await authService.requestPasswordReset(email);
+        if (!result.success) {
+          if (submitLabel) submitLabel.textContent = 'Kirim tautan reset';
+          setResetMessage('reset-request-error', result.error);
+          return;
+        }
+        if (submitLabel) submitLabel.textContent = 'Kirim ulang tautan';
+        setResetMessage(
+          'reset-request-success',
+          `Tautan reset dikirim ke ${result.email}. Periksa inbox atau folder spam (berlaku ±1 jam).`,
+          'success',
+        );
+      } catch (error) {
+        if (submitLabel) submitLabel.textContent = 'Kirim tautan reset';
+        setResetMessage(
+          'reset-request-error',
+          'Gagal mengirim tautan reset. Periksa koneksi lalu coba lagi.',
+        );
+        logError('Request password reset UI', error);
+      } finally {
+        isRequestingReset = false;
+        void setBusy('reset-request', false);
       }
-      setResetMessage(
-        'reset-request-success',
-        `Tautan reset dikirim ke ${result.email}. Periksa inbox atau folder spam (berlaku ±1 jam).`,
-        'success',
-      );
     });
 
     // Langkah 2: simpan kata sandi baru dari sesi recovery.
+    let isSavingPassword = false;
     document.getElementById('reset-password-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isSavingPassword) return;
       const passwordInput = document.getElementById('reset-new-password');
       const confirmInput = document.getElementById('reset-confirm-password');
       const submitLabel = document.getElementById('reset-password-submit-text');
@@ -1922,25 +1940,36 @@ export function initializeUserPage() {
       }
 
       if (submitLabel) submitLabel.textContent = 'Menyimpan...';
+      isSavingPassword = true;
       void setBusy('reset-password', true);
-      const result = await authService.updatePasswordFromRecovery(password);
-      void setBusy('reset-password', false);
-      if (submitLabel) submitLabel.textContent = 'Simpan kata sandi';
-      if (!result.success) {
-        setResetMessage('reset-password-error', result.error);
-        return;
-      }
+      try {
+        const result = await authService.updatePasswordFromRecovery(password);
+        if (submitLabel) submitLabel.textContent = 'Simpan kata sandi';
+        if (!result.success) {
+          setResetMessage('reset-password-error', result.error);
+          return;
+        }
 
-      const email = result.email ?? '';
-      closeResetModals();
-      await authService.logout();
-      currentUser = null;
-      updateNavbarAuth(null);
-      const loginEmail = document.getElementById('login-email');
-      if (loginEmail && email) loginEmail.value = email;
-      if (location.hash !== '#login') history.replaceState(null, '', '#login');
-      navigateTo('login');
-      showToast('Kata sandi diperbarui. Silakan masuk dengan kata sandi baru.', 'success');
+        const email = result.email ?? '';
+        closeResetModals();
+        await authService.logout();
+        currentUser = null;
+        updateNavbarAuth(null);
+        const loginEmail = document.getElementById('login-email');
+        if (loginEmail && email) loginEmail.value = email;
+        if (location.hash !== '#login') history.replaceState(null, '', '#login');
+        navigateTo('login');
+        showToast('Kata sandi diperbarui. Silakan masuk dengan kata sandi baru.', 'success');
+      } catch (error) {
+        setResetMessage(
+          'reset-password-error',
+          'Gagal menyimpan kata sandi baru. Periksa koneksi lalu coba lagi.',
+        );
+        logError('Save new password UI', error);
+      } finally {
+        isSavingPassword = false;
+        void setBusy('reset-password', false);
+      }
     });
   }
 
