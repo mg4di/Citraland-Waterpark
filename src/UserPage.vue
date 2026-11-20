@@ -31,7 +31,11 @@ onMounted(initializeUserPage);
             <span
               class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
             >
-              <img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" />
+              <img
+                src="/images/logo.png"
+                alt="Logo Citraland Waterpark"
+                class="h-full w-full rounded-[inherit] object-contain"
+              />
             </span>
             <span class="font-display text-lg font-extrabold tracking-tight"
               >CITRALAND<span class="text-cyan-200">.</span></span
@@ -284,7 +288,11 @@ onMounted(initializeUserPage);
             >
               <span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain"
+              /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -347,7 +355,8 @@ onMounted(initializeUserPage);
               <div class="relative z-10 animate-slide-in-left">
                 <span
                   class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
-                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon></span>
+                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon
+                ></span>
                 <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
                   Selamat datang kembali
                 </p>
@@ -422,7 +431,9 @@ onMounted(initializeUserPage);
               </div>
               <form id="login-form" class="mt-8" novalidate>
                 <div class="animate-fade-in-up delay-200">
-                  <label class="mb-2 block text-sm font-bold text-slate-700">Alamat email</label>
+                  <label for="login-email" class="mb-2 block text-sm font-bold text-slate-700"
+                    >Alamat email</label
+                  >
                   <div class="relative">
                     <iconify-icon
                       icon="lucide:mail"
@@ -430,7 +441,9 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="login-email"
+                      name="email"
                       type="email"
+                      autocomplete="username"
                       placeholder="nama@email.com"
                       class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
                     />
@@ -438,12 +451,12 @@ onMounted(initializeUserPage);
                 </div>
                 <div class="mt-5 animate-fade-in-up delay-300">
                   <div class="mb-2 flex items-center justify-between">
-                    <label class="block text-sm font-bold text-slate-700">Kata sandi</label
+                    <label for="login-password" class="block text-sm font-bold text-slate-700"
+                      >Kata sandi</label
                     ><a
+                      id="forgot-password-link"
                       href="#"
-                      @click.prevent="
-                        window.showToast('Link reset kata sandi dikirim ke email Anda', 'success')
-                      "
+                      @click.prevent="window.openPasswordResetDialog()"
                       class="text-xs font-bold text-ocean transition hover:text-aqua"
                       >Lupa kata sandi?</a
                     >
@@ -455,7 +468,9 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="login-password"
+                      name="password"
                       type="password"
+                      autocomplete="current-password"
                       placeholder="Masukkan kata sandi"
                       class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
                     /><button
@@ -544,7 +559,11 @@ onMounted(initializeUserPage);
             >
               <span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain"
+              /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -573,7 +592,8 @@ onMounted(initializeUserPage);
               <div class="relative z-10 animate-slide-in-left">
                 <span
                   class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
-                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon></span>
+                  ><iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon
+                ></span>
                 <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
                   Mulai petualanganmu
                 </p>
@@ -639,6 +659,7 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="register-name"
+                      name="name"
                       type="text"
                       autocomplete="name"
                       placeholder="Nama lengkapmu"
@@ -657,6 +678,7 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="register-email"
+                      name="email"
                       type="email"
                       autocomplete="email"
                       placeholder="nama@email.com"
@@ -675,6 +697,7 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="register-password"
+                      name="password"
                       type="password"
                       autocomplete="new-password"
                       placeholder="Minimal 8 karakter"
@@ -703,6 +726,7 @@ onMounted(initializeUserPage);
                     ></iconify-icon
                     ><input
                       id="register-confirm-password"
+                      name="confirm-password"
                       type="password"
                       autocomplete="new-password"
                       placeholder="Ulangi kata sandi"
@@ -783,7 +807,11 @@ onMounted(initializeUserPage);
             >
               <span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain"
+              /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -989,7 +1017,11 @@ onMounted(initializeUserPage);
             >
               <span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain"
+              /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -1275,7 +1307,9 @@ onMounted(initializeUserPage);
                 <div class="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p class="font-bold text-slate-900">Punya kode promo?</p>
-                    <p class="mt-1 text-sm text-slate-500">Masukkan kode untuk mendapatkan potongan harga.</p>
+                    <p class="mt-1 text-sm text-slate-500">
+                      Masukkan kode untuk mendapatkan potongan harga.
+                    </p>
                   </div>
                   <div class="flex gap-2">
                     <input
@@ -1292,7 +1326,10 @@ onMounted(initializeUserPage);
                     </button>
                   </div>
                 </div>
-                <div id="promo-success" class="mt-3 hidden items-center gap-2 text-sm text-emerald-600">
+                <div
+                  id="promo-success"
+                  class="mt-3 hidden items-center gap-2 text-sm text-emerald-600"
+                >
                   <iconify-icon icon="lucide:check-circle" class="text-lg"></iconify-icon>
                   <span>Kode promo berhasil diterapkan! Diskon Rp10.000</span>
                 </div>
@@ -1391,7 +1428,10 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
               ><span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain" /></span
               ><span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               ></a
@@ -1531,9 +1571,13 @@ onMounted(initializeUserPage);
             class="scroll-reveal mx-auto max-w-3xl overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-100"
             style="transition-delay: 0.2s"
           >
-            <div class="flex items-start justify-between gap-4 border-b border-slate-100 p-6 md:p-8">
+            <div
+              class="flex items-start justify-between gap-4 border-b border-slate-100 p-6 md:p-8"
+            >
               <div>
-                <p class="text-xs font-bold uppercase tracking-[.2em] text-ocean">Pembayaran aman</p>
+                <p class="text-xs font-bold uppercase tracking-[.2em] text-ocean">
+                  Pembayaran aman
+                </p>
                 <h2 class="mt-2 font-display text-2xl font-bold text-slate-900">
                   Pembayaran melalui Midtrans
                 </h2>
@@ -1541,7 +1585,9 @@ onMounted(initializeUserPage);
                   Pilih metode pembayaran di jendela aman Midtrans.
                 </p>
               </div>
-              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lagoon text-ocean">
+              <span
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-lagoon text-ocean"
+              >
                 <iconify-icon icon="lucide:shield-check" class="text-xl"></iconify-icon>
               </span>
             </div>
@@ -1556,18 +1602,29 @@ onMounted(initializeUserPage);
                       <span id="pay-date">Pilih tanggal kunjungan</span>
                     </p>
                   </div>
-                  <span id="pay-booking-code" class="rounded-full bg-white px-3 py-1 text-xs font-bold text-ocean">
+                  <span
+                    id="pay-booking-code"
+                    class="rounded-full bg-white px-3 py-1 text-xs font-bold text-ocean"
+                  >
                     Kode booking
                   </span>
                 </div>
-                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-cyan-100 pt-4">
+                <div
+                  class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-cyan-100 pt-4"
+                >
                   <div>
                     <p class="text-xs text-slate-500">Pemesan</p>
-                    <p class="text-sm font-semibold text-slate-800" id="pay-customer-name">Nama pemesan</p>
+                    <p class="text-sm font-semibold text-slate-800" id="pay-customer-name">
+                      Nama pemesan
+                    </p>
                     <p class="text-xs text-slate-500" id="pay-customer-email">Email pemesan</p>
                   </div>
-                  <div class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                    <div class="countdown-timer flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                  <div
+                    class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3"
+                  >
+                    <div
+                      class="countdown-timer flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
+                    >
                       <iconify-icon icon="lucide:clock" class="text-amber-600"></iconify-icon>
                     </div>
                     <div>
@@ -1596,22 +1653,24 @@ onMounted(initializeUserPage);
                 </div>
                 <div class="mt-4 flex items-end justify-between border-t border-slate-100 pt-4">
                   <span class="font-bold text-slate-700">Total pembayaran</span>
-                  <span class="font-display text-2xl font-extrabold text-ocean" id="pay-total">Rp0</span>
+                  <span class="font-display text-2xl font-extrabold text-ocean" id="pay-total"
+                    >Rp0</span
+                  >
                 </div>
               </div>
 
-
-
               <div class="rounded-2xl border border-cyan-100 bg-lagoon p-5">
                 <div class="flex items-start gap-4">
-                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-ocean">
+                  <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-ocean"
+                  >
                     <iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon>
                   </span>
                   <div>
                     <p class="font-bold text-slate-900">Metode pembayaran di Snap</p>
                     <p class="mt-1 text-sm leading-6 text-slate-600">
-                      Klik "Bayar Sekarang" untuk membuka popup Midtrans. Detail kartu dan pembayaran
-                      hanya dimasukkan di halaman aman Midtrans.
+                      Klik "Bayar Sekarang" untuk membuka popup Midtrans. Detail kartu dan
+                      pembayaran hanya dimasukkan di halaman aman Midtrans.
                     </p>
                   </div>
                 </div>
@@ -1624,7 +1683,11 @@ onMounted(initializeUserPage);
                   class="btn-primary flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 font-bold text-white shadow-xl shadow-cyan-200 transition-all hover:bg-ocean active:scale-[0.98]"
                 >
                   <span id="pay-btn-text">Bayar Sekarang</span>
-                  <iconify-icon icon="lucide:arrow-right" class="text-lg" id="pay-btn-icon"></iconify-icon>
+                  <iconify-icon
+                    icon="lucide:arrow-right"
+                    class="text-lg"
+                    id="pay-btn-icon"
+                  ></iconify-icon>
                   <div class="loading-spinner hidden" id="pay-btn-spinner"></div>
                 </button>
                 <button
@@ -1634,13 +1697,17 @@ onMounted(initializeUserPage);
                 >
                   Sudah membayar? Periksa status
                 </button>
-                <p class="flex items-center justify-center gap-2 text-center text-xs text-slate-400">
+                <p
+                  class="flex items-center justify-center gap-2 text-center text-xs text-slate-400"
+                >
                   <iconify-icon icon="lucide:lock-keyhole" class="text-emerald-500"></iconify-icon>
                   Pembayaran aman dan terenkripsi
                 </p>
               </div>
 
-              <div class="flex items-center justify-center gap-5 border-t border-slate-100 pt-5 text-slate-400">
+              <div
+                class="flex items-center justify-center gap-5 border-t border-slate-100 pt-5 text-slate-400"
+              >
                 <span class="flex items-center gap-1 text-xs">
                   <iconify-icon icon="lucide:shield-check" class="text-emerald-500"></iconify-icon>
                   SSL Secure
@@ -1677,7 +1744,10 @@ onMounted(initializeUserPage);
               class="flex items-center gap-3 text-white group"
               ><span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain" /></span
               ><span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               ></a
@@ -2061,7 +2131,11 @@ onMounted(initializeUserPage);
             >
               <span
                 class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-                ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+                ><img
+                  src="/images/logo.png"
+                  alt="Logo Citraland Waterpark"
+                  class="h-full w-full rounded-[inherit] object-contain"
+              /></span>
               <span class="font-display text-lg font-extrabold tracking-tight"
                 >CITRALAND<span class="text-cyan-200">.</span></span
               >
@@ -2215,7 +2289,10 @@ onMounted(initializeUserPage);
         class="flex items-center gap-3 text-white"
         ><span
           class="flex h-11 w-11 items-center justify-center rounded-2xl bg-transparent text-white"
-          ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span
+          ><img
+            src="/images/logo.png"
+            alt="Logo Citraland Waterpark"
+            class="h-full w-full rounded-[inherit] object-contain" /></span
         ><span class="font-display text-lg font-extrabold tracking-tight"
           >CITRALAND<span class="text-cyan-200">.</span></span
         ></a
@@ -2328,6 +2405,168 @@ onMounted(initializeUserPage);
         ></a>
       </div>
     </nav>
+  </div>
+
+  <!-- Password reset: minta tautan lewat email -->
+  <div
+    id="reset-request-modal"
+    class="fixed inset-0 z-[140] hidden items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reset-request-title"
+  >
+    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="reset-request-title" class="font-display text-xl font-bold text-slate-900">
+            Lupa kata sandi?
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Masukkan email akun Anda. Kami kirimkan tautan untuk membuat kata sandi baru.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-reset-close="reset-request-modal"
+          aria-label="Tutup"
+          class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+        >
+          <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
+        </button>
+      </div>
+      <form id="reset-request-form" class="mt-6" novalidate>
+        <label for="reset-email" class="mb-2 block text-sm font-bold text-slate-700"
+          >Email akun</label
+        >
+        <div class="relative">
+          <iconify-icon
+            icon="lucide:mail"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+          ></iconify-icon
+          ><input
+            id="reset-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="nama@email.com"
+            class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
+          />
+        </div>
+        <p
+          id="reset-request-error"
+          class="mt-3 hidden text-xs font-semibold text-rose-600"
+          role="alert"
+        ></p>
+        <p
+          id="reset-request-success"
+          class="mt-3 hidden text-xs font-semibold text-emerald-600"
+          role="status"
+        ></p>
+        <button
+          type="submit"
+          id="reset-request-submit"
+          class="btn-primary mt-5 flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition-all hover:bg-ocean hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <span id="reset-request-submit-text">Kirim tautan reset</span>
+          <div class="loading-spinner hidden" id="reset-request-spinner"></div>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Password reset: buat kata sandi baru (setelah klik tautan email) -->
+  <div
+    id="reset-password-modal"
+    class="fixed inset-0 z-[140] hidden items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reset-password-title"
+  >
+    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-7">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="reset-password-title" class="font-display text-xl font-bold text-slate-900">
+            Buat kata sandi baru
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Masukkan kata sandi baru untuk akun <b id="reset-password-email"></b>.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-reset-close="reset-password-modal"
+          aria-label="Tutup"
+          class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+        >
+          <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
+        </button>
+      </div>
+      <form id="reset-password-form" class="mt-6" novalidate>
+        <label for="reset-new-password" class="mb-2 block text-sm font-bold text-slate-700"
+          >Kata sandi baru</label
+        >
+        <div class="relative">
+          <iconify-icon
+            icon="lucide:lock-keyhole"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+          ></iconify-icon
+          ><input
+            id="reset-new-password"
+            name="new-password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Minimal 8 karakter"
+            class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
+          /><button
+            type="button"
+            @click.prevent="window.togglePassword($event.currentTarget)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+            aria-label="Tampilkan atau sembunyikan kata sandi"
+          >
+            <iconify-icon icon="lucide:eye"></iconify-icon>
+          </button>
+        </div>
+        <label
+          for="reset-confirm-password"
+          class="mb-2 mt-4 block text-sm font-bold text-slate-700"
+          >Ulangi kata sandi baru</label
+        >
+        <div class="relative">
+          <iconify-icon
+            icon="lucide:lock-keyhole"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+          ></iconify-icon
+          ><input
+            id="reset-confirm-password"
+            name="confirm-password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Ulangi kata sandi baru"
+            class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
+          /><button
+            type="button"
+            @click.prevent="window.togglePassword($event.currentTarget)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+            aria-label="Tampilkan atau sembunyikan kata sandi"
+          >
+            <iconify-icon icon="lucide:eye"></iconify-icon>
+          </button>
+        </div>
+        <p
+          id="reset-password-error"
+          class="mt-3 hidden text-xs font-semibold text-rose-600"
+          role="alert"
+        ></p>
+        <button
+          type="submit"
+          id="reset-password-submit"
+          class="btn-primary mt-5 flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition-all hover:bg-ocean hover:shadow-xl active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <span id="reset-password-submit-text">Simpan kata sandi</span>
+          <div class="loading-spinner hidden" id="reset-password-spinner"></div>
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Toast -->

@@ -694,7 +694,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     document.getElementById('bk-page-total').textContent = filtered.length;
 
     const tbody = document.getElementById('bk-table-body');
-    tbody.innerHTML = '';
+    tbody.replaceChildren();
     if (!pageData.length) {
       tbody.innerHTML =
         '<tr><td colspan="8" class="px-6 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400"><iconify-icon icon="lucide:search-x" class="text-2xl"></iconify-icon></span><p class="mt-4 font-display font-bold text-slate-700">Tidak ada booking</p></td></tr>';
@@ -743,7 +743,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
 
     // Pagination
     const pag = document.getElementById('bk-pagination');
-    pag.innerHTML = '';
+    pag.replaceChildren();
     if (totalPages > 1) {
       const mkBtn = (label, pg, disabled = false, active = false) => {
         const b = document.createElement('button');
@@ -895,7 +895,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     setText('#usr-result-count', `Menampilkan ${users.length} pengguna`);
 
     const tbody = document.getElementById('usr-table-body');
-    tbody.innerHTML = '';
+    tbody.replaceChildren();
     if (!users.length) {
       tbody.innerHTML =
         '<tr><td colspan="9" class="px-6 py-16 text-center"><p class="font-display font-bold text-slate-700">Tidak ada pengguna</p><p class="mt-1 text-sm text-slate-400">Coba ubah kata kunci atau filter status.</p></td></tr>';
@@ -1086,7 +1086,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   // Pricing
   function renderPricing() {
     const container = document.getElementById('pricing-cards');
-    container.innerHTML = '';
+    container.replaceChildren();
     pricing.forEach((p) => {
       const card = document.createElement('article');
       card.className = `pricing-card rounded-2xl ${p.featured ? 'border-2 border-ocean ring-2 ring-cyan-50' : 'border border-slate-200'} bg-white p-6 shadow-sm`;
@@ -1146,7 +1146,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   // Facilities
   function renderFacilities() {
     const tbody = document.getElementById('fac-table-body');
-    tbody.innerHTML = '';
+    tbody.replaceChildren();
     facilities.forEach((f) => {
       const stCls =
         f.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500';
@@ -1237,7 +1237,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     const list = document.getElementById('promo-list');
     const ac = promotions.filter((p) => p.active).length;
     document.getElementById('promo-active-count').textContent = `${ac} Active`;
-    list.innerHTML = '';
+    list.replaceChildren();
     if (!promotions.length) {
       list.innerHTML =
         '<div class="py-10 text-center"><p class="font-display font-bold text-slate-700">Belum ada promosi</p></div>';
@@ -1313,7 +1313,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     const grid = document.getElementById('gallery-grid');
     const publishedCount = galleryItems.filter((item) => item.status === 'published').length;
     document.getElementById('gallery-count-badge').textContent = `${publishedCount} Published`;
-    grid.innerHTML = '';
+    grid.replaceChildren();
     if (!galleryItems.length) {
       grid.innerHTML =
         '<div class="col-span-full py-10 text-center"><p class="font-display font-bold text-slate-700">Galeri kosong</p></div>';

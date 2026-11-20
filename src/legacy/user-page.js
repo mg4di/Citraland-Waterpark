@@ -146,10 +146,27 @@ export function initializeUserPage() {
   }
 
   // ===== NAVIGATION =====
+  function currentPageElement() {
+    const active = document.getElementById('page-' + appState.currentPage);
+    if (active) return active;
+    // Saat deep link, halaman home masih bertanda active dari markup awal
+    // sehingga harus ikut disembunyikan saat pindah halaman.
+    return appState.currentPage ? null : document.querySelector('.page.active');
+  }
+
   function renderPage(page) {
-    const currentEl = document.getElementById('page-' + appState.currentPage);
+    const currentEl = currentPageElement();
     const targetEl = document.getElementById('page-' + page);
     if (!targetEl || page === appState.currentPage) return;
+
+    if (currentEl === targetEl) {
+      // Deep link ke halaman yang sudah tampil: cukup sinkronkan state & URL.
+      targetEl.style.display = 'block';
+      targetEl.classList.add('active');
+      appState.currentPage = page;
+      history.pushState(null, '', '#' + page);
+      return;
+    }
 
     // Hide current
     if (currentEl) {
@@ -244,7 +261,7 @@ export function initializeUserPage() {
     navigateTo(hash);
   });
 
-  authService.onAuthStateChange((user) => {
+  authService.onAuthStateChange((user, _session, event) => {
     currentUser = user;
     updateNavbarAuth(user);
     if (!user) {
@@ -252,6 +269,10 @@ export function initializeUserPage() {
       appState.confirmationBooking = null;
       appState.qrDataUrl = '';
       appState.paymentTotalOverride = null;
+    }
+    if (event === 'PASSWORD_RECOVERY') {
+      // Pengunjung baru membuka tautan reset dari email.
+      openSetNewPasswordDialog();
     }
     if (!user && protectedPages.has(appState.currentPage)) {
       appState.pendingPage = appState.currentPage;
@@ -1727,6 +1748,175 @@ export function initializeUserPage() {
     });
   }
 
+  // ===== PASSWORD RESET =====
+  function setResetMessage(elementId, message, type = 'error') {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    const targets = ['reset-request-error', 'reset-request-success', 'reset-password-error'];
+    for (const id of targets) document.getElementById(id)?.classList.add('hidden');
+    if (!message) return;
+    element.textContent = message;
+    element.classList.remove('hidden');
+    element.classList.toggle('text-rose-600', type === 'error');
+    element.classList.toggle('text-emerald-600', type === 'success');
+  }
+
+  function toggleResetModal(modalId, open) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.toggle('hidden', !open);
+    modal.classList.toggle('flex', open);
+    const anyOpen = ['reset-request-modal', 'reset-password-modal'].some(
+      (id) => !document.getElementById(id)?.classList.contains('hidden'),
+    );
+    document.body.style.overflow = anyOpen ? 'hidden' : '';
+    if (open) {
+      setTimeout(() => modal.querySelector('input')?.focus({ preventScroll: true }), 50);
+      if (modalId === 'reset-password-modal') {
+        document.getElementById('reset-password-form')?.reset();
+        setResetMessage('reset-password-error', '');
+      }
+    }
+  }
+
+  function closeResetModals() {
+    toggleResetModal('reset-request-modal', false);
+    toggleResetModal('reset-password-modal', false);
+  }
+
+  // Dipanggil tombol "Lupa kata sandi?" dan tautan reset di email.
+  function openPasswordResetDialog() {
+    const emailField = document.getElementById('reset-email');
+    if (emailField) {
+      const typed = document.getElementById('login-email')?.value?.trim();
+      emailField.value = typed || currentUser?.email || '';
+    }
+    setResetMessage('reset-request-error', '');
+    setResetMessage('reset-request-success', '');
+    const submit = document.getElementById('reset-request-submit');
+    if (submit) submit.disabled = false;
+    const label = document.getElementById('reset-request-submit-text');
+    if (label) label.textContent = 'Kirim tautan reset';
+    toggleResetModal('reset-request-modal', true);
+  }
+
+  function openSetNewPasswordDialog() {
+    const email = document.getElementById('reset-password-email');
+    if (email) email.textContent = currentUser?.email ? `(${currentUser.email})` : '';
+    const submit = document.getElementById('reset-password-submit');
+    if (submit) submit.disabled = false;
+    const label = document.getElementById('reset-password-submit-text');
+    if (label) label.textContent = 'Simpan kata sandi';
+    toggleResetModal('reset-password-modal', true);
+  }
+
+  async function setBusy(prefix, busy) {
+    const spinner = document.getElementById(`${prefix}-spinner`);
+    const submit = document.getElementById(`${prefix}-submit`);
+    if (spinner) spinner.classList.toggle('hidden', !busy);
+    if (submit) submit.disabled = busy;
+  }
+
+  function initPasswordReset() {
+    document.getElementById('forgot-password-link')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openPasswordResetDialog();
+    });
+
+    document.querySelectorAll('[data-reset-close]').forEach((button) => {
+      button.addEventListener('click', () => toggleResetModal(button.dataset.resetClose, false));
+    });
+
+    for (const modalId of ['reset-request-modal', 'reset-password-modal']) {
+      document.getElementById(modalId)?.addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) toggleResetModal(modalId, false);
+      });
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeResetModals();
+    });
+
+    // Langkah 1: minta tautan reset.
+    document.getElementById('reset-request-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const emailInput = document.getElementById('reset-email');
+      const submitLabel = document.getElementById('reset-request-submit-text');
+      const email = emailInput?.value?.trim() ?? '';
+      emailInput?.classList.remove('error');
+      setResetMessage('reset-request-error', '');
+      setResetMessage('reset-request-success', '');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        emailInput?.classList.add('error');
+        setResetMessage('reset-request-error', 'Masukkan email yang valid.');
+        emailInput?.focus();
+        return;
+      }
+
+      if (submitLabel) submitLabel.textContent = 'Mengirim...';
+      void setBusy('reset-request', true);
+      const result = await authService.requestPasswordReset(email);
+      void setBusy('reset-request', false);
+      if (submitLabel) submitLabel.textContent = 'Kirim ulang tautan';
+      if (!result.success) {
+        setResetMessage('reset-request-error', result.error);
+        return;
+      }
+      setResetMessage(
+        'reset-request-success',
+        `Tautan reset dikirim ke ${result.email}. Periksa inbox atau folder spam (berlaku ±1 jam).`,
+        'success',
+      );
+    });
+
+    // Langkah 2: simpan kata sandi baru dari sesi recovery.
+    document.getElementById('reset-password-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const passwordInput = document.getElementById('reset-new-password');
+      const confirmInput = document.getElementById('reset-confirm-password');
+      const submitLabel = document.getElementById('reset-password-submit-text');
+      const password = passwordInput?.value ?? '';
+      const confirmation = confirmInput?.value ?? '';
+      passwordInput?.classList.remove('error');
+      confirmInput?.classList.remove('error');
+      setResetMessage('reset-password-error', '');
+
+      if (password.length < 8) {
+        passwordInput?.classList.add('error');
+        setResetMessage('reset-password-error', 'Kata sandi minimal 8 karakter.');
+        passwordInput?.focus();
+        return;
+      }
+      if (password !== confirmation) {
+        confirmInput?.classList.add('error');
+        setResetMessage('reset-password-error', 'Konfirmasi kata sandi tidak cocok.');
+        confirmInput?.focus();
+        return;
+      }
+
+      if (submitLabel) submitLabel.textContent = 'Menyimpan...';
+      void setBusy('reset-password', true);
+      const result = await authService.updatePasswordFromRecovery(password);
+      void setBusy('reset-password', false);
+      if (submitLabel) submitLabel.textContent = 'Simpan kata sandi';
+      if (!result.success) {
+        setResetMessage('reset-password-error', result.error);
+        return;
+      }
+
+      const email = result.email ?? '';
+      closeResetModals();
+      await authService.logout();
+      currentUser = null;
+      updateNavbarAuth(null);
+      const loginEmail = document.getElementById('login-email');
+      if (loginEmail && email) loginEmail.value = email;
+      if (location.hash === '#reset-password') history.replaceState(null, '', '#login');
+      navigateTo('login');
+      showToast('Kata sandi diperbarui. Silakan masuk dengan kata sandi baru.', 'success');
+    });
+  }
+
   // ===== INIT =====
   (async () => {
     // Show initial page
@@ -1746,6 +1936,7 @@ export function initializeUserPage() {
 
     initLoginForm();
     initRegisterForm();
+    initPasswordReset();
     initBookingPage();
     initPaymentPage();
     initTicketHistoryPage();
@@ -1765,11 +1956,40 @@ export function initializeUserPage() {
         return;
       }
     }
+
+    // Mendarat dari tautan reset email: supabase-js sudah menukar kode di URL
+    // menjadi sesi recovery saat client dibuat.
+    if (hash === 'reset-password') {
+      if (sessionGuard.success && sessionGuard.user) {
+        currentUser = sessionGuard.user;
+        updateNavbarAuth(currentUser);
+        navigateTo('home');
+        openSetNewPasswordDialog();
+        return;
+      }
+      navigateTo('login');
+      showToast(
+        'Tautan reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.',
+        'error',
+      );
+      // Bersihkan sisa parameter PKCE agar muat ulang tidak mengulang penukaran kode.
+      const currentUrl = window.location.href;
+      const url = new URL(currentUrl);
+      for (const key of ['code', 'sb_flow_id', 'error', 'error_description']) {
+        url.searchParams.delete(key);
+      }
+      if (url.toString() !== currentUrl) {
+        history.replaceState(null, '', url.toString());
+      }
+      return;
+    }
+
     navigateTo(initialPage);
   })();
 
   if (typeof window !== 'undefined') {
     window.navigateTo = navigateTo;
+    window.openPasswordResetDialog = openPasswordResetDialog;
     window.toggleMobileMenu = toggleMobileMenu;
     window.toggleProfileMenu = toggleProfileMenu;
     window.logoutUser = logoutUser;

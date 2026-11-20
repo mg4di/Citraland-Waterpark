@@ -28,6 +28,27 @@ export function mapSupabaseError(error) {
   if (error?.code === '23503') {
     return { message: 'Data yang dipilih tidak lagi tersedia.', code: 'RELATED_DATA_MISSING' };
   }
+  const rateLimitSeconds = /after (\d+) seconds?/.exec(message)?.[1];
+  if (error?.status === 429 || message.includes('rate limit') || rateLimitSeconds) {
+    return {
+      message: rateLimitSeconds
+        ? `Terlalu banyak permintaan. Coba lagi dalam ${rateLimitSeconds} detik.`
+        : 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
+      code: 'RATE_LIMITED',
+    };
+  }
+  if (message.includes('invalid or has expired') || message.includes('auth session missing')) {
+    return {
+      message: 'Tautan reset sudah kedaluwarsa atau tidak valid. Silakan minta tautan baru.',
+      code: 'LINK_EXPIRED',
+    };
+  }
+  if (message.includes('password should be at least') || message.includes('weak password')) {
+    return {
+      message: 'Kata sandi terlalu lemah. Gunakan minimal 8 karakter.',
+      code: 'WEAK_PASSWORD',
+    };
+  }
   if (
     error?.name === 'TypeError' ||
     message.includes('fetch') ||
@@ -71,8 +92,8 @@ export async function retryWithBackoff(operation, maxAttempts = 3, baseDelay = 3
 export function throwIfError(error, context) {
   if (!error) return;
   logError(context, error);
-  throw Object.assign(new Error(mapSupabaseError(error).message), {
-    cause: error,
-    code: error.code,
-  });
+  const mapped = mapSupabaseError(error);
+  const wrapped = new Error(mapped.message, { cause: error });
+  wrapped.code = error.code;
+  throw wrapped;
 }

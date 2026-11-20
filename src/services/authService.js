@@ -7,6 +7,12 @@ function failure(error, context) {
   return { success: false, error: mapSupabaseError(error).message };
 }
 
+// Halaman tujuan tautan reset: rute hash dipakai aplikasi untuk berpindah page.
+function passwordRecoveryRedirectUrl() {
+  const { origin, pathname } = window.location;
+  return `${origin}${pathname}#reset-password`;
+}
+
 export const authService = {
   async register(email, password, fullName) {
     const normalizedEmail = validators.sanitize(email).toLowerCase();
@@ -110,6 +116,47 @@ export const authService = {
       return { success: true, user: data.user, session: data.session };
     } catch (error) {
       return failure(error, isAdmin ? 'Admin login' : 'User login');
+    }
+  },
+
+  // Kirim email berisi tautan pembuatan kata sandi baru.
+  async requestPasswordReset(email) {
+    const normalizedEmail = validators.sanitize(email).toLowerCase();
+    const emailValidation = validators.email(normalizedEmail);
+    if (!emailValidation.valid) return { success: false, error: emailValidation.error };
+
+    try {
+      const { error } = await getSupabaseClient().auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: passwordRecoveryRedirectUrl(),
+      });
+      if (error) return failure(error, 'Request password reset');
+      return { success: true, email: normalizedEmail };
+    } catch (error) {
+      return failure(error, 'Request password reset');
+    }
+  },
+
+  // Dipakai setelah pengunjung membuka tautan reset dari email (sesi recovery).
+  async updatePasswordFromRecovery(newPassword) {
+    const passwordValidation = validators.password(newPassword);
+    if (!passwordValidation.valid) return { success: false, error: passwordValidation.error };
+
+    try {
+      const supabase = getSupabaseClient();
+      const { data, error } = await supabase.auth.getSession();
+      if (error) return failure(error, 'Get recovery session');
+      if (!data.session) {
+        return {
+          success: false,
+          error: 'Tautan reset tidak valid atau sudah kedaluwarsa. Minta tautan baru.',
+        };
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) return failure(updateError, 'Update password via recovery');
+      return { success: true, email: data.session.user?.email ?? null };
+    } catch (error) {
+      return failure(error, 'Update password via recovery');
     }
   },
 
@@ -280,8 +327,8 @@ export const authService = {
   },
 
   onAuthStateChange(callback) {
-    return getSupabaseClient().auth.onAuthStateChange((_event, session) => {
-      callback(session?.user ?? null, session);
+    return getSupabaseClient().auth.onAuthStateChange((event, session) => {
+      callback(session?.user ?? null, session, event);
     });
   },
 };

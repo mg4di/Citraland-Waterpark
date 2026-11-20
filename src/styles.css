@@ -1057,13 +1057,18 @@ body {
 }
 
 .card-details {
-  max-height: 0;
+  height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Allows height: auto to be interpolated instead of faking it with max-height. */
+  interpolate-size: allow-keywords;
+  transition:
+    height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-details.open {
-  max-height: 600px;
+  height: auto;
+  height: calc-size(auto, size);
   opacity: 1;
 }
 
