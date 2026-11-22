@@ -1,30 +1,42 @@
 <template>
   <aside
+    id="admin-sidebar"
+    aria-label="Navigasi admin"
+    aria-hidden="true"
+    inert
     class="sidebar fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white transition-all duration-300"
   >
     <div class="flex h-20 items-center border-b border-slate-100 px-5">
       <a href="#dashboard" class="brand-link flex items-center gap-3">
         <span
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-transparent text-white"
-          ><img src="/images/logo.png" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
+          ><img src="/images/logo.webp" alt="Logo Citraland Waterpark" class="h-full w-full rounded-[inherit] object-contain" /></span>
         <span class="brand-label font-display text-sm font-extrabold tracking-tight text-slate-900"
           >CITRALAND<span class="text-aqua">.</span
           ><small
-            class="mt-0.5 block text-[10px] font-semibold uppercase tracking-[.18em] text-slate-400"
+            class="mt-0.5 block text-[10px] font-semibold uppercase tracking-[.18em] text-slate-500"
             >Waterpark admin</small
           ></span
         >
       </a>
+      <button
+        id="sidebar-close-button"
+        type="button"
+        aria-label="Tutup menu navigasi"
+        class="ml-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 md:hidden"
+      >
+        <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+      </button>
     </div>
-    <nav class="flex-1 space-y-1 px-3 py-6 overflow-y-auto">
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-6">
       <p
-        class="sidebar-section-label mb-3 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"
+        class="sidebar-section-label mb-3 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500"
       >
         Workspace
       </p>
       <a
         href="#dashboard"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="dashboard"
         data-label="Dashboard"
         ><iconify-icon icon="lucide:layout-dashboard" class="shrink-0 text-lg"></iconify-icon
@@ -32,7 +44,7 @@
       >
       <a
         href="#bookings"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="bookings"
         data-label="Booking Management"
         ><iconify-icon icon="lucide:ticket-check" class="shrink-0 text-lg"></iconify-icon
@@ -40,7 +52,7 @@
       >
       <a
         href="#users"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="users"
         data-label="User Management"
         ><iconify-icon icon="lucide:users-round" class="shrink-0 text-lg"></iconify-icon
@@ -48,7 +60,7 @@
       >
       <a
         href="#content"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="content"
         data-label="Content Management"
         ><iconify-icon icon="lucide:panels-top-left" class="shrink-0 text-lg"></iconify-icon
@@ -56,20 +68,20 @@
       >
       <a
         href="#analytics"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="analytics"
         data-label="Analytics"
         ><iconify-icon icon="lucide:chart-no-axes-combined" class="shrink-0 text-lg"></iconify-icon
         ><span class="sidebar-label">Analytics</span></a
       >
       <p
-        class="sidebar-section-label mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-400"
+        class="sidebar-section-label mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[.2em] text-slate-500"
       >
         System
       </p>
       <a
         href="#settings"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="settings"
         data-label="Pengaturan"
         ><iconify-icon icon="lucide:settings-2" class="shrink-0 text-lg"></iconify-icon
@@ -77,7 +89,7 @@
       >
       <a
         href="#help"
-        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-link nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool"
         data-page="help"
         data-label="Pusat Bantuan"
         ><iconify-icon icon="lucide:circle-help" class="shrink-0 text-lg"></iconify-icon
@@ -88,7 +100,7 @@
       <button
         id="sidebar-collapse-button"
         type="button"
-        class="sidebar-toggle flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-ocean"
+        class="sidebar-toggle flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 transition hover:bg-lagoon hover:text-pool"
       >
         <iconify-icon
           icon="lucide:panel-left-close"

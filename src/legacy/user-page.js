@@ -41,8 +41,13 @@ export function initializeUserPage() {
     isLoadingHistory: false,
     paymentTotalOverride: null,
   };
-  const bookingPages = new Set(['select-ticket', 'booking-details', 'payment', 'confirmation']);
-  const protectedPages = new Set([...bookingPages, 'ticket-history']);
+  // Tiket boleh dipilih sebelum masuk; akun baru diminta saat checkout.
+  const protectedPages = new Set([
+    'booking-details',
+    'payment',
+    'confirmation',
+    'ticket-history',
+  ]);
   let currentUser = null;
   const profileMenus = [
     {
@@ -204,6 +209,7 @@ export function initializeUserPage() {
       if (page === 'payment') updatePaymentSummary();
       if (page === 'confirmation') updateConfirmationDetails();
       if (page === 'ticket-history') loadTicketHistory();
+      if (page === 'home') initSectionSpy();
       if (page === 'home') initScrollReveal();
       initScrollReveal();
       initBubbles(page);
@@ -211,6 +217,38 @@ export function initializeUserPage() {
 
     // Update URL hash
     history.pushState(null, '', '#' + page);
+  }
+
+  function goToSection(sectionId) {
+    if (!sectionId) return;
+    toggleMobileMenu(false);
+    const scroll = () => {
+      if (sectionId === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const heading = document.querySelector('#home h1');
+        if (heading) {
+          heading.setAttribute('tabindex', '-1');
+          heading.focus({ preventScroll: true });
+        }
+        return;
+      }
+      const target =
+        (sectionId === 'harga' && document.querySelector('#harga .home-loket')) ||
+        document.getElementById(sectionId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const heading = target.querySelector('h2, h1, h3') || document.querySelector(`#${sectionId} h2`);
+      if (heading) {
+        heading.setAttribute('tabindex', '-1');
+        heading.focus({ preventScroll: true });
+      }
+    };
+    if (appState.currentPage !== 'home') {
+      navigateTo('home');
+      setTimeout(scroll, 450);
+    } else {
+      setTimeout(scroll, 40);
+    }
   }
 
   async function navigateTo(page) {
@@ -308,14 +346,38 @@ export function initializeUserPage() {
   }
 
   // ===== MOBILE MENU =====
+  let mobileMenuReturnFocus = null;
+
+  function mobileMenuFocusable() {
+    const menu = document.getElementById('mobileMenu');
+    if (!menu) return [];
+    return Array.from(
+      menu.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => element.getClientRects().length > 0);
+  }
+
   function toggleMobileMenu(open) {
     const menu = document.getElementById('mobileMenu');
-    if (open) {
-      menu.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    } else {
-      menu.classList.remove('open');
-      document.body.style.overflow = '';
+    if (!menu) return;
+    const isOpen = Boolean(open);
+    if (isOpen && !menu.classList.contains('open')) {
+      mobileMenuReturnFocus = document.activeElement;
+    }
+    menu.classList.toggle('open', isOpen);
+    menu.inert = !isOpen;
+    menu.setAttribute('aria-hidden', String(!isOpen));
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    document
+      .querySelectorAll('[data-mobile-menu-trigger]')
+      .forEach((trigger) => trigger.setAttribute('aria-expanded', String(isOpen)));
+
+    if (isOpen) {
+      setTimeout(() => menu.querySelector('[data-mobile-menu-close]')?.focus(), 60);
+    } else if (mobileMenuReturnFocus?.focus) {
+      mobileMenuReturnFocus.focus({ preventScroll: true });
+      mobileMenuReturnFocus = null;
     }
   }
 
@@ -332,10 +394,10 @@ export function initializeUserPage() {
       icon.className = 'text-emerald-400 text-xl';
     } else if (type === 'error') {
       icon.setAttribute('icon', 'lucide:alert-circle');
-      icon.className = 'text-red-400 text-xl';
+      icon.className = 'text-rose-400 text-xl';
     } else {
       icon.setAttribute('icon', 'lucide:info');
-      icon.className = 'text-blue-400 text-xl';
+      icon.className = 'text-aqua text-xl';
     }
     toast.classList.add('show');
     toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
@@ -348,9 +410,13 @@ export function initializeUserPage() {
     if (input.type === 'password') {
       input.type = 'text';
       icon.setAttribute('icon', 'lucide:eye-off');
+      btn.setAttribute('aria-pressed', 'true');
+      btn.setAttribute('aria-label', 'Sembunyikan kata sandi');
     } else {
       input.type = 'password';
       icon.setAttribute('icon', 'lucide:eye');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', 'Tampilkan kata sandi');
     }
   }
 
@@ -365,7 +431,6 @@ export function initializeUserPage() {
     appState.quantities[type] = Math.max(0, Math.min(max, appState.quantities[type] + delta));
     document.getElementById(type + '-qty').value = appState.quantities[type];
     updateSummaryBar();
-    if (delta > 0) showToast('Tiket ' + appState.names[type] + ' ditambahkan!', 'success');
   }
 
   function formatRupiah(n) {
@@ -384,16 +449,28 @@ export function initializeUserPage() {
     else bar.classList.add('hidden-bar');
   }
 
+  function selectTicketType(type) {
+    if (!Object.hasOwn(appState.quantities, type)) return;
+    appState.paymentTotalOverride = null;
+    for (const key of Object.keys(appState.quantities)) {
+      appState.quantities[key] = key === type ? 1 : 0;
+      const input = document.getElementById(`${key}-qty`);
+      if (input) input.value = appState.quantities[key];
+    }
+    updateSummaryBar();
+    navigateTo('select-ticket');
+  }
+
   function goToBooking(type) {
     appState.paymentTotalOverride = null;
+    if (appState.quantities[type] === 0) {
+      showToast('Pilih jumlah tiket dulu, lalu lanjutkan.', 'info');
+      document.getElementById(type + '-qty')?.focus();
+      return;
+    }
     const otherType = type === 'weekday' ? 'weekend' : 'weekday';
     appState.quantities[otherType] = 0;
     document.getElementById(otherType + '-qty').value = 0;
-    if (appState.quantities[type] === 0) {
-      appState.quantities[type] = 1;
-      document.getElementById(type + '-qty').value = 1;
-      updateSummaryBar();
-    }
     navigateTo('booking-details');
   }
 
@@ -479,10 +556,10 @@ export function initializeUserPage() {
       button.setAttribute('aria-label', formatDateID(dateValue));
       if (isSelected) button.setAttribute('aria-pressed', 'true');
       button.className = isSelected
-        ? 'mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-ocean text-sm font-bold text-white'
+        ? 'mx-auto flex h-10 w-full max-w-10 items-center justify-center rounded-full bg-pool text-sm font-bold text-white'
         : isAllowed
-          ? 'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-ocean focus-visible:outline focus-visible:outline-2 focus-visible:outline-ocean'
-          : 'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm text-slate-300 disabled:cursor-not-allowed';
+          ? 'mx-auto flex h-10 w-full max-w-10 items-center justify-center rounded-full text-sm font-semibold text-slate-700 transition hover:bg-lagoon hover:text-pool focus-visible:outline focus-visible:outline-2 focus-visible:outline-ocean'
+          : 'mx-auto flex h-10 w-full max-w-10 items-center justify-center rounded-full text-sm text-slate-300 disabled:cursor-not-allowed';
       calendarDays.appendChild(button);
     }
   }
@@ -560,8 +637,29 @@ export function initializeUserPage() {
     const form = document.getElementById('booking-form');
     const dateInput = document.getElementById('bf-date');
     initBookingCalendar();
-    dateInput.addEventListener('change', updateBookingSummary);
+    dateInput.addEventListener('change', () => {
+      updateBookingSummary();
+      dateInput.classList.remove('error');
+      dateInput.setAttribute('aria-invalid', 'false');
+      const dateError = document.getElementById('bf-date-error');
+      if (dateError) {
+        dateError.textContent = '';
+        dateError.classList.add('hidden');
+      }
+    });
     updateBookingSummary();
+
+    form.querySelectorAll('input').forEach((input) => {
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+        input.setAttribute('aria-invalid', 'false');
+        const errorElement = document.getElementById(`${input.id}-error`);
+        if (errorElement) {
+          errorElement.textContent = '';
+          errorElement.classList.add('hidden');
+        }
+      });
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -597,21 +695,40 @@ export function initializeUserPage() {
         visitDate: dateInput.value,
       };
       const validation = validateBookingForm(formData);
-      for (const [field, input] of Object.entries({
-        userName: name,
-        userEmail: email,
-        userPhone: phone,
-        visitDate: dateInput,
-      }))
-        input.classList.toggle('error', Boolean(validation.errors[field]));
+      const fields = [
+        { key: 'userName', input: name, error: 'bf-name-error' },
+        { key: 'userEmail', input: email, error: 'bf-email-error' },
+        { key: 'userPhone', input: phone, error: 'bf-phone-error' },
+        { key: 'visitDate', input: dateInput, error: 'bf-date-error' },
+      ];
+      let firstInvalid = null;
+      for (const field of fields) {
+        const message = validation.errors[field.key] || '';
+        const invalid = Boolean(message);
+        field.input.classList.toggle('error', invalid);
+        field.input.setAttribute('aria-invalid', String(invalid));
+        const errorElement = document.getElementById(field.error);
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.classList.toggle('hidden', !invalid);
+        }
+        if (invalid && !firstInvalid) firstInvalid = field.input;
+      }
       if (!validation.valid) {
-        showToast(Object.values(validation.errors)[0], 'error');
+        firstInvalid?.focus({ preventScroll: true });
+        firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
       const ticketType = getSelectedTicketType();
       const dateValidation = bookingService.validateVisitDate(formData.visitDate, ticketType);
       if (!dateValidation.valid) {
-        showToast(dateValidation.error, 'error');
+        const dateError = document.getElementById('bf-date-error');
+        if (dateError) {
+          dateError.textContent = dateValidation.error;
+          dateError.classList.remove('hidden');
+        }
+        dateInput.setAttribute('aria-invalid', 'true');
+        dateInput.closest('.rounded-2xl')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -624,12 +741,10 @@ export function initializeUserPage() {
 
       const btnText = document.getElementById('bf-btn-text');
       const btnIcon = document.getElementById('bf-btn-icon');
-      const btnSpinner = document.getElementById('bf-btn-spinner');
       const submitButton = form.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       btnText.textContent = 'Memproses...';
       btnIcon.classList.add('hidden');
-      btnSpinner.classList.remove('hidden');
 
       const ticketTypes = {
         [ticketType]: {
@@ -785,6 +900,14 @@ export function initializeUserPage() {
 
     renderOrderLines('bs-lines', selectedTickets, 'Belum ada tiket dipilih.');
     document.getElementById('bs-total').textContent = formatRupiah(total);
+    const mobileTotal = document.getElementById('bf-mobile-total');
+    if (mobileTotal) mobileTotal.textContent = formatRupiah(total);
+    const mobileSummary = document.getElementById('bf-mobile-summary');
+    if (mobileSummary) {
+      mobileSummary.textContent = selectedTickets.length
+        ? `${quantity} tiket · ${selectedTickets.map((ticket) => ticket.name).join(', ')}`
+        : 'Belum ada tiket dipilih.';
+    }
   }
 
   // ===== PAYMENT PAGE =====
@@ -955,7 +1078,6 @@ export function initializeUserPage() {
     if (button) button.disabled = busy;
     if (text) text.textContent = busy ? 'Menyiapkan PDF...' : 'Unduh e-ticket';
     icon?.classList.toggle('hidden', busy);
-    spinner?.classList.toggle('hidden', !busy);
   }
 
   async function downloadTicket() {
@@ -1022,11 +1144,9 @@ export function initializeUserPage() {
     const button = document.getElementById('pay-btn');
     const text = document.getElementById('pay-btn-text');
     const icon = document.getElementById('pay-btn-icon');
-    const spinner = document.getElementById('pay-btn-spinner');
     if (button) button.disabled = busy;
     if (text) text.textContent = busy ? label : 'Bayar Sekarang';
     icon?.classList.toggle('hidden', busy);
-    spinner?.classList.toggle('hidden', !busy);
   }
 
   async function verifyPaymentStatus(paymentResult) {
@@ -1127,8 +1247,8 @@ export function initializeUserPage() {
     amber: 'bg-amber-50 text-amber-700',
     rose: 'bg-rose-50 text-rose-700',
     slate: 'bg-slate-100 text-slate-600',
-    violet: 'bg-violet-50 text-violet-700',
-    ocean: 'bg-lagoon text-ocean',
+    violet: 'bg-seafoam text-pool',
+    ocean: 'bg-lagoon text-pool',
   };
 
   function formatHistoryCreatedAt(value) {
@@ -1160,10 +1280,10 @@ export function initializeUserPage() {
     header.className = 'flex items-start justify-between gap-4';
     const codeWrap = document.createElement('div');
     const code = document.createElement('p');
-    code.className = 'font-display text-lg font-extrabold tracking-widest text-ocean';
+    code.className = 'font-display text-lg font-extrabold tracking-widest text-pool';
     code.textContent = booking.booking_code;
     const created = document.createElement('p');
-    created.className = 'mt-1 text-xs text-slate-400';
+    created.className = 'mt-1 text-xs text-slate-500';
     created.textContent = `Dipesan ${formatHistoryCreatedAt(booking.created_at)}`;
     codeWrap.append(code, created);
     header.append(codeWrap, createHistoryBadge(payment.label, payment.tone));
@@ -1175,7 +1295,7 @@ export function initializeUserPage() {
       'inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5 font-semibold text-slate-600';
     const dateIcon = document.createElement('iconify-icon');
     dateIcon.setAttribute('icon', 'lucide:calendar-days');
-    dateIcon.className = 'text-ocean';
+    dateIcon.className = 'text-pool';
     const dateText = document.createElement('span');
     dateText.textContent = formatTicketDate(booking.visit_date);
     dateBadge.append(dateIcon, dateText);
@@ -1187,7 +1307,7 @@ export function initializeUserPage() {
     summaryTitle.className = 'text-sm font-bold text-slate-800';
     summaryTitle.textContent = getTicketSummary(booking);
     const summaryTotal = document.createElement('p');
-    summaryTotal.className = 'mt-1 font-display text-xl font-extrabold text-ocean';
+    summaryTotal.className = 'mt-1 font-display text-xl font-extrabold text-pool';
     summaryTotal.textContent = formatTicketRupiah(booking.total_amount);
     summary.append(summaryTitle, summaryTotal);
 
@@ -1209,13 +1329,13 @@ export function initializeUserPage() {
       const view = document.createElement('button');
       view.type = 'button';
       view.className =
-        'inline-flex min-h-10 items-center gap-2 rounded-full bg-ocean px-4 text-xs font-bold text-white transition hover:bg-aqua';
+        'inline-flex min-h-10 items-center gap-2 rounded-full bg-pool px-4 text-xs font-bold text-white transition hover:bg-aqua hover:text-ink';
       view.textContent = 'Lihat E-Ticket';
       view.addEventListener('click', () => openTicketFromHistory(booking.booking_code));
       const download = document.createElement('button');
       download.type = 'button';
       download.className =
-        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-pool';
       download.textContent = 'Unduh PDF';
       download.addEventListener('click', () => downloadHistoryTicket(booking.booking_code));
       actions.append(view, download);
@@ -1253,7 +1373,7 @@ export function initializeUserPage() {
       const retry = document.createElement('button');
       retry.type = 'button';
       retry.className =
-        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-pool';
       retry.textContent = 'Pesan tiket lagi';
       retry.addEventListener('click', () => navigateTo('select-ticket'));
       actions.append(note, retry);
@@ -1261,7 +1381,7 @@ export function initializeUserPage() {
       const retry = document.createElement('button');
       retry.type = 'button';
       retry.className =
-        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-ocean';
+        'inline-flex min-h-10 items-center gap-2 rounded-full border border-slate-200 px-4 text-xs font-bold text-slate-600 transition hover:border-ocean hover:text-pool';
       retry.textContent = 'Pesan tiket lagi';
       retry.addEventListener('click', () => navigateTo('select-ticket'));
       actions.append(retry);
@@ -1548,7 +1668,7 @@ export function initializeUserPage() {
     appState.ticketHistoryFilter = filter;
     document.querySelectorAll('.history-filter').forEach((button) => {
       const active = button.dataset.filter === filter;
-      button.classList.toggle('bg-ocean', active);
+      button.classList.toggle('bg-pool', active);
       button.classList.toggle('text-white', active);
       button.classList.toggle('border', !active);
       button.classList.toggle('border-slate-200', !active);
@@ -1567,7 +1687,7 @@ export function initializeUserPage() {
 
   function createConfetti() {
     const container = document.getElementById('confetti-container');
-    const colors = ['#00BCD4', '#0097A7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+    const colors = ['#00BCD4', '#0097A7', '#10b981', '#f59e0b', '#007884', '#ec4899', '#06b6d4'];
     for (let i = 0; i < 50; i++) {
       setTimeout(() => {
         const p = document.createElement('div');
@@ -1623,6 +1743,40 @@ export function initializeUserPage() {
     setTimeout(check, 100);
   }
 
+  // ===== HOME SECTION NAV STATE =====
+  let homeSpyHandler = null;
+  function initSectionSpy() {
+    const links = Array.from(document.querySelectorAll('[data-nav-section]'));
+    if (!links.length) return;
+    const sections = links
+      .map((link) => link.dataset.navSection)
+      .filter((id) => id && id !== 'home')
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    const setActive = (id) => {
+      for (const link of links) {
+        const active = link.dataset.navSection === id;
+        link.classList.toggle('is-active', active);
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      }
+    };
+
+    if (homeSpyHandler) window.removeEventListener('scroll', homeSpyHandler);
+    homeSpyHandler = () => {
+      const marker = window.scrollY + window.innerHeight * 0.4;
+      let current = 'home';
+      for (const section of sections) {
+        const top = section.getBoundingClientRect().top + window.scrollY;
+        if (top <= marker) current = section.id;
+      }
+      setActive(current);
+    };
+    window.addEventListener('scroll', homeSpyHandler, { passive: true });
+    homeSpyHandler();
+  }
+
   // ===== COUNTER ANIMATION =====
   function animateCounters() {
     document.querySelectorAll('.counter').forEach((c) => {
@@ -1655,38 +1809,67 @@ export function initializeUserPage() {
     if (e.key === 'Escape') {
       toggleMobileMenu(false);
       closeProfileMenus();
+      return;
+    }
+    const menu = document.getElementById('mobileMenu');
+    if (e.key === 'Tab' && menu?.classList.contains('open')) {
+      const focusable = mobileMenuFocusable();
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   });
 
   // ===== LOGIN FORM =====
+  function setFieldError(input, errorId, message) {
+    if (!input) return;
+    const invalid = Boolean(message);
+    input.classList.toggle('error', invalid);
+    input.setAttribute('aria-invalid', String(invalid));
+    const errorElement = document.getElementById(errorId);
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.classList.toggle('hidden', !invalid);
+    }
+  }
+
   function initLoginForm() {
     const form = document.getElementById('login-form');
     if (!form) return;
+    form.querySelectorAll('input').forEach((input) => {
+      input.addEventListener('input', () => setFieldError(input, `${input.id}-error`, ''));
+    });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email');
       const pass = document.getElementById('login-password');
+      setFieldError(email, 'login-email-error', '');
+      setFieldError(pass, 'login-password-error', '');
       if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-        email.classList.add('error');
-        showToast('Masukkan email yang valid', 'error');
+        setFieldError(email, 'login-email-error', 'Masukkan email yang valid.');
+        email.focus({ preventScroll: true });
         return;
       }
       if (!pass.value || pass.value.length < 8) {
-        pass.classList.add('error');
-        showToast('Kata sandi minimal 8 karakter', 'error');
+        setFieldError(pass, 'login-password-error', 'Kata sandi minimal 8 karakter.');
+        pass.focus({ preventScroll: true });
         return;
       }
-      email.classList.remove('error');
-      pass.classList.remove('error');
       document.getElementById('login-btn-text').textContent = 'Memproses...';
       document.getElementById('login-btn-icon').classList.add('hidden');
-      document.getElementById('login-btn-spinner').classList.remove('hidden');
       const result = await authService.login(email.value, pass.value);
       document.getElementById('login-btn-text').textContent = 'Masuk ke Citraland Waterpark';
       document.getElementById('login-btn-icon').classList.remove('hidden');
-      document.getElementById('login-btn-spinner').classList.add('hidden');
       if (!result.success) {
-        showToast(result.error, 'error');
+        setFieldError(pass, 'login-password-error', result.error);
+        pass.focus({ preventScroll: true });
         return;
       }
       currentUser = result.user;
@@ -1701,38 +1884,48 @@ export function initializeUserPage() {
   function initRegisterForm() {
     const form = document.getElementById('register-form');
     if (!form) return;
+    form.querySelectorAll('input').forEach((input) => {
+      input.addEventListener('input', () => setFieldError(input, `${input.id}-error`, ''));
+    });
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const name = document.getElementById('register-name');
       const email = document.getElementById('register-email');
       const password = document.getElementById('register-password');
       const confirmPassword = document.getElementById('register-confirm-password');
-      [name, email, password, confirmPassword].forEach((field) => field.classList.remove('error'));
+      const fields = [
+        [name, 'register-name-error'],
+        [email, 'register-email-error'],
+        [password, 'register-password-error'],
+        [confirmPassword, 'register-confirm-password-error'],
+      ];
+      fields.forEach(([field, errorId]) => setFieldError(field, errorId, ''));
 
       if (name.value.trim().length < 2) {
-        name.classList.add('error');
-        showToast('Masukkan nama lengkap', 'error');
+        setFieldError(name, 'register-name-error', 'Masukkan nama lengkap.');
+        name.focus({ preventScroll: true });
         return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-        email.classList.add('error');
-        showToast('Masukkan email yang valid', 'error');
+        setFieldError(email, 'register-email-error', 'Masukkan email yang valid.');
+        email.focus({ preventScroll: true });
         return;
       }
       if (password.value.length < 8) {
-        password.classList.add('error');
-        showToast('Kata sandi minimal 8 karakter', 'error');
+        setFieldError(password, 'register-password-error', 'Kata sandi minimal 8 karakter.');
+        password.focus({ preventScroll: true });
         return;
       }
       if (password.value !== confirmPassword.value) {
-        confirmPassword.classList.add('error');
-        showToast('Konfirmasi kata sandi tidak cocok', 'error');
+        setFieldError(confirmPassword, 'register-confirm-password-error', 'Konfirmasi kata sandi tidak cocok.');
+        confirmPassword.focus({ preventScroll: true });
         return;
       }
 
       const result = await authService.register(email.value, password.value, name.value);
       if (!result.success) {
-        showToast(result.error, 'error');
+        setFieldError(email, 'register-email-error', result.error);
+        email.focus({ preventScroll: true });
         return;
       }
       if (result.session) {
@@ -1759,7 +1952,7 @@ export function initializeUserPage() {
     element.textContent = message;
     element.classList.remove('hidden');
     element.classList.toggle('text-rose-600', type === 'error');
-    element.classList.toggle('text-emerald-600', type === 'success');
+    element.classList.toggle('text-emerald-700', type === 'success');
   }
 
   // Password manager sering menyisipkan kata sandi acak ke input password baru.
@@ -2058,6 +2251,7 @@ export function initializeUserPage() {
 
   if (typeof window !== 'undefined') {
     window.navigateTo = navigateTo;
+    window.goToSection = goToSection;
     window.openPasswordResetDialog = openPasswordResetDialog;
     window.toggleMobileMenu = toggleMobileMenu;
     window.toggleProfileMenu = toggleProfileMenu;
@@ -2069,9 +2263,33 @@ export function initializeUserPage() {
       if (!Object.hasOwn(appState.prices, type) || !Number.isFinite(price) || price < 0) return;
       appState.prices[type] = price;
       if (name) appState.names[type] = name;
+
+      const heroPrice = document.getElementById(`hero-${type}-price`);
+      if (heroPrice) {
+        heroPrice.textContent = (price / 1000).toLocaleString('id-ID', {
+          maximumFractionDigits: 1,
+        });
+      }
+      const infoPrice = document.getElementById(`info-${type}-price`);
+      if (infoPrice) infoPrice.textContent = formatRupiah(price);
+      const minPrice = Math.min(appState.prices.weekday, appState.prices.weekend);
+      const maxPrice = Math.max(appState.prices.weekday, appState.prices.weekend);
+      const startingPrice = document.getElementById('hero-starting-price');
+      if (startingPrice) startingPrice.textContent = formatRupiah(minPrice);
+      const priceRange = document.getElementById('hero-price-range');
+      if (priceRange) {
+        priceRange.textContent =
+          minPrice === maxPrice
+            ? formatRupiah(minPrice)
+            : `${formatRupiah(minPrice)}–${formatRupiah(maxPrice)}`;
+      }
+      const mobilePrice = document.getElementById('mobile-price-from');
+      if (mobilePrice) mobilePrice.textContent = formatRupiah(minPrice);
+
       updateSummaryBar();
       updateBookingSummary();
     };
+    window.selectTicketType = selectTicketType;
     window.goToBooking = goToBooking;
     window.goToBookingFromSummary = goToBookingFromSummary;
     window.applyPromo = applyPromo;

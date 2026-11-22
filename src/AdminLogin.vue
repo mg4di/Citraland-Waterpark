@@ -28,17 +28,17 @@ async function enterAdmin() {
 </script>
 
 <template>
-  <section class="relative min-h-screen overflow-hidden bg-slate-900">
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-ocean to-[#20b8c5]"></div>
+  <section class="relative min-h-screen overflow-hidden bg-ink">
+    <div class="absolute inset-0 bg-gradient-to-br from-deep via-ink to-pool"></div>
     <div
       class="absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full border-[42px] border-white/10 animate-pulse-ring"
     ></div>
     <div
-      class="absolute -bottom-56 -left-24 h-[470px] w-[470px] rounded-full border-[28px] border-cyan-200/10 animate-pulse-ring"
+      class="absolute -bottom-56 -left-24 h-[470px] w-[470px] rounded-full border-[28px] border-aqua/15 animate-pulse-ring"
       style="animation-delay: 1.5s"
     ></div>
     <div
-      class="absolute right-[12%] top-[20%] h-24 w-24 rounded-full bg-cyan-200/10 blur-2xl animate-float"
+      class="absolute right-[12%] top-[20%] h-24 w-24 rounded-full bg-aqua/10 blur-2xl animate-float"
     ></div>
 
     <main
@@ -56,11 +56,11 @@ async function enterAdmin() {
           <div class="relative z-10 animate-slide-in-left">
             <a
               href="/"
-              class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-cyan-100"
+              class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-transparent text-seafoam"
             >
               <iconify-icon icon="lucide:user" class="text-3xl"></iconify-icon>
             </a>
-            <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-cyan-100">
+            <p class="mt-10 text-sm font-bold uppercase tracking-[.22em] text-seafoam">
               Citraland Waterpark Admin
             </p>
             <h1
@@ -78,7 +78,7 @@ async function enterAdmin() {
             >
               <div class="flex items-start gap-4">
                 <span
-                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-200/20 text-cyan-100"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-aqua/15 text-seafoam"
                   ><iconify-icon icon="lucide:ticket-check" class="text-xl"></iconify-icon
                 ></span>
                 <div>
@@ -94,7 +94,7 @@ async function enterAdmin() {
             >
               <div class="flex items-start gap-4">
                 <span
-                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-200/20 text-cyan-100"
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-aqua/15 text-seafoam"
                   ><iconify-icon icon="lucide:chart-no-axes-combined" class="text-xl"></iconify-icon
                 ></span>
                 <div>
@@ -111,7 +111,7 @@ async function enterAdmin() {
         <section class="p-7 sm:p-10 lg:p-12 animate-slide-in-right">
           <div class="flex items-start justify-between gap-4">
             <div>
-              <p class="text-sm font-bold uppercase tracking-[.2em] text-ocean">Admin portal</p>
+              <p class="text-sm font-bold uppercase tracking-[.2em] text-pool">Admin portal</p>
               <h2 class="mt-3 font-display text-3xl font-extrabold tracking-tight text-slate-900">
                 Masuk ke dashboard
               </h2>
@@ -122,7 +122,7 @@ async function enterAdmin() {
             <a
               href="/"
               aria-label="Kembali ke halaman utama"
-              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-all hover:border-aqua hover:text-ocean hover:rotate-90 duration-300"
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-aqua hover:text-pool hover:rotate-90 duration-300"
             >
               <iconify-icon icon="lucide:x"></iconify-icon>
             </a>
@@ -136,7 +136,7 @@ async function enterAdmin() {
               <div class="relative">
                 <iconify-icon
                   icon="lucide:mail"
-                  class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
                 ></iconify-icon>
                 <input
                   id="admin-email"
@@ -144,7 +144,7 @@ async function enterAdmin() {
                   type="email"
                   autocomplete="username"
                   placeholder="admin@bluehaven.id"
-                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm outline-none placeholder:text-slate-400"
+                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-base outline-none placeholder:text-slate-500"
                 />
               </div>
             </div>
@@ -155,20 +155,21 @@ async function enterAdmin() {
               <div class="relative">
                 <iconify-icon
                   icon="lucide:lock-keyhole"
-                  class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
                 ></iconify-icon>
                 <input
                   id="admin-password"
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
-                  placeholder="Masukkan kata sandi"
-                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-sm outline-none placeholder:text-slate-400"
+                  placeholder="Kata sandi"
+                  class="input-field h-[52px] w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-12 text-base outline-none placeholder:text-slate-500"
                 />
                 <button
                   type="button"
-                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-ocean"
+                  class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 transition hover:bg-lagoon hover:text-pool"
                   :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                  :aria-pressed="showPassword"
                   @click="showPassword = !showPassword"
                 >
                   <iconify-icon :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'"></iconify-icon>
@@ -182,13 +183,13 @@ async function enterAdmin() {
                   class="checkbox-custom h-4 w-4 rounded border-slate-300"
                 /><span>Ingat saya</span></label
               >
-              <span class="flex items-center gap-1.5 text-xs text-emerald-600"
+              <span class="flex items-center gap-1.5 text-xs text-emerald-700"
                 ><iconify-icon icon="lucide:shield-check"></iconify-icon> Sesi aman</span
               >
             </div>
             <button
               type="submit"
-              class="btn-primary mt-7 flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 text-sm font-bold text-white shadow-lg shadow-cyan-900/15 transition-all hover:bg-ocean hover:shadow-xl active:scale-[0.98] animate-fade-in-up delay-500"
+              class="btn-primary mt-7 flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full bg-aqua px-6 text-sm font-bold text-ink shadow-lg shadow-ink/15 transition-all hover:bg-ocean hover:shadow-xl active:scale-[0.98] animate-fade-in-up delay-500"
             >
               <span>{{ loading ? 'Memeriksa...' : 'Masuk ke Admin' }}</span>
               <iconify-icon
@@ -196,7 +197,6 @@ async function enterAdmin() {
                 icon="lucide:arrow-right"
                 class="text-lg"
               ></iconify-icon>
-              <div v-else class="loading-spinner"></div>
             </button>
             <p v-if="errorMessage" class="mt-4 text-sm text-rose-600" role="alert">
               {{ errorMessage }}
@@ -207,13 +207,13 @@ async function enterAdmin() {
             Gunakan email dan kata sandi yang terdaftar pada Supabase Auth.
           </p>
           <div
-            class="mt-7 flex items-center justify-center gap-5 border-t border-slate-100 pt-6 text-xs text-slate-400"
+            class="mt-7 flex items-center justify-center gap-5 border-t border-slate-100 pt-6 text-xs text-slate-500"
           >
             <span class="flex items-center gap-1.5"
               ><iconify-icon icon="lucide:lock" class="text-emerald-500"></iconify-icon> SSL
               Secure</span
             >
-            <a href="/" class="flex items-center gap-1.5 transition hover:text-ocean"
+            <a href="/" class="flex items-center gap-1.5 transition hover:text-pool"
               ><iconify-icon icon="lucide:arrow-left"></iconify-icon> Halaman utama</a
             >
           </div>

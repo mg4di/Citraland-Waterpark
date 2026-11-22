@@ -65,7 +65,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
 
   // ===================== TOAST =====================
   function showToast(msg, type = 'success') {
-    const c = { success: 'bg-emerald-500', error: 'bg-rose-500', info: 'bg-ocean' };
+    const c = { success: 'bg-emerald-500', error: 'bg-rose-500', info: 'bg-pool' };
     const i = { success: 'lucide:check-circle', error: 'lucide:alert-circle', info: 'lucide:info' };
     const t = document.createElement('div');
     t.className = `toast show pointer-events-auto flex items-center gap-3 rounded-xl ${c[type]} px-5 py-3.5 text-sm font-semibold text-white shadow-lg`;
@@ -181,13 +181,13 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
 
     // Update sidebar
     document.querySelectorAll('.nav-link').forEach((l) => {
-      l.classList.remove('bg-lagoon', 'text-ocean', 'font-bold');
+      l.classList.remove('bg-lagoon', 'text-pool', 'font-bold');
       l.classList.add('text-slate-500', 'font-semibold');
     });
     const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
     if (activeLink) {
       activeLink.classList.remove('text-slate-500', 'font-semibold');
-      activeLink.classList.add('bg-lagoon', 'text-ocean', 'font-bold');
+      activeLink.classList.add('bg-lagoon', 'text-pool', 'font-bold');
     }
 
     // Update breadcrumb
@@ -203,8 +203,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     document.getElementById('breadcrumb-current').textContent = labels[page] || 'Dashboard';
 
     // Close mobile sidebar
-    root.classList.remove('sidebar-open');
-    overlay.classList.add('hidden');
+    setSidebarOpen(false, { restoreFocus: false });
 
     // Re-render page-specific content
     if (page === 'bookings') renderBookings();
@@ -247,21 +246,79 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   });
 
   // ===================== SIDEBAR & HEADER =====================
+  const mobileSidebarQuery = window.matchMedia('(max-width: 767px)');
+  let sidebarTrigger = null;
+
+  function setSidebarOpen(open, { restoreFocus = true } = {}) {
+    const sidebar = document.getElementById('admin-sidebar');
+    const trigger = document.getElementById('mobile-menu-button');
+    const isMobile = mobileSidebarQuery.matches;
+    root.classList.toggle('sidebar-open', open);
+    overlay.classList.toggle('hidden', !open);
+    document.body.style.overflow = open && isMobile ? 'hidden' : '';
+    trigger?.setAttribute('aria-expanded', String(open));
+    if (isMobile) {
+      sidebar?.toggleAttribute('inert', !open);
+      sidebar?.setAttribute('aria-hidden', String(!open));
+    } else {
+      sidebar?.removeAttribute('inert');
+      sidebar?.removeAttribute('aria-hidden');
+    }
+    if (open) {
+      sidebarTrigger = trigger;
+      closeAllDD();
+      const closeButton = document.getElementById('sidebar-close-button');
+      (closeButton ?? sidebar?.querySelector('a[href], button'))?.focus({ preventScroll: true });
+    } else if (restoreFocus && sidebarTrigger) {
+      sidebarTrigger.focus({ preventScroll: true });
+      sidebarTrigger = null;
+    }
+  }
+
+  function syncSidebarA11y() {
+    const sidebar = document.getElementById('admin-sidebar');
+    if (!mobileSidebarQuery.matches) {
+      sidebar?.removeAttribute('inert');
+      sidebar?.removeAttribute('aria-hidden');
+      document.body.style.overflow = '';
+      document.getElementById('mobile-menu-button')?.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    const open = root.classList.contains('sidebar-open');
+    document.body.style.overflow = open ? 'hidden' : '';
+    sidebar?.toggleAttribute('inert', !open);
+    sidebar?.setAttribute('aria-hidden', String(!open));
+    document.getElementById('mobile-menu-button')?.setAttribute('aria-expanded', String(open));
+  }
+
   document
     .getElementById('sidebar-collapse-button')
     .addEventListener('click', () => root.classList.toggle('sidebar-collapsed'));
-  document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
-    root.classList.toggle('sidebar-open');
-    overlay.classList.toggle('hidden');
-  });
-  overlay.addEventListener('click', () => {
-    root.classList.remove('sidebar-open');
-    overlay.classList.add('hidden');
-  });
+  document
+    .getElementById('mobile-menu-button')
+    ?.addEventListener('click', () => setSidebarOpen(!root.classList.contains('sidebar-open')));
+  document
+    .getElementById('sidebar-close-button')
+    ?.addEventListener('click', () => setSidebarOpen(false));
+  overlay.addEventListener('click', () => setSidebarOpen(false));
+  syncSidebarA11y();
+  window.addEventListener('resize', syncSidebarA11y);
 
   // Dropdowns (pakai event delegation agar tetap berjalan walau header di-render ulang)
-  function closeAllDD() {
-    document.getElementById('profile-dropdown')?.classList.remove('show');
+  function setDropdown(open) {
+    const dropdown = document.getElementById('profile-dropdown');
+    const button = document.getElementById('profile-menu-button');
+    dropdown?.classList.toggle('show', open);
+    dropdown?.toggleAttribute('inert', !open);
+    dropdown?.setAttribute('aria-hidden', String(!open));
+    button?.setAttribute('aria-expanded', String(open));
+  }
+  function closeAllDD({ restoreFocus = false } = {}) {
+    const wasOpen = document.getElementById('profile-dropdown')?.classList.contains('show');
+    setDropdown(false);
+    if (wasOpen && restoreFocus) {
+      document.getElementById('profile-menu-button')?.focus({ preventScroll: true });
+    }
   }
   onDocument('click', (e) => {
     const target = e.target instanceof Element ? e.target : null;
@@ -273,7 +330,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
       const dd = document.getElementById('profile-dropdown');
       const open = dd?.classList.contains('show');
       closeAllDD();
-      if (!open) dd?.classList.add('show');
+      if (!open) setDropdown(true);
       return;
     }
     if (target.closest('#profile-dropdown')) {
@@ -350,18 +407,35 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   // Keyboard
   onDocument('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeAllDD();
+      closeAllDD({ restoreFocus: true });
+      if (root.classList.contains('sidebar-open')) setSidebarOpen(false);
       document.querySelectorAll('.modal-overlay.show').forEach((m) => m.classList.remove('show'));
+    }
+    if (e.key === 'Tab' && root.classList.contains('sidebar-open') && mobileSidebarQuery.matches) {
+      const sidebar = document.getElementById('admin-sidebar');
+      const focusable = [...(sidebar?.querySelectorAll('a[href], button:not([disabled])') ?? [])].filter(
+        (element) => element.offsetParent !== null,
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   });
 
   // ===================== BOOKINGS PAGE =====================
   const statusCfg = {
-    paid: { label: 'Paid', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+    paid: { label: 'Paid', bg: 'bg-emerald-50', text: 'text-emerald-700' },
     pending: { label: 'Pending', bg: 'bg-amber-50', text: 'text-amber-600' },
     failed: { label: 'Failed', bg: 'bg-rose-50', text: 'text-rose-600' },
     cancelled: { label: 'Cancelled', bg: 'bg-slate-100', text: 'text-slate-600' },
-    refunded: { label: 'Refunded', bg: 'bg-violet-50', text: 'text-violet-600' },
+    refunded: { label: 'Refunded', bg: 'bg-seafoam', text: 'text-pool' },
   };
 
   function mapBooking(booking) {
@@ -459,7 +533,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     if (!legend) return;
     legend.replaceChildren();
     if (!result.total) {
-      legend.innerHTML = '<p class="text-sm text-slate-400">Belum ada data pada periode ini.</p>';
+      legend.innerHTML = '<p class="text-sm text-slate-500">Belum ada data pada periode ini.</p>';
       return;
     }
     for (const segment of result.segments) {
@@ -479,26 +553,33 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     }
   }
 
+  function labelTableRow(row, labels) {
+    row.querySelectorAll('td').forEach((cell, index) => {
+      if (labels[index] !== undefined) cell.dataset.label = labels[index];
+    });
+  }
+
   function renderDashboardRecent(bookings) {
-    const body = document.querySelector('#page-dashboard table tbody');
+    const body = document.getElementById('dash-recent-body');
     if (!body) return;
     body.replaceChildren();
     if (!bookings.length) {
       body.innerHTML =
-        '<tr><td colspan="6" class="px-6 py-14 text-center text-sm text-slate-400">Belum ada booking pada periode ini.</td></tr>';
+        '<tr><td colspan="6" class="px-6 py-14 text-center text-sm text-slate-500">Belum ada booking pada periode ini.</td></tr>';
       return;
     }
     for (const rawBooking of bookings) {
       const booking = mapBooking(rawBooking);
       const status = statusCfg[booking.status] ?? statusCfg.pending;
       const row = document.createElement('tr');
-      row.className = 'hover:bg-slate-50';
-      row.innerHTML = `<td class="px-6 py-4 font-bold text-ocean">${escapeHtml(booking.id)}</td>
+      row.className = 'hover:bg-lagoon';
+      row.innerHTML = `<td class="px-6 py-4 font-bold text-pool">${escapeHtml(booking.id)}</td>
       <td class="px-4 py-4 font-semibold text-slate-700">${escapeHtml(booking.name)}</td>
       <td class="px-4 py-4 text-slate-500">${escapeHtml(booking.ticket)}</td>
       <td class="px-4 py-4 text-slate-500">${escapeHtml(booking.date)}</td>
       <td class="px-4 py-4"><span class="rounded-full ${status.bg} px-3 py-1.5 text-xs font-bold ${status.text}">${status.label}</span></td>
       <td class="px-6 py-4 text-right font-bold text-slate-800">${escapeHtml(booking.amount)}</td>`;
+      labelTableRow(row, ['Booking ID', 'Guest', 'Type', 'Visit Date', 'Status', 'Amount']);
       body.appendChild(row);
     }
   }
@@ -697,25 +778,26 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     tbody.replaceChildren();
     if (!pageData.length) {
       tbody.innerHTML =
-        '<tr><td colspan="8" class="px-6 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400"><iconify-icon icon="lucide:search-x" class="text-2xl"></iconify-icon></span><p class="mt-4 font-display font-bold text-slate-700">Tidak ada booking</p></td></tr>';
+        '<tr><td colspan="8" class="px-6 py-16 text-center"><span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500"><iconify-icon icon="lucide:search-x" class="text-2xl"></iconify-icon></span><p class="mt-4 font-display font-bold text-slate-700">Tidak ada booking</p></td></tr>';
       return;
     }
 
     pageData.forEach((b) => {
       const sc = statusCfg[b.status] ?? statusCfg.pending;
       const checkinBtn = b.canCheckIn
-        ? `<button class="checkin-booking rounded-lg p-2 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600" title="Check-in manual" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:door-open"></iconify-icon></button>`
+        ? `<button class="checkin-booking rounded-lg p-2 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700" title="Check-in manual" aria-label="Check-in booking ${escapeHtml(b.id)}" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:door-open"></iconify-icon></button>`
         : '';
       const actions =
         b.status === 'cancelled'
-          ? '<span class="px-2 text-xs font-semibold text-slate-400">Riwayat</span>'
-          : `${checkinBtn}<button class="delete-booking rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
+          ? '<span class="px-2 text-xs font-semibold text-slate-500">Riwayat</span>'
+          : `${checkinBtn}<button class="delete-booking rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-500" aria-label="Hapus booking ${escapeHtml(b.id)}" data-id="${escapeHtml(b.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
       const checkinCell = b.checkedInAt
-        ? `<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600"><iconify-icon icon="lucide:check"></iconify-icon>${escapeHtml(b.checkInLabel)}</span>`
+        ? `<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700"><iconify-icon icon="lucide:check"></iconify-icon>${escapeHtml(b.checkInLabel)}</span>`
         : '<span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500">Belum masuk</span>';
       const tr = document.createElement('tr');
-      tr.className = 'table-row hover:bg-slate-50';
-      tr.innerHTML = `<td class="px-6 py-5 font-bold text-ocean">${escapeHtml(b.id)}</td><td class="px-4 py-5"><p class="font-semibold text-slate-700">${escapeHtml(b.name)}</p><p class="mt-1 text-xs text-slate-400">${escapeHtml(b.email)}</p></td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.ticket)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.date)}</td><td class="px-4 py-5"><span class="rounded-full ${sc.bg} px-3 py-1.5 text-xs font-bold ${sc.text}">${sc.label}</span></td><td class="px-4 py-5">${checkinCell}</td><td class="px-4 py-5 text-right font-bold text-slate-800">${escapeHtml(b.amount)}</td><td class="px-6 py-5"><div class="flex justify-center gap-1">${actions}</div></td>`;
+      tr.className = 'table-row hover:bg-lagoon';
+      tr.innerHTML = `<td class="px-6 py-5 font-bold text-pool">${escapeHtml(b.id)}</td><td class="px-4 py-5"><p class="font-semibold text-slate-700">${escapeHtml(b.name)}</p><p class="mt-1 text-xs text-slate-500">${escapeHtml(b.email)}</p></td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.ticket)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(b.date)}</td><td class="px-4 py-5"><span class="rounded-full ${sc.bg} px-3 py-1.5 text-xs font-bold ${sc.text}">${sc.label}</span></td><td class="px-4 py-5">${checkinCell}</td><td class="px-4 py-5 text-right font-bold text-slate-800">${escapeHtml(b.amount)}</td><td class="px-6 py-5"><div class="flex justify-center gap-1">${actions}</div></td>`;
+      labelTableRow(tr, ['Booking ID', 'Guest', 'Ticket Type', 'Visit Date', 'Status', 'Check-in', 'Amount', 'Actions']);
       tbody.appendChild(tr);
     });
 
@@ -747,7 +829,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     if (totalPages > 1) {
       const mkBtn = (label, pg, disabled = false, active = false) => {
         const b = document.createElement('button');
-        b.className = `page-btn flex h-9 w-9 items-center justify-center rounded-lg ${active ? 'bg-ocean text-sm font-bold text-white' : 'border border-slate-200 text-sm font-semibold text-slate-500 hover:border-aqua hover:text-ocean'} ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`;
+        b.className = `page-btn flex h-9 w-9 items-center justify-center rounded-lg ${active ? 'bg-pool text-sm font-bold text-white' : 'border border-slate-200 text-sm font-semibold text-slate-500 hover:border-aqua hover:text-pool'} ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`;
         b.innerHTML = label;
         b.disabled = disabled;
         b.addEventListener('click', () => {
@@ -789,9 +871,9 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
       bkPage = 1;
       document.querySelectorAll('.bk-filter').forEach((x) => {
         x.className =
-          'bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-ocean';
+          'bk-filter rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:bg-lagoon hover:text-pool';
       });
-      btn.className = 'bk-filter rounded-xl bg-ocean px-4 py-2.5 text-sm font-bold text-white';
+      btn.className = 'bk-filter rounded-xl bg-pool px-4 py-2.5 text-sm font-bold text-white';
       loadBookings();
     });
   });
@@ -898,7 +980,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     tbody.replaceChildren();
     if (!users.length) {
       tbody.innerHTML =
-        '<tr><td colspan="9" class="px-6 py-16 text-center"><p class="font-display font-bold text-slate-700">Tidak ada pengguna</p><p class="mt-1 text-sm text-slate-400">Coba ubah kata kunci atau filter status.</p></td></tr>';
+        '<tr><td colspan="9" class="px-6 py-16 text-center"><p class="font-display font-bold text-slate-700">Tidak ada pengguna</p><p class="mt-1 text-sm text-slate-500">Coba ubah kata kunci atau filter status.</p></td></tr>';
       updateUsrCount();
       return;
     }
@@ -906,10 +988,11 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     users.forEach((u, index) => {
       const status = u.status === 'active' ? 'Active' : 'Inactive';
       const stBg =
-        u.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500';
+        u.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500';
       const tr = document.createElement('tr');
-      tr.className = 'user-row hover:bg-slate-50';
-      tr.innerHTML = `<td class="px-5 py-4"><input type="checkbox" class="usr-check h-4 w-4 rounded border-slate-300 accent-ocean cursor-pointer" data-id="${escapeHtml(u.user_id)}" ${usrSelected.has(u.user_id) ? 'checked' : ''}></td><td class="px-4 py-4"><div class="flex items-center gap-3"><span class="avatar-c${index % 8} flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold">${escapeHtml(getInitials(u.full_name))}</span><div><p class="font-bold text-slate-800">${escapeHtml(u.full_name)}</p><p class="text-xs text-slate-400">${escapeHtml(u.email)}</p></div></div></td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.email)}</td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.phone || '—')}</td><td class="px-4 py-4 text-slate-500">${formatJoinDate(u.created_at)}</td><td class="px-4 py-4 text-slate-500">${formatNumber(u.paid_bookings)} / ${formatNumber(u.booking_count)}</td><td class="px-4 py-4 text-right font-semibold text-slate-700">${formatRupiah(u.total_spend)}</td><td class="px-4 py-4"><span class="rounded-full ${stBg} px-3 py-1.5 text-xs font-bold">${status}</span></td><td class="px-5 py-4"><div class="flex justify-end gap-1"><button class="edit-usr rounded-lg p-2 text-slate-400 hover:bg-lagoon hover:text-ocean" data-id="${escapeHtml(u.user_id)}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="toggle-usr rounded-lg p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-600" data-id="${escapeHtml(u.user_id)}" title="${u.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}"><iconify-icon icon="${u.status === 'active' ? 'lucide:user-round-x' : 'lucide:user-check'}"></iconify-icon></button></div></td>`;
+      tr.className = 'user-row hover:bg-lagoon';
+      tr.innerHTML = `<td class="px-5 py-4"><input type="checkbox" class="usr-check h-4 w-4 rounded border-slate-300 accent-pool cursor-pointer" data-id="${escapeHtml(u.user_id)}" ${usrSelected.has(u.user_id) ? 'checked' : ''}></td><td class="px-4 py-4"><div class="flex items-center gap-3"><span class="avatar-c${index % 8} flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold">${escapeHtml(getInitials(u.full_name))}</span><div><p class="font-bold text-slate-800">${escapeHtml(u.full_name)}</p><p class="text-xs text-slate-500">${escapeHtml(u.email)}</p></div></div></td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.email)}</td><td class="px-4 py-4 text-slate-500">${escapeHtml(u.phone || '—')}</td><td class="px-4 py-4 text-slate-500">${formatJoinDate(u.created_at)}</td><td class="px-4 py-4 text-slate-500">${formatNumber(u.paid_bookings)} / ${formatNumber(u.booking_count)}</td><td class="px-4 py-4 text-right font-semibold text-slate-700">${formatRupiah(u.total_spend)}</td><td class="px-4 py-4"><span class="rounded-full ${stBg} px-3 py-1.5 text-xs font-bold">${status}</span></td><td class="px-5 py-4"><div class="flex justify-end gap-1"><button class="edit-usr rounded-lg p-2 text-slate-500 hover:bg-lagoon hover:text-pool" aria-label="Edit pengguna ${escapeHtml(u.full_name)}" data-id="${escapeHtml(u.user_id)}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="toggle-usr rounded-lg p-2 text-slate-500 hover:bg-amber-50 hover:text-amber-600" aria-label="${u.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'} pengguna ${escapeHtml(u.full_name)}" data-id="${escapeHtml(u.user_id)}" title="${u.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}"><iconify-icon icon="${u.status === 'active' ? 'lucide:user-round-x' : 'lucide:user-check'}"></iconify-icon></button></div></td>`;
+      labelTableRow(tr, ['', 'User', 'Email', 'Phone', 'Join Date', 'Bookings', 'Spend', 'Status', 'Actions']);
       tbody.appendChild(tr);
     });
 
@@ -1071,10 +1154,10 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   document.querySelectorAll('.ctab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.ctab-btn').forEach((b) => {
-        b.classList.remove('bg-ocean', 'text-white');
+        b.classList.remove('bg-pool', 'text-white');
         b.classList.add('text-slate-500');
       });
-      btn.classList.add('bg-ocean', 'text-white');
+      btn.classList.add('bg-pool', 'text-white');
       btn.classList.remove('text-slate-500');
       document
         .querySelectorAll('#page-content .tab-panel')
@@ -1089,9 +1172,9 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     container.replaceChildren();
     pricing.forEach((p) => {
       const card = document.createElement('article');
-      card.className = `pricing-card rounded-2xl ${p.featured ? 'border-2 border-ocean ring-2 ring-cyan-50' : 'border border-slate-200'} bg-white p-6 shadow-sm`;
+      card.className = `pricing-card rounded-2xl ${p.featured ? 'border-2 border-ocean ring-2 ring-aqua/15' : 'border border-slate-200'} bg-white p-6 shadow-sm`;
       const id = escapeHtml(p.id);
-      card.innerHTML = `<div class="flex items-start justify-between"><div><span class="flex h-11 w-11 items-center justify-center rounded-xl ${p.featured ? 'bg-ocean text-white' : 'bg-lagoon text-ocean'}"><iconify-icon icon="${escapeHtml(p.icon)}" class="text-xl"></iconify-icon></span><h3 class="mt-5 font-display text-lg font-bold">${escapeHtml(p.name)}</h3><p class="mt-1 text-xs text-slate-400">${escapeHtml(p.desc)}</p></div><span class="rounded-full ${p.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'} px-3 py-1 text-xs font-bold">${p.status === 'active' ? 'Published' : 'Unpublished'}</span></div><label class="mt-6 block text-sm font-bold text-slate-700">Harga tiket<input type="text" value="${p.price}" data-pid="${id}" class="price-field mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-cyan-100"></label><label class="mt-4 block text-sm font-bold text-slate-700">Deskripsi<textarea readonly class="mt-2 h-24 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">${escapeHtml(p.desc)}</textarea></label><div class="mt-4 rounded-xl ${p.featured ? 'bg-lagoon' : 'bg-slate-50'} p-4"><div><p class="text-xs text-slate-400">Preview harga</p><p class="price-preview mt-1 font-display text-2xl font-extrabold text-ocean" data-pid="${id}">Rp${p.price.toLocaleString('id-ID')}</p></div></div><div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-5"><label class="flex items-center gap-2 text-xs font-bold text-slate-500"><input type="checkbox" ${p.status === 'active' ? 'checked' : ''} data-pid="${id}" class="pricing-status h-4 w-4 accent-ocean"> Publish</label><button class="save-price-btn flex min-h-10 items-center gap-2 rounded-xl bg-ocean px-4 text-sm font-bold text-white hover:bg-ocean/90" data-pid="${id}"><iconify-icon icon="lucide:save"></iconify-icon> Simpan</button></div>`;
+      card.innerHTML = `<div class="flex items-start justify-between"><div><span class="flex h-11 w-11 items-center justify-center rounded-xl ${p.featured ? 'bg-pool text-white' : 'bg-lagoon text-pool'}"><iconify-icon icon="${escapeHtml(p.icon)}" class="text-xl"></iconify-icon></span><h3 class="mt-5 font-display text-lg font-bold">${escapeHtml(p.name)}</h3><p class="mt-1 text-xs text-slate-500">${escapeHtml(p.desc)}</p></div><span class="rounded-full ${p.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'} px-3 py-1 text-xs font-bold">${p.status === 'active' ? 'Published' : 'Unpublished'}</span></div><label class="mt-6 block text-sm font-bold text-slate-700">Harga tiket<input type="text" value="${p.price}" data-pid="${id}" class="price-field mt-2 h-12 w-full rounded-xl border border-slate-200 px-4 font-semibold outline-none focus:border-aqua focus:ring-4 focus:ring-aqua/20"></label><label class="mt-4 block text-sm font-bold text-slate-700">Deskripsi<textarea readonly class="mt-2 h-24 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">${escapeHtml(p.desc)}</textarea></label><div class="mt-4 rounded-xl ${p.featured ? 'bg-lagoon' : 'bg-slate-50'} p-4"><div><p class="text-xs text-slate-500">Preview harga</p><p class="price-preview mt-1 font-display text-2xl font-extrabold text-pool" data-pid="${id}">Rp${p.price.toLocaleString('id-ID')}</p></div></div><div class="mt-5 flex items-center justify-between border-t border-slate-100 pt-5"><label class="flex items-center gap-2 text-xs font-bold text-slate-500"><input type="checkbox" ${p.status === 'active' ? 'checked' : ''} data-pid="${id}" class="pricing-status h-4 w-4 accent-pool"> Publish</label><button class="save-price-btn flex min-h-10 items-center gap-2 rounded-xl bg-pool px-4 text-sm font-bold text-white hover:bg-pool/90" data-pid="${id}"><iconify-icon icon="lucide:save"></iconify-icon> Simpan</button></div>`;
       container.appendChild(card);
     });
     container.querySelectorAll('.price-field').forEach((inp) => {
@@ -1149,10 +1232,10 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     tbody.replaceChildren();
     facilities.forEach((f) => {
       const stCls =
-        f.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500';
+        f.status === 'Active' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500';
       const tr = document.createElement('tr');
-      tr.className = 'facility-row hover:bg-slate-50';
-      tr.innerHTML = `<td class="px-6 py-5 font-bold text-slate-800">${escapeHtml(f.name)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(f.desc)}</td><td class="px-4 py-5"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lagoon text-ocean"><iconify-icon icon="${escapeHtml(f.icon)}"></iconify-icon></span></td><td class="px-4 py-5"><span class="rounded-full ${stCls} px-3 py-1.5 text-xs font-bold">${f.status}</span></td><td class="px-6 py-5 text-right"><div class="flex justify-end gap-1"><button class="edit-fac rounded-lg p-2 text-slate-400 hover:bg-lagoon hover:text-ocean" data-id="${escapeHtml(f.id)}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="del-fac rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" data-id="${escapeHtml(f.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button></div></td>`;
+      tr.className = 'facility-row hover:bg-lagoon';
+      tr.innerHTML = `<td class="px-6 py-5 font-bold text-slate-800">${escapeHtml(f.name)}</td><td class="px-4 py-5 text-slate-500">${escapeHtml(f.desc)}</td><td class="px-4 py-5"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-lagoon text-pool"><iconify-icon icon="${escapeHtml(f.icon)}"></iconify-icon></span></td><td class="px-4 py-5"><span class="rounded-full ${stCls} px-3 py-1.5 text-xs font-bold">${f.status}</span></td><td class="px-6 py-5 text-right"><div class="flex justify-end gap-1"><button class="edit-fac rounded-lg p-2 text-slate-500 hover:bg-lagoon hover:text-pool" aria-label="Edit fasilitas ${escapeHtml(f.name)}" data-id="${escapeHtml(f.id)}"><iconify-icon icon="lucide:pencil"></iconify-icon></button><button class="del-fac rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-500" aria-label="Hapus fasilitas ${escapeHtml(f.name)}" data-id="${escapeHtml(f.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button></div></td>`;
       tbody.appendChild(tr);
     });
     tbody.querySelectorAll('.edit-fac').forEach((b) => {
@@ -1247,7 +1330,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
       const d = document.createElement('div');
       d.className =
         'promo-card flex items-center justify-between rounded-xl border border-slate-100 p-4';
-      d.innerHTML = `<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl ${p.active ? 'bg-lagoon text-ocean' : 'bg-slate-100 text-slate-400'}"><iconify-icon icon="lucide:ticket-percent"></iconify-icon></span><div><p class="font-bold ${p.active ? 'text-ocean' : 'text-slate-400'}">${escapeHtml(p.code)}</p><p class="mt-0.5 text-xs text-slate-500">${escapeHtml(p.discount)} · ${escapeHtml(p.period)}</p></div></div><div class="flex items-center gap-3"><div class="toggle-switch ${p.active ? 'active' : ''}" data-id="${escapeHtml(p.id)}"><span class="toggle-knob"></span></div><button class="del-promo rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-500" data-id="${escapeHtml(p.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button></div>`;
+      d.innerHTML = `<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl ${p.active ? 'bg-lagoon text-pool' : 'bg-slate-100 text-slate-500'}"><iconify-icon icon="lucide:ticket-percent"></iconify-icon></span><div><p class="font-bold ${p.active ? 'text-pool' : 'text-slate-500'}">${escapeHtml(p.code)}</p><p class="mt-0.5 text-xs text-slate-500">${escapeHtml(p.discount)} · ${escapeHtml(p.period)}</p></div></div><div class="flex items-center gap-3"><div class="toggle-switch ${p.active ? 'active' : ''}" data-id="${escapeHtml(p.id)}"><span class="toggle-knob"></span></div><button class="del-promo rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-500" aria-label="Hapus promosi ${escapeHtml(p.code)}" data-id="${escapeHtml(p.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button></div>`;
       list.appendChild(d);
     });
     list.querySelectorAll('.toggle-switch').forEach((t) => {
@@ -1334,12 +1417,12 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
       imageContainer.appendChild(image);
       const overlayElement = document.createElement('div');
       overlayElement.className =
-        'gallery-overlay absolute inset-0 flex items-center justify-center bg-slate-900/40';
-      overlayElement.innerHTML = `<button class="del-gallery flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-rose-500 hover:bg-white" data-id="${escapeHtml(item.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
+        'gallery-overlay absolute inset-0 flex items-center justify-center bg-ink/40';
+      overlayElement.innerHTML = `<button class="del-gallery flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-rose-500 hover:bg-white" aria-label="Hapus foto galeri" data-id="${escapeHtml(item.id)}"><iconify-icon icon="lucide:trash-2"></iconify-icon></button>`;
       imageContainer.appendChild(overlayElement);
       const details = document.createElement('div');
       details.className = 'flex items-center justify-between p-3';
-      details.innerHTML = `<div><p class="text-sm font-bold">${escapeHtml(item.title)}</p><p class="text-xs text-slate-400">Order ${String(item.order).padStart(2, '0')} · ${escapeHtml(item.status)}</p></div>`;
+      details.innerHTML = `<div><p class="text-sm font-bold">${escapeHtml(item.title)}</p><p class="text-xs text-slate-500">Order ${String(item.order).padStart(2, '0')} · ${escapeHtml(item.status)}</p></div>`;
       d.append(imageContainer, details);
       grid.appendChild(d);
     });
@@ -1470,8 +1553,8 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     }
     const max = Math.max(0, ...counts.flat());
     const colors = [
-      'bg-cyan-50',
-      'bg-cyan-100',
+      'bg-lagoon',
+      'bg-seafoam',
       'bg-aqua/40',
       'bg-aqua/50',
       'bg-aqua/70',
@@ -1514,7 +1597,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
     legend.replaceChildren();
     if (!result.total) {
       legend.innerHTML =
-        '<p class="text-sm text-slate-400">Belum ada tiket terjual pada periode ini.</p>';
+        '<p class="text-sm text-slate-500">Belum ada tiket terjual pada periode ini.</p>';
       return;
     }
     for (const segment of result.segments) {
@@ -1675,7 +1758,7 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   const initialRecent = document.querySelector('#page-dashboard table tbody');
   if (initialRecent)
     initialRecent.innerHTML =
-      '<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-400">Memuat pemesanan…</td></tr>';
+      '<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">Memuat pemesanan…</td></tr>';
 
   // Periode default: awal bulan berjalan sampai hari ini (WITA).
   dashFrom = monthStartWita();

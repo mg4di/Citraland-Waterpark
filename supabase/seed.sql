@@ -31,10 +31,10 @@ ON CONFLICT (promo_code) DO NOTHING;
 WITH images(image_url, caption, display_order) AS (
   VALUES
     ('/images/waterpark-hero.webp', 'Citraland Waterpark Denpasar', 1),
-    ('/images/gallery-pirate-pool.jpg', 'Kolam bermain bertema bajak laut', 2),
-    ('/images/gallery-water-slide.jpg', 'Area seluncuran air anak', 3),
-    ('/images/gallery-entrance.jpg', 'Pintu masuk Citraland Waterpark', 4),
-    ('/images/gallery-pirate-statue.jpg', 'Dekorasi bajak laut di area waterpark', 5)
+    ('/images/gallery-pirate-pool.webp', 'Kolam bermain bertema bajak laut', 2),
+    ('/images/gallery-water-slide.webp', 'Area seluncuran air anak', 3),
+    ('/images/gallery-entrance.webp', 'Pintu masuk Citraland Waterpark', 4),
+    ('/images/gallery-pirate-statue.webp', 'Dekorasi bajak laut di area waterpark', 5)
 ),
 updated AS (
   UPDATE public.gallery_images AS existing

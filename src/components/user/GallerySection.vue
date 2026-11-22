@@ -8,19 +8,29 @@ const window = globalThis.window;
 const gallery = ref(waterparkGalleryImages.map((image) => ({ ...image })));
 
 function updateGallery(images) {
-  if (!images.length) {
+  const curated = (images ?? []).filter((image) => {
+    const text = `${image.caption ?? ''} ${image.image_url ?? ''}`.toLowerCase();
+    return !/(uhdpaper|wallpaper|harbor-cats|mimi|kucing)/.test(text);
+  });
+  if (!curated.length) {
     gallery.value = waterparkGalleryImages.map((image) => ({ ...image }));
     activeIndex.value = 0;
     requestAnimationFrame(updateActiveIndex);
     return;
   }
 
-  gallery.value = images.map((image) => {
-    const localImage = waterparkGalleryImages.find((item) => item.caption === image.caption);
+  gallery.value = curated.map((image) => {
+    const localImage = waterparkGalleryImages.find(
+      (item) => item.caption === image.caption || item.src === image.image_url,
+    );
     return {
       src: localImage?.src || image.image_url,
+      srcset: localImage?.srcset,
       alt: localImage?.alt || image.caption || 'Foto Citraland Waterpark Denpasar',
       caption: image.caption || 'Citraland Waterpark Denpasar',
+      width: localImage?.width || 1200,
+      height: localImage?.height || 800,
+      position: localImage?.position || 'center',
     };
   });
   activeIndex.value = 0;
@@ -97,91 +107,116 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section id="galeri" class="mx-auto max-w-7xl px-6 py-24 lg:px-10">
-    <div class="scroll-reveal flex items-end justify-between">
-      <div>
-        <p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">
-          Galeri Citraland Waterpark
-        </p>
-        <h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-          Suasana di Denpasar
+  <section id="galeri" class="scroll-mt-24 bg-sand px-5 py-20 lg:px-8 lg:py-28">
+    <div class="mx-auto grid min-w-0 max-w-7xl gap-10 lg:grid-cols-[.62fr_1.38fr] lg:gap-16">
+      <div class="min-w-0 self-start lg:sticky lg:top-28">
+        <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
+          Suasana<br />kolam.
         </h2>
-      </div>
-    </div>
-    <p class="mt-3 text-xs text-slate-400">
-      Foto dari Google Maps.
-      <a
-        href="https://goo.gl/maps/SkPFYkq98TpqHFzL9"
-        target="_blank"
-        rel="noreferrer"
-        class="font-semibold text-ocean underline underline-offset-2"
-        >Lihat sumber foto</a
-      >
-    </p>
-    <div class="mt-10">
-      <div
-        id="gallery-track"
-        ref="track"
-        class="gallery-track flex h-[300px] snap-x snap-mandatory gap-4 overflow-x-auto rounded-3xl scroll-smooth sm:h-[420px] lg:h-[500px]"
-        role="region"
-        aria-label="Galeri foto Citraland Waterpark"
-        tabindex="0"
-        @keydown="onKeydown"
-      >
-        <figure
-          v-for="image in gallery"
-          :key="image.src"
-          data-gallery-slide
-          class="relative h-full min-w-full snap-start overflow-hidden rounded-3xl bg-slate-100"
-        >
-          <img
-            :src="image.src"
-            :alt="image.alt"
-            loading="lazy"
-            decoding="async"
-            class="gallery-img h-full w-full object-cover"
-          />
-          <figcaption
-            class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-6 pb-6 pt-20 text-lg font-bold text-white sm:px-10 sm:pb-9"
+        <p class="mt-5 max-w-sm leading-7 text-ink/70">
+          Foto dari Google Maps. Lihat warna air, kapal bajak laut, dan area bermain sebelum
+          berangkat.
+        </p>
+
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-y border-ink/15 py-3">
+          <div class="flex flex-wrap items-center gap-1">
+            <button
+              type="button"
+              aria-label="Foto sebelumnya"
+              title="Foto sebelumnya"
+              class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/20 text-ink transition hover:border-ink hover:bg-white"
+              @click="goTo(activeIndex - 1)"
+            >
+              <iconify-icon icon="lucide:arrow-left" class="text-lg"></iconify-icon>
+            </button>
+            <p class="min-w-16 text-center text-sm font-bold tabular-nums" aria-live="polite">
+              {{ String(activeIndex + 1).padStart(2, '0') }} / {{ String(gallery.length).padStart(2, '0') }}
+            </p>
+            <button
+              type="button"
+              aria-label="Foto berikutnya"
+              title="Foto berikutnya"
+              class="flex h-11 w-11 items-center justify-center rounded-full border border-ink/20 text-ink transition hover:border-ink hover:bg-white"
+              @click="goTo(activeIndex + 1)"
+            >
+              <iconify-icon icon="lucide:arrow-right" class="text-lg"></iconify-icon>
+            </button>
+          </div>
+          <a
+            href="https://goo.gl/maps/SkPFYkq98TpqHFzL9"
+            target="_blank"
+            rel="noreferrer"
+            class="flex items-center gap-2 text-xs font-bold text-ink/70 underline decoration-ink/25 underline-offset-4 transition hover:text-ink hover:decoration-ink"
           >
-            {{ image.caption }}
-          </figcaption>
-        </figure>
-      </div>
-      <div class="mt-5 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-2" aria-label="Pilih foto galeri">
-          <button
-            v-for="(_, index) in gallery"
-            :key="index"
-            type="button"
-            :aria-label="`Tampilkan foto ${index + 1}`"
-            :aria-current="activeIndex === index ? 'true' : undefined"
-            :class="[
-              'h-2.5 rounded-full transition-all hover:bg-ocean',
-              activeIndex === index ? 'w-7 bg-ocean' : 'w-2.5 bg-slate-300',
-            ]"
-            @click="goTo(index)"
-          ></button>
+            Sumber foto
+            <iconify-icon icon="lucide:arrow-up-right" class="text-sm"></iconify-icon>
+          </a>
         </div>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            aria-label="Foto sebelumnya"
-            title="Foto sebelumnya"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-ocean hover:bg-lagoon hover:text-ocean"
-            @click="goTo(activeIndex - 1)"
+        <p class="mt-4 text-xs leading-5 text-ink/70">
+          Geser atau klik panah untuk berpindah foto.
+        </p>
+      </div>
+
+      <div class="min-w-0">
+        <div
+          id="gallery-track"
+          ref="track"
+          class="gallery-track flex h-[420px] min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto rounded-[1.75rem] bg-ink scroll-smooth sm:h-[520px]"
+          role="region"
+          aria-label="Galeri foto Citraland Waterpark"
+          tabindex="0"
+          @keydown="onKeydown"
+        >
+          <figure
+            v-for="(image, index) in gallery"
+            :key="image.src"
+            data-gallery-slide
+            class="relative h-full min-w-full snap-start overflow-hidden rounded-[1.75rem] bg-ink"
           >
-            <iconify-icon icon="lucide:arrow-left" class="text-lg"></iconify-icon>
-          </button>
-          <button
-            type="button"
-            aria-label="Foto berikutnya"
-            title="Foto berikutnya"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-ocean hover:bg-lagoon hover:text-ocean"
-            @click="goTo(activeIndex + 1)"
-          >
-            <iconify-icon icon="lucide:arrow-right" class="text-lg"></iconify-icon>
-          </button>
+            <img
+              :src="image.src"
+              :srcset="image.srcset"
+              :alt="image.alt"
+              :width="image.width"
+              :height="image.height"
+              :style="{ objectPosition: image.position }"
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              :loading="index < 2 ? 'eager' : 'lazy'"
+              :fetchpriority="index < 2 ? 'high' : 'low'"
+              decoding="async"
+              class="gallery-img h-full w-full object-cover"
+            />
+            <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-transparent px-5 pb-5 pt-24 text-white sm:px-7 sm:pb-7">
+              <p class="text-xs font-bold uppercase tracking-[.2em] text-sun">
+                {{ String(index + 1).padStart(2, '0') }} / {{ String(gallery.length).padStart(2, '0') }}
+              </p>
+              <p class="home-display mt-1 text-2xl font-extrabold tracking-[-.03em] sm:text-3xl">
+                {{ image.caption }}
+              </p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-1" aria-label="Pilih foto galeri">
+            <button
+              v-for="(_, index) in gallery"
+              :key="index"
+              type="button"
+              :aria-label="`Tampilkan foto ${index + 1}`"
+              :aria-current="activeIndex === index ? 'true' : undefined"
+              class="group flex h-11 w-11 items-center justify-center rounded-full"
+              @click="goTo(index)"
+            >
+              <span
+                :class="[
+                  'block h-2.5 rounded-full transition-all',
+                  activeIndex === index ? 'w-7 bg-ink' : 'w-2.5 bg-ink/55 group-hover:bg-ink/80',
+                ]"
+              ></span>
+            </button>
+          </div>
+          <p class="text-xs text-ink/70">Foto: Google Maps</p>
         </div>
       </div>
     </div>

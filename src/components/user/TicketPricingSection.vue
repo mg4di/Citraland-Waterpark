@@ -7,29 +7,26 @@ const window = globalThis.window;
 
 const tickets = ref([
   {
+    type: 'weekday',
     name: 'Weekdays',
+    days: 'Selasa–Jumat',
     price: 35000,
-    age: 'Selasa–Jumat',
-    features: ['Rp35.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
   },
   {
+    type: 'weekend',
     name: 'Weekend',
+    days: 'Sabtu–Minggu',
     price: 50000,
-    age: 'Sabtu–Minggu',
-    features: ['Rp50.000 per orang', 'Anak dengan tinggi di bawah 85 cm gratis'],
-    featured: true,
   },
 ]);
 
 function updatePricing(pricing) {
   for (const ticket of pricing) {
-    const current = tickets.value.find((item) =>
-      item.name.toLowerCase().includes(ticket.ticket_type),
-    );
+    const current = tickets.value.find((item) => item.type === ticket.ticket_type);
     if (!current) continue;
-    current.price = Number(ticket.price);
-    current.age = ticket.days_description;
-    current.features[0] = `Rp${current.price.toLocaleString('id-ID')} per orang`;
+    const nextPrice = Number(ticket.price);
+    if (Number.isFinite(nextPrice)) current.price = nextPrice;
+    if (ticket.days_description) current.days = ticket.days_description;
     window.setTicketPrice?.(ticket.ticket_type, current.price, `Tiket ${current.name}`);
   }
 }
@@ -50,74 +47,97 @@ onBeforeUnmount(() => unsubscribe?.());
 </script>
 
 <template>
-  <section id="harga" class="relative overflow-hidden bg-lagoon px-6 py-24 lg:px-10">
-    <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-200/30 blur-3xl"></div>
-    <div class="relative mx-auto max-w-7xl">
-      <div class="scroll-reveal text-center">
-        <p class="text-sm font-bold uppercase tracking-[.22em] text-ocean">Pilih tiketmu</p>
-        <h2 class="mt-3 font-display text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-          Liburan seru dimulai di sini
+  <section id="harga" class="scroll-mt-24 bg-sand px-5 py-20 lg:px-8 lg:py-28">
+    <div class="mx-auto grid min-w-0 max-w-7xl gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
+      <div class="min-w-0 scroll-reveal self-start lg:sticky lg:top-28">
+        <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
+          Satu harga,<br />seharian main.
         </h2>
-        <p class="mx-auto mt-4 max-w-xl text-slate-500 leading-7">
-          Pilih harga sesuai hari kunjungan. Anak dengan tinggi badan di bawah 85 cm dapat masuk
-          gratis.
+        <p class="mt-5 max-w-md leading-7 text-ink/70">
+          Harga per orang, berlaku sesuai hari kunjungan. Pilih tiket dulu—akun baru diminta saat
+          checkout.
         </p>
+
+        <ul class="mt-8 space-y-3 text-sm text-ink/75">
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+              <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>
+            </span>
+            Berlaku untuk satu hari kunjungan.
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+              <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>
+            </span>
+            Anak di bawah 85 cm masuk gratis.
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+              <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>
+            </span>
+            E-ticket masuk ke akun setelah pembayaran.
+          </li>
+        </ul>
+
+        <div class="mt-8 flex items-start gap-3 border-t border-ink/15 pt-5 text-sm leading-6 text-ink/70">
+          <iconify-icon icon="lucide:shield-check" class="mt-1 text-lg text-pool"></iconify-icon>
+          <p>Pembayaran diproses lewat Midtrans. Harga selalu diambil dari sistem tiket resmi.</p>
+        </div>
       </div>
 
-      <div class="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
-        <article
-          v-for="(ticket, index) in tickets"
-          :key="ticket.name"
-          class="scroll-reveal pricing-card relative rounded-3xl p-8"
-          :class="
-            ticket.featured
-              ? 'featured bg-ocean text-white shadow-xl shadow-cyan-900/20 lg:-mt-4'
-              : 'bg-white text-slate-900 shadow-sm hover:shadow-lg'
-          "
-          :style="{ transitionDelay: `${index * 0.1}s` }"
-        >
-          <span
-            v-if="ticket.featured"
-            class="absolute right-6 top-6 animate-pulse rounded-full bg-cyan-200 px-3 py-1 text-xs font-bold text-ocean"
-            >Terpopuler</span
+      <div class="min-w-0 scroll-reveal">
+        <div class="home-loket relative min-w-0 overflow-hidden rounded-[1.75rem] bg-white p-6 shadow-[0_28px_70px_-35px_rgba(15,23,42,.35)] ring-1 ring-ink/5 sm:p-8">
+          <div class="flex items-start justify-between gap-4 border-b border-ink/10 pb-6">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[.22em] text-ink/70">Loket tiket</p>
+              <p class="home-display mt-1 text-3xl font-extrabold tracking-[-.04em]">Harga resmi</p>
+            </div>
+            <span class="hidden rounded-full bg-seafoam px-3 py-1 text-xs font-bold uppercase tracking-[.16em] text-pool sm:inline-block">
+              Tiket harian
+            </span>
+          </div>
+
+          <div
+            v-for="ticket in tickets"
+            :key="ticket.type"
+            class="grid gap-5 border-b border-ink/10 py-6 sm:grid-cols-[1fr_auto] sm:items-center"
           >
-          <p class="font-semibold" :class="ticket.featured ? 'text-cyan-100' : 'text-slate-500'">
-            {{ ticket.name }}
-          </p>
-          <p class="mt-4 font-display text-4xl font-extrabold">
-            Rp{{ ticket.price.toLocaleString('id-ID') }}
-          </p>
-          <p class="mt-2 text-sm" :class="ticket.featured ? 'text-cyan-100' : 'text-slate-500'">
-            {{ ticket.age }}
-          </p>
-          <div class="my-7 h-px" :class="ticket.featured ? 'bg-white/20' : 'bg-slate-100'"></div>
-          <p
-            v-for="feature in ticket.features"
-            :key="feature"
-            class="flex gap-3 text-sm"
-            :class="
-              ticket.featured ? 'mt-4 text-white first:mt-0' : 'mt-4 text-slate-600 first:mt-0'
-            "
-          >
-            <iconify-icon
-              icon="lucide:check"
-              class="mt-0.5"
-              :class="ticket.featured ? 'text-cyan-200' : 'text-aqua'"
-            ></iconify-icon>
-            {{ feature }}
-          </p>
-          <a
-            href="#"
-            class="mt-8 flex min-h-12 items-center justify-center rounded-full font-bold transition-all hover:shadow-lg"
-            :class="
-              ticket.featured
-                ? 'bg-white text-ocean hover:bg-cyan-100'
-                : 'border-2 border-aqua text-ocean hover:bg-aqua hover:text-white'
-            "
-            @click.prevent="window.navigateTo('select-ticket')"
-            >Pilih Tiket</a
-          >
-        </article>
+            <div>
+              <p class="home-display text-2xl font-extrabold tracking-[-.03em]">{{ ticket.name }}</p>
+              <p class="mt-1 text-sm text-ink/70">{{ ticket.days }}</p>
+              <p class="mt-3 flex items-center gap-2 text-xs font-semibold text-pool">
+                <iconify-icon icon="lucide:calendar-check" class="text-sm"></iconify-icon>
+                Berlaku sesuai hari yang dipilih
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-end justify-between gap-5 sm:flex-col sm:items-end">
+              <div class="text-right">
+                <p class="text-xs font-bold uppercase tracking-[.16em] text-ink/70">Per orang</p>
+                <p class="home-display mt-1 text-3xl font-extrabold leading-none tracking-[-.04em] sm:text-4xl">
+                  Rp{{ ticket.price.toLocaleString('id-ID') }}
+                </p>
+              </div>
+              <button
+                type="button"
+                :aria-label="`Pilih tiket ${ticket.name}`"
+                class="flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white transition hover:bg-pool focus-visible:outline-pool"
+                @click="window.selectTicketType(ticket.type)"
+              >
+                Pilih
+                <iconify-icon icon="lucide:arrow-up-right" class="text-base"></iconify-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-start gap-3 rounded-2xl bg-seafoam p-4 text-sm leading-6 text-ink/75">
+            <iconify-icon icon="lucide:baby" class="mt-0.5 text-lg text-pool"></iconify-icon>
+            <p>
+              <strong class="font-bold text-ink">Anak di bawah 85 cm gratis.</strong>
+              Tiket berbayar berlaku per orang. Pilih tiket dulu, lalu masuk saat checkout.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </section>

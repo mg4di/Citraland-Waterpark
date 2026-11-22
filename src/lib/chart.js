@@ -52,7 +52,7 @@ export function areaChart(values, options = {}) {
 
   const numbers = values.map((value) => Math.max(0, Number(value) || 0));
   if (!numbers.length || numbers.every((value) => value === 0)) {
-    return `<div class="flex h-full min-h-40 flex-col items-center justify-center gap-2 text-center text-sm text-slate-400">
+    return `<div class="flex h-full min-h-40 flex-col items-center justify-center gap-2 text-center text-sm text-slate-500">
       <iconify-icon icon="lucide:chart-no-axes-column" class="text-2xl"></iconify-icon>
       <span>${escapeHtml(emptyLabel)}</span>
     </div>`;
@@ -132,7 +132,7 @@ export function barChart(values, labels, options = {}) {
   );
   const flattened = series.flat();
   if (!flattened.length || flattened.every((value) => value === 0)) {
-    return `<div class="flex h-full min-h-40 flex-col items-center justify-center gap-2 text-center text-sm text-slate-400">
+    return `<div class="flex h-full min-h-40 flex-col items-center justify-center gap-2 text-center text-sm text-slate-500">
       <iconify-icon icon="lucide:chart-no-axes-column" class="text-2xl"></iconify-icon>
       <span>${escapeHtml(emptyLabel)}</span>
     </div>`;
@@ -186,7 +186,7 @@ const DONUT_COLORS = {
   pending: '#f59e0b',
   failed: '#f43f5e',
   cancelled: '#94a3b8',
-  refunded: '#8b5cf6',
+  refunded: '#007884',
   weekday: '#00BCD4',
   weekend: '#0097A7',
 };

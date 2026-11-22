@@ -121,10 +121,10 @@ Nama file gambar yang disiapkan:
 
 ```text
 public/images/waterpark-hero.webp
-public/images/gallery-pirate-pool.jpg
-public/images/gallery-water-slide.jpg
-public/images/gallery-entrance.jpg
-public/images/gallery-pirate-statue.jpg
+public/images/gallery-pirate-pool.webp
+public/images/gallery-water-slide.webp
+public/images/gallery-entrance.webp
+public/images/gallery-pirate-statue.webp
 ```
 
 File foto default website menggunakan path lokal. Foto tambahan yang diunggah lewat dashboard admin tetap dilayani Supabase Storage. Jalankan kembali `supabase/seed.sql` di SQL Editor untuk memperbarui entri foto default yang sudah ada.
