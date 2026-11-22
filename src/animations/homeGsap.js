@@ -72,7 +72,8 @@ export function initHomeGsap() {
         scrollTrigger: {
           trigger: element,
           start: 'top 95%',
-          once: true,
+          once: false,
+          toggleActions: 'play reset play reset',
         },
       });
     });
@@ -86,7 +87,8 @@ export function initHomeGsap() {
         scrollTrigger: {
           trigger: element,
           start: 'top 95%',
-          once: true,
+          once: false,
+          toggleActions: 'play reset play reset',
         },
       });
     });
