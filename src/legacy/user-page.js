@@ -1078,7 +1078,6 @@ export function initializeUserPage() {
     const button = document.getElementById('download-ticket-btn');
     const text = document.getElementById('download-ticket-text');
     const icon = document.getElementById('download-ticket-icon');
-    const spinner = document.getElementById('download-ticket-spinner');
     if (button) button.disabled = busy;
     if (text) text.textContent = busy ? 'Menyiapkan PDF...' : 'Unduh e-ticket';
     icon?.classList.toggle('hidden', busy);

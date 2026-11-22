@@ -2228,8 +2228,7 @@ onBeforeUnmount(() => disposeHomeGsap?.());
                   class="btn-primary inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-aqua px-6 text-sm font-bold text-ink transition hover:bg-ocean disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <iconify-icon icon="lucide:download" id="download-ticket-icon"></iconify-icon
-                  ><span id="download-ticket-text">Unduh e-ticket</span
-                  ><span id="download-ticket-spinner" class="loading-spinner hidden"></span>
+                  ><span id="download-ticket-text">Unduh e-ticket</span>
                 </button>
               </div>
             </div>
