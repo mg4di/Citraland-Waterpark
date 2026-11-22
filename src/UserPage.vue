@@ -51,12 +51,13 @@ onBeforeUnmount(() => disposeHomeGsap?.());
             >
           </a>
 
-          <nav class="hidden items-center gap-7 text-sm font-semibold text-white/75 lg:flex" aria-label="Navigasi utama">
+          <nav class="relative hidden items-center gap-7 text-sm font-semibold text-white/75 lg:flex" aria-label="Navigasi utama">
             <a href="#" data-nav-section="home" @click.prevent="window.goToSection('home')" class="home-nav-link is-active">Beranda</a>
             <a href="#" data-nav-section="harga" @click.prevent="window.goToSection('harga')" class="home-nav-link">Harga</a>
             <a href="#" data-nav-section="fasilitas" @click.prevent="window.goToSection('fasilitas')" class="home-nav-link">Fasilitas</a>
             <a href="#" data-nav-section="info" @click.prevent="window.goToSection('info')" class="home-nav-link">Info</a>
             <a href="#" data-nav-section="galeri" @click.prevent="window.goToSection('galeri')" class="home-nav-link">Galeri</a>
+            <span class="home-nav-indicator" aria-hidden="true"></span>
           </nav>
 
           <div class="flex items-center gap-2">
@@ -182,10 +183,15 @@ onBeforeUnmount(() => disposeHomeGsap?.());
                 </div>
               </div>
 
-              <aside
-                data-gsap-hero="ticket" class="home-ticket relative mx-auto hidden w-full max-w-sm rotate-1 bg-sand p-6 text-ink shadow-2xl shadow-deep/50 sm:block sm:p-7 lg:mx-0 lg:justify-self-end"
-                aria-label="Ringkasan harga tiket"
-              >
+              <div data-gsap-hero="ticket" class="mx-auto hidden w-full max-w-sm sm:block lg:mx-0 lg:justify-self-end">
+                <aside
+                  class="home-ticket relative w-full bg-sand p-6 text-ink shadow-2xl shadow-deep/50 sm:p-7"
+                  aria-label="Ringkasan harga tiket"
+                >
+                <!--
+                  From Uiverse.io by mihocsaszilard - https://uiverse.io/mihocsaszilard/rare-fox-73
+                  MIT License, Copyright (c) mihocsaszilard (Mihocsa Szilard)
+                -->
                 <div class="flex items-start justify-between gap-4 border-b border-ink/15 pb-4">
                   <div>
                     <p class="text-xs font-bold uppercase tracking-[.2em] text-ink/70">Denpasar, Bali</p>
@@ -226,7 +232,8 @@ onBeforeUnmount(() => disposeHomeGsap?.());
                   <iconify-icon icon="lucide:arrow-right" class="text-base"></iconify-icon>
                 </a>
                 <p class="mt-3 text-center text-xs text-ink/70">Senin tutup · Harga per orang</p>
-              </aside>
+                </aside>
+              </div>
             </div>
 
             <div data-gsap-hero="facts" class="mt-12 grid gap-3 border-t border-white/15 pt-6 text-sm text-white/75 sm:grid-cols-3">
@@ -366,24 +373,26 @@ onBeforeUnmount(() => disposeHomeGsap?.());
               </div>
             </div>
 
-            <figure data-gsap-reveal class="relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-sand p-7 text-ink sm:p-9">
-              <iconify-icon icon="lucide:quote" class="text-4xl text-ink/20"></iconify-icon>
-              <blockquote class="home-display mt-8 text-3xl font-extrabold leading-tight tracking-[-.04em] sm:text-4xl">
-                “Great waterpark for kids”
-              </blockquote>
-              <figcaption class="mt-8 border-t border-ink/15 pt-5 text-sm leading-6 text-ink/70">
-                Judul ulasan di Tripadvisor. Bukan rating perorangan yang kami klaim.
-                <a
-                  href="https://www.tripadvisor.co.id/Search?q=Citraland%20Waterpark%20Denpasar"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="mt-3 flex w-fit items-center gap-2 font-bold text-ink underline decoration-ink/30 underline-offset-4 transition hover:decoration-ink"
-                >
-                  Baca di Tripadvisor
-                  <iconify-icon icon="lucide:arrow-up-right" class="text-base"></iconify-icon>
-                </a>
-              </figcaption>
-            </figure>
+            <div data-gsap-reveal class="relative min-w-0">
+              <figure class="review-quote-card relative flex h-full flex-col justify-between overflow-hidden rounded-[1.75rem] bg-sand p-7 text-ink sm:p-9">
+                <iconify-icon icon="lucide:quote" class="text-4xl text-ink/20"></iconify-icon>
+                <blockquote class="home-display mt-8 text-3xl font-extrabold leading-tight tracking-[-.04em] sm:text-4xl">
+                  “Great waterpark for kids”
+                </blockquote>
+                <figcaption class="mt-8 border-t border-ink/15 pt-5 text-sm leading-6 text-ink/70">
+                  Judul ulasan di Tripadvisor. Bukan rating perorangan yang kami klaim.
+                  <a
+                    href="https://www.tripadvisor.co.id/Search?q=Citraland%20Waterpark%20Denpasar"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="mt-3 flex w-fit items-center gap-2 font-bold text-ink underline decoration-ink/30 underline-offset-4 transition hover:decoration-ink"
+                  >
+                    Baca di Tripadvisor
+                    <iconify-icon icon="lucide:arrow-up-right" class="text-base"></iconify-icon>
+                  </a>
+                </figcaption>
+              </figure>
+            </div>
           </div>
         </section>
 

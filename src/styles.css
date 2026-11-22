@@ -1271,21 +1271,19 @@ select {
 .home-nav-link.is-active {
   color: #ffffff;
 }
-.home-nav-link::after {
-  content: '';
+.home-nav-indicator {
   position: absolute;
-  right: 0;
   bottom: 0;
   left: 0;
+  width: 0;
   height: 2px;
+  border-radius: 999px;
   background: #00bcd4;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.home-nav-link:hover::after,
-.home-nav-link.is-active::after {
-  transform: scaleX(1);
+  transform: translateX(0);
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 .mobile-menu nav > a {
   font-family: 'Bricolage Grotesque', 'Plus Jakarta Sans', sans-serif;
@@ -1303,23 +1301,87 @@ select {
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
 }
+
+/* Review quote card: inset black border and a subtle zoom on hover. */
+.review-quote-card {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.review-quote-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 3px solid transparent;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: border-color 0.28s ease;
+}
+
+.review-quote-card:hover,
+.review-quote-card:focus-within {
+  transform: scale(1.03);
+}
+
+.review-quote-card:hover::after,
+.review-quote-card:focus-within::after {
+  border-color: #000;
+}
+/* Hover animation adapted from Uiverse.io by mihocsaszilard. */
 .home-ticket {
   border-radius: 1.35rem;
   box-shadow:
     0 28px 60px -24px rgba(0, 0, 0, 0.65),
     inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+  transform: rotate(1deg);
+  position: relative;
+  transition:
+    transform 300ms ease-in,
+    box-shadow 300ms ease-in;
 }
-.home-ticket.home-rise {
-  animation-name: homeTicketRise;
+
+.home-ticket:hover,
+.home-ticket:focus-within {
+  transform: rotateZ(1deg) rotateY(10deg) scale(1.1);
+  box-shadow: 0 5em 2em #111;
 }
-@keyframes homeTicketRise {
-  from {
-    transform: translateY(22px) rotate(1deg);
+
+/* Moving light band from the Uiverse card, kept inside the ticket radius. */
+.home-ticket::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(0, 0, 0, 1) 42%,
+      rgba(255, 255, 255, 1) 47%,
+      rgba(255, 255, 255, 1) 51%,
+      rgba(0, 0, 0, 1) 52%
+    );
+  background-size: 300% 300%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.home-ticket:hover::after,
+.home-ticket:focus-within::after {
+  opacity: 0.05;
+  animation: ticketSheen 4s linear infinite;
+}
+
+@keyframes ticketSheen {
+  0% {
+    background-position: -100% -100%;
   }
-  to {
-    transform: translateY(0) rotate(1deg);
+  20%,
+  100% {
+    background-position: 100% 100%;
   }
 }
+
 .home-shell [tabindex='-1']:focus {
   outline: none;
 }
@@ -1345,33 +1407,12 @@ select {
 .home-ticket-tear::after {
   right: -12px;
 }
-.home-rise {
-  animation: homeRise 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.home-rise-2 {
-  animation-delay: 0.09s;
-}
-.home-rise-3 {
-  animation-delay: 0.18s;
-}
-.home-rise-4 {
-  animation-delay: 0.27s;
-}
-@keyframes homeRise {
-  from {
-    transform: translateY(22px);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
 @media (min-width: 640px) {
   .home-ticket-tear {
     margin-right: -1.75rem;
     margin-left: -1.75rem;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

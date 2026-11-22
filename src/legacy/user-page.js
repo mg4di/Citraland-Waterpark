@@ -171,6 +171,10 @@ export function initializeUserPage() {
       targetEl.classList.add('active');
       appState.currentPage = page;
       history.pushState(null, '', '#' + page);
+      if (page === 'home') {
+        initSectionSpy();
+        initScrollReveal();
+      }
       return;
     }
 
@@ -1745,6 +1749,7 @@ export function initializeUserPage() {
 
   // ===== HOME SECTION NAV STATE =====
   let homeSpyHandler = null;
+  let homeSpyResizeHandler = null;
   function initSectionSpy() {
     const links = Array.from(document.querySelectorAll('[data-nav-section]'));
     if (!links.length) return;
@@ -1753,14 +1758,31 @@ export function initializeUserPage() {
       .filter((id) => id && id !== 'home')
       .map((id) => document.getElementById(id))
       .filter(Boolean);
+    const nav = document.querySelector('nav[aria-label="Navigasi utama"]');
+    const indicator = nav?.querySelector('.home-nav-indicator');
+    const navLinks = links.filter((link) => nav?.contains(link));
+
+    const moveIndicator = () => {
+      if (!indicator || !nav) return;
+      const activeLink = navLinks.find((link) => link.classList.contains('is-active'));
+      if (!activeLink) {
+        indicator.style.width = '0px';
+        return;
+      }
+      indicator.style.width = `${activeLink.offsetWidth}px`;
+      indicator.style.transform = `translateX(${activeLink.offsetLeft}px)`;
+    };
 
     const setActive = (id) => {
+      let changed = false;
       for (const link of links) {
         const active = link.dataset.navSection === id;
+        if (link.classList.contains('is-active') !== active) changed = true;
         link.classList.toggle('is-active', active);
         if (active) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
       }
+      if (changed) requestAnimationFrame(moveIndicator);
     };
 
     if (homeSpyHandler) window.removeEventListener('scroll', homeSpyHandler);
@@ -1774,7 +1796,12 @@ export function initializeUserPage() {
       setActive(current);
     };
     window.addEventListener('scroll', homeSpyHandler, { passive: true });
+
+    if (homeSpyResizeHandler) window.removeEventListener('resize', homeSpyResizeHandler);
+    homeSpyResizeHandler = () => requestAnimationFrame(moveIndicator);
+    window.addEventListener('resize', homeSpyResizeHandler, { passive: true });
     homeSpyHandler();
+    requestAnimationFrame(moveIndicator);
   }
 
   // ===== COUNTER ANIMATION =====

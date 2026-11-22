@@ -86,7 +86,7 @@ onBeforeUnmount(() => unsubscribe?.());
       </div>
 
       <div class="min-w-0 scroll-reveal">
-        <div class="home-loket relative min-w-0 overflow-hidden rounded-[1.75rem] bg-white p-6 shadow-[0_28px_70px_-35px_rgba(15,23,42,.35)] ring-1 ring-ink/5 sm:p-8">
+        <div class="home-loket relative min-w-0 scroll-mt-24 overflow-hidden rounded-[1.75rem] bg-white p-6 shadow-[0_28px_70px_-35px_rgba(15,23,42,.35)] ring-1 ring-ink/5 sm:p-8">
           <div data-gsap-item class="flex items-start justify-between gap-4 border-b border-ink/10 pb-6">
             <div>
               <p class="text-xs font-bold uppercase tracking-[.22em] text-ink/70">Loket tiket</p>
