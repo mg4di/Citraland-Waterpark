@@ -60,8 +60,9 @@ onBeforeUnmount(() => unsubscribe?.());
 <template>
   <section id="fasilitas" class="scroll-mt-24 bg-white px-5 py-20 lg:px-8 lg:py-28">
     <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[.95fr_1.05fr] lg:items-start lg:gap-20">
-      <div class="scroll-reveal lg:sticky lg:top-24">
+      <div data-gsap-reveal class="lg:sticky lg:top-24">
         <figure
+          data-gsap-parallax
           class="relative overflow-hidden rounded-[1.75rem] bg-seafoam"
           :style="{
             backgroundImage: `url('${facilityImage.src}')`,
@@ -100,10 +101,10 @@ onBeforeUnmount(() => unsubscribe?.());
       </div>
 
       <div class="scroll-reveal">
-        <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
+        <h2 data-gsap-item class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
           Basah di<br />setiap sudut.
         </h2>
-        <p class="mt-5 max-w-lg leading-7 text-ink/70">
+        <p data-gsap-item class="mt-5 max-w-lg leading-7 text-ink/70">
           Dari kapal bajak laut sampai kolam arus—pilih cara bermain air yang paling cocok untuk
           keluarga.
         </p>
@@ -112,6 +113,7 @@ onBeforeUnmount(() => unsubscribe?.());
           <article
             v-for="facility in facilities"
             :key="facility.title"
+            data-gsap-item
             class="grid grid-cols-[auto_1fr] gap-4 border-b border-ink/10 py-6 first:border-t"
             role="listitem"
           >
@@ -142,8 +144,9 @@ onBeforeUnmount(() => unsubscribe?.());
 
         <a
           href="#"
+          data-gsap-item
           @click.prevent="window.goToSection('galeri')"
-          class="mt-8 inline-flex min-h-11 items-center gap-2 border-b border-ink/30 pb-1 text-sm font-bold text-ink transition hover:border-ink"
+          class="mt-8 inline-flex min-h-11 items-center gap-2 border-b border-ink/30 pb-1 text-sm font-bold text-ink transition-colors hover:border-ink"
         >
           Lihat foto wahana
           <iconify-icon icon="lucide:arrow-up-right" class="text-base"></iconify-icon>

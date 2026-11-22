@@ -1497,3 +1497,13 @@ p,
 li {
   text-wrap: pretty;
 }
+
+/* GSAP targets: keep inline highlighted hero line transformable. */
+#page-home .home-hero h1 .text-sun {
+  display: inline-block;
+}
+#page-home [data-gsap-hero="image"],
+#page-home [data-gsap-hero="title"],
+#page-home [data-gsap-hero="ticket"] {
+  will-change: transform, opacity;
+}

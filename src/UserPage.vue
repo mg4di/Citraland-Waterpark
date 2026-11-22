@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue';
 import { initializeUserPage } from './legacy/user-page.js';
 import FacilitySection from './components/user/FacilitySection.vue';
 import GallerySection from './components/user/GallerySection.vue';
@@ -7,10 +7,18 @@ import TicketPricingSection from './components/user/TicketPricingSection.vue';
 import TicketSelectionSection from './components/user/TicketSelectionSection.vue';
 import UserFooter from './components/user/UserFooter.vue';
 import { waterparkHeroImage } from './data/waterparkImages.js';
+import { initHomeGsap } from './animations/homeGsap.js';
 
 const window = globalThis.window;
 
-onMounted(initializeUserPage);
+let disposeHomeGsap;
+
+onMounted(() => {
+  initializeUserPage();
+  disposeHomeGsap = initHomeGsap();
+});
+
+onBeforeUnmount(() => disposeHomeGsap?.());
 </script>
 
 <template>
@@ -21,7 +29,7 @@ onMounted(initializeUserPage);
   <div id="page-home" class="page active">
     <div class="home-shell home-body min-h-screen bg-sand text-ink">
       <!-- Header -->
-      <header id="mainHeader" class="home-header fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+      <header id="mainHeader" data-gsap-hero="header" class="home-header fixed top-0 left-0 right-0 z-50 transition-all duration-500">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
           <a
             href="#"
@@ -126,6 +134,7 @@ onMounted(initializeUserPage);
             height="711"
             fetchpriority="high"
             decoding="async"
+            data-gsap-hero="image"
             class="absolute inset-0 h-full w-full object-cover"
           />
           <div class="absolute inset-0 bg-slate-950/55"></div>
@@ -136,13 +145,13 @@ onMounted(initializeUserPage);
           <div class="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-end px-5 pb-28 pt-32 lg:px-8 lg:pb-14">
             <div class="grid items-end gap-12 lg:grid-cols-[1.3fr_.7fr] lg:gap-16">
               <div class="max-w-3xl">
-                <h1 class="home-display home-rise text-[clamp(2.8rem,7.6vw,6.5rem)] font-extrabold leading-[.88] tracking-[-.04em]">
+                <h1 data-gsap-hero="title" class="home-display text-[clamp(2.8rem,7.6vw,6.5rem)] font-extrabold leading-[.88] tracking-[-.04em]">
                   Bajak laut,<br />ombak,<br /><span class="text-sun">seru seharian.</span>
                 </h1>
-                <p class="home-rise home-rise-2 mt-7 max-w-xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
+                <p data-gsap-hero="copy" class="mt-7 max-w-xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
                   Waterpark keluarga di Denpasar Utara. Tiket mulai <span id="hero-starting-price">Rp35.000</span>, anak di bawah 85 cm gratis.
                 </p>
-                <div class="home-rise home-rise-3 mt-8 flex flex-col gap-3 sm:flex-row">
+                <div data-gsap-hero="actions" class="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
                     href="#"
                     @click.prevent="window.goToSection('harga')"
@@ -160,7 +169,7 @@ onMounted(initializeUserPage);
                     Lihat suasana
                   </a>
                 </div>
-                <div class="home-rise home-rise-4 mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/75">
+                <div data-gsap-hero="trust" class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/75">
                   <span class="flex items-center gap-2">
                     <iconify-icon icon="mdi:star" class="text-base text-amber-300"></iconify-icon>
                     4,5/5 <span class="text-white/60">·</span> 3.611 ulasan Google
@@ -174,7 +183,7 @@ onMounted(initializeUserPage);
               </div>
 
               <aside
-                class="home-ticket home-rise home-rise-3 relative mx-auto hidden w-full max-w-sm rotate-1 bg-sand p-6 text-ink shadow-2xl shadow-deep/50 sm:block sm:p-7 lg:mx-0 lg:justify-self-end"
+                data-gsap-hero="ticket" class="home-ticket relative mx-auto hidden w-full max-w-sm rotate-1 bg-sand p-6 text-ink shadow-2xl shadow-deep/50 sm:block sm:p-7 lg:mx-0 lg:justify-self-end"
                 aria-label="Ringkasan harga tiket"
               >
                 <div class="flex items-start justify-between gap-4 border-b border-ink/15 pb-4">
@@ -220,7 +229,7 @@ onMounted(initializeUserPage);
               </aside>
             </div>
 
-            <div class="mt-12 grid gap-3 border-t border-white/15 pt-6 text-sm text-white/75 sm:grid-cols-3">
+            <div data-gsap-hero="facts" class="mt-12 grid gap-3 border-t border-white/15 pt-6 text-sm text-white/75 sm:grid-cols-3">
               <p class="flex items-center gap-2">
                 <iconify-icon icon="lucide:map-pin" class="text-base text-sun"></iconify-icon>
                 Denpasar Utara, Bali
@@ -247,9 +256,9 @@ onMounted(initializeUserPage);
         <FacilitySection />
 
         <!-- Info kunjungan -->
-        <section id="info" class="scroll-mt-24 bg-seafoam px-5 py-20 lg:px-8 lg:py-28">
+        <section id="info" data-gsap-section="info" class="scroll-mt-24 bg-seafoam px-5 py-20 lg:px-8 lg:py-28">
           <div class="mx-auto grid min-w-0 max-w-7xl gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
-            <div class="min-w-0 self-start lg:sticky lg:top-28">
+            <div data-gsap-reveal class="min-w-0 self-start lg:sticky lg:top-28">
               <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
                 Sebelum berangkat,<br />ini yang perlu kamu tahu.
               </h2>
@@ -268,14 +277,14 @@ onMounted(initializeUserPage);
             </div>
 
             <div class="border-t border-ink/20">
-              <div class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
+              <div data-gsap-item class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-ink/70">Jam buka</p>
                 <div>
                   <p class="font-semibold">Selasa–Minggu, 09.00–18.00 WITA</p>
                   <p class="mt-1 text-sm text-ink/70">Senin tutup.</p>
                 </div>
               </div>
-              <div class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
+              <div data-gsap-item class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-ink/70">Lokasi</p>
                 <div>
                   <p class="font-semibold">Perumahan CitraLand, Denpasar Utara</p>
@@ -284,14 +293,14 @@ onMounted(initializeUserPage);
                   </p>
                 </div>
               </div>
-              <div class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
+              <div data-gsap-item class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-ink/70">Anak</p>
                 <div>
                   <p class="font-semibold">Di bawah 85 cm gratis</p>
                   <p class="mt-1 text-sm text-ink/70">Tiket berbayar berlaku per orang.</p>
                 </div>
               </div>
-              <div class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
+              <div data-gsap-item class="grid gap-3 border-b border-ink/20 py-6 sm:grid-cols-[10rem_1fr]">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-ink/70">Tiket</p>
                 <div class="flex flex-wrap items-end justify-between gap-4">
                   <div>
@@ -315,9 +324,9 @@ onMounted(initializeUserPage);
         <GallerySection />
 
         <!-- Ulasan -->
-        <section id="ulasan" class="scroll-mt-24 bg-ink px-5 py-20 text-white lg:px-8 lg:py-28">
+        <section id="ulasan" data-gsap-section="ulasan" class="scroll-mt-24 bg-ink px-5 py-20 text-white lg:px-8 lg:py-28">
           <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
-            <div>
+            <div data-gsap-reveal>
               <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
                 Kata mereka<br />yang sudah basah.
               </h2>
@@ -330,7 +339,8 @@ onMounted(initializeUserPage);
                   href="https://goo.gl/maps/SkPFYkq98TpqHFzL9"
                   target="_blank"
                   rel="noreferrer"
-                  class="group rounded-2xl border border-white/15 p-5 transition hover:border-white/35 hover:bg-white/5"
+                  data-gsap-item
+                  class="group rounded-2xl border border-white/15 p-5 transition-colors hover:border-white/35 hover:bg-white/5"
                 >
                   <div class="flex items-baseline gap-1">
                     <span class="home-display text-4xl font-extrabold text-sun">4,5</span>
@@ -343,7 +353,8 @@ onMounted(initializeUserPage);
                   href="https://www.tripadvisor.co.id/Search?q=Citraland%20Waterpark%20Denpasar"
                   target="_blank"
                   rel="noreferrer"
-                  class="group rounded-2xl border border-white/15 p-5 transition hover:border-white/35 hover:bg-white/5"
+                  data-gsap-item
+                  class="group rounded-2xl border border-white/15 p-5 transition-colors hover:border-white/35 hover:bg-white/5"
                 >
                   <div class="flex items-baseline gap-1">
                     <span class="home-display text-4xl font-extrabold text-sun">4,3</span>
@@ -355,7 +366,7 @@ onMounted(initializeUserPage);
               </div>
             </div>
 
-            <figure class="relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-sand p-7 text-ink sm:p-9">
+            <figure data-gsap-reveal class="relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] bg-sand p-7 text-ink sm:p-9">
               <iconify-icon icon="lucide:quote" class="text-4xl text-ink/20"></iconify-icon>
               <blockquote class="home-display mt-8 text-3xl font-extrabold leading-tight tracking-[-.04em] sm:text-4xl">
                 “Great waterpark for kids”
@@ -377,16 +388,17 @@ onMounted(initializeUserPage);
         </section>
 
         <!-- Closing CTA -->
-        <section class="bg-sun px-5 py-16 text-ink lg:px-8">
+        <section data-gsap-section="closing" class="bg-sun px-5 py-16 text-ink lg:px-8">
           <div class="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 class="home-display text-4xl font-extrabold tracking-[-.04em] sm:text-5xl">Siap basah-basahan?</h2>
-              <p class="mt-2 text-ink/80">Pilih hari, tambah tiket, lalu masuk saat checkout.</p>
+              <h2 data-gsap-item class="home-display text-4xl font-extrabold tracking-[-.04em] sm:text-5xl">Siap basah-basahan?</h2>
+              <p data-gsap-item class="mt-2 text-ink/80">Pilih hari, tambah tiket, lalu masuk saat checkout.</p>
             </div>
             <a
               href="#"
+              data-gsap-item
               @click.prevent="window.goToSection('harga')"
-              class="home-focus-ink inline-flex min-h-14 w-fit items-center justify-center gap-3 rounded-full bg-ink px-7 text-sm font-bold text-white transition hover:bg-pool"
+              class="home-focus-ink inline-flex min-h-14 w-fit items-center justify-center gap-3 rounded-full bg-ink px-7 text-sm font-bold text-white transition-colors hover:bg-pool"
             >
               Pilih tiket
               <iconify-icon icon="lucide:arrow-up-right" class="text-lg"></iconify-icon>

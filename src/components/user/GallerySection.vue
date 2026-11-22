@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
 <template>
   <section id="galeri" class="scroll-mt-24 bg-sand px-5 py-20 lg:px-8 lg:py-28">
     <div class="mx-auto grid min-w-0 max-w-7xl gap-10 lg:grid-cols-[.62fr_1.38fr] lg:gap-16">
-      <div class="min-w-0 self-start lg:sticky lg:top-28">
+      <div data-gsap-reveal class="min-w-0 self-start lg:sticky lg:top-28">
         <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
           Suasana<br />kolam.
         </h2>
@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
-      <div class="min-w-0">
+      <div data-gsap-reveal class="min-w-0">
         <div
           id="gallery-track"
           ref="track"

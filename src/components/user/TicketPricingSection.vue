@@ -49,7 +49,7 @@ onBeforeUnmount(() => unsubscribe?.());
 <template>
   <section id="harga" class="scroll-mt-24 bg-sand px-5 py-20 lg:px-8 lg:py-28">
     <div class="mx-auto grid min-w-0 max-w-7xl gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
-      <div class="min-w-0 scroll-reveal self-start lg:sticky lg:top-28">
+      <div data-gsap-reveal class="min-w-0 self-start lg:sticky lg:top-28">
         <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
           Satu harga,<br />seharian main.
         </h2>
@@ -87,7 +87,7 @@ onBeforeUnmount(() => unsubscribe?.());
 
       <div class="min-w-0 scroll-reveal">
         <div class="home-loket relative min-w-0 overflow-hidden rounded-[1.75rem] bg-white p-6 shadow-[0_28px_70px_-35px_rgba(15,23,42,.35)] ring-1 ring-ink/5 sm:p-8">
-          <div class="flex items-start justify-between gap-4 border-b border-ink/10 pb-6">
+          <div data-gsap-item class="flex items-start justify-between gap-4 border-b border-ink/10 pb-6">
             <div>
               <p class="text-xs font-bold uppercase tracking-[.22em] text-ink/70">Loket tiket</p>
               <p class="home-display mt-1 text-3xl font-extrabold tracking-[-.04em]">Harga resmi</p>
@@ -100,6 +100,7 @@ onBeforeUnmount(() => unsubscribe?.());
           <div
             v-for="ticket in tickets"
             :key="ticket.type"
+            data-gsap-item
             class="grid gap-5 border-b border-ink/10 py-6 sm:grid-cols-[1fr_auto] sm:items-center"
           >
             <div>
@@ -130,7 +131,7 @@ onBeforeUnmount(() => unsubscribe?.());
             </div>
           </div>
 
-          <div class="mt-6 flex items-start gap-3 rounded-2xl bg-seafoam p-4 text-sm leading-6 text-ink/75">
+          <div data-gsap-item class="mt-6 flex items-start gap-3 rounded-2xl bg-seafoam p-4 text-sm leading-6 text-ink/75">
             <iconify-icon icon="lucide:baby" class="mt-0.5 text-lg text-pool"></iconify-icon>
             <p>
               <strong class="font-bold text-ink">Anak di bawah 85 cm gratis.</strong>

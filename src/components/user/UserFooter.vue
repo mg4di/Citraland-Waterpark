@@ -5,7 +5,7 @@ const window = globalThis.window;
 <template>
   <footer class="bg-deep px-5 pb-28 pt-14 text-white lg:px-8 lg:pb-14">
     <div class="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.2fr_1fr_auto]">
-      <div>
+      <div data-gsap-reveal>
         <a
           href="#"
           @click.prevent="window.goToSection('home')"
@@ -35,7 +35,7 @@ const window = globalThis.window;
         <p class="mt-1 text-xs text-white/60">Senin tutup.</p>
       </div>
 
-      <div>
+      <div data-gsap-reveal>
         <h3 class="text-sm font-bold text-white">Kontak</h3>
         <div class="mt-4 space-y-3 text-sm leading-6 text-white/65">
           <p class="flex items-start gap-3">
@@ -68,7 +68,7 @@ const window = globalThis.window;
         </div>
       </div>
 
-      <div>
+      <div data-gsap-reveal>
         <h3 class="text-sm font-bold text-white">Ikuti keseruan kami</h3>
         <div class="mt-4 flex gap-3">
           <a
@@ -107,7 +107,7 @@ const window = globalThis.window;
       </div>
     </div>
 
-    <div class="mx-auto mt-10 flex max-w-7xl flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
+    <div data-gsap-reveal class="mx-auto mt-10 flex max-w-7xl flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
       <p>© 2026 Citraland Waterpark Denpasar</p>
       <p>Denpasar Utara, Bali</p>
     </div>
