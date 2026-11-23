@@ -1335,13 +1335,32 @@ select {
     inset 0 0 0 1px rgba(15, 23, 42, 0.08);
   transform: rotate(1deg);
   position: relative;
+  animation: ticketIdleFloat 7s ease-in-out infinite;
   transition:
     transform 300ms ease-in,
     box-shadow 300ms ease-in;
 }
 
+/* Gentle buoy motion while idle; the existing hover tilt takes over on hover. */
+@keyframes ticketIdleFloat {
+  0%,
+  100% {
+    transform: rotate(1deg) translate3d(0, 0, 0);
+  }
+  22% {
+    transform: rotate(-0.6deg) translate3d(0, -9px, 0);
+  }
+  50% {
+    transform: rotate(1.35deg) translate3d(0, 4px, 0);
+  }
+  76% {
+    transform: rotate(0.2deg) translate3d(0, -5px, 0);
+  }
+}
+
 .home-ticket:hover,
 .home-ticket:focus-within {
+  animation: none;
   transform: rotateZ(1deg) rotateY(10deg) scale(1.1);
   box-shadow: 0 5em 2em #111;
 }
@@ -1429,6 +1448,10 @@ select {
   .scroll-reveal {
     opacity: 1 !important;
     transform: none !important;
+  }
+  .home-ticket {
+    animation: none;
+    transform: rotate(1deg);
   }
 }
 
