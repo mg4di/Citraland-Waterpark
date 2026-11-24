@@ -335,7 +335,7 @@ onBeforeUnmount(() => disposeHomeGsap?.());
           <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
             <div data-gsap-reveal>
               <h2 class="home-display text-4xl font-extrabold leading-[.95] tracking-[-.04em] sm:text-5xl">
-                Kata mereka<br />yang sudah basah.
+                Kata mereka<br />yang sudah berkunjung.
               </h2>
               <p class="mt-5 max-w-md leading-7 text-white/70">
                 Rating publik, bukan klaim kami. Ulasan bisa berbeda-beda—baca konteks lengkapnya di sumbernya.

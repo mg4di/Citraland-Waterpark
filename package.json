@@ -23,5 +23,9 @@
     "supabase": "^3.0.0",
     "tailwindcss": "^4.3.3",
     "vite": "^6.1.0"
+  },
+  "allowScripts": {
+    "core-js@3.51.0": true,
+    "esbuild@0.25.12": true
   }
 }

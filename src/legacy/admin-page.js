@@ -1530,10 +1530,10 @@ export function initializeAdminPage(onLogout = () => window.location.assign('/ad
   }
 
   // ===================== ANALYTICS PAGE =====================
-  // Jam kunjungan 08.00–16.00 WITA. Setiap check-in dihitung berdasarkan angka
-  // depan jamnya (mis. 08.30 -> jam 08, 09.45 -> jam 09).
-  const VISIT_START_HOUR = 8;
-  const VISIT_END_HOUR = 16;
+  // Jam kunjungan 09.00–17.00 WITA. Setiap check-in dihitung berdasarkan angka
+  // depan jamnya (mis. 09.30 -> jam 09, 10.45 -> jam 10).
+  const VISIT_START_HOUR = 9;
+  const VISIT_END_HOUR = 17;
 
   function renderHeatmap(analytics) {
     const grid = document.getElementById('heatmap-grid');

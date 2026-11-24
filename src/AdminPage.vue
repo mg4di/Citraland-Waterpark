@@ -971,7 +971,7 @@ onBeforeUnmount(() => cleanup?.());
                 <div>
                   <h2 class="font-display text-lg font-bold text-slate-900">Peak Hours Heatmap</h2>
                   <p class="mt-1 text-sm text-slate-500">
-                    Pola kunjungan berdasarkan hari &amp; jam (08.00–16.00 WITA)
+                    Pola kunjungan berdasarkan hari &amp; jam (09.00–17.00 WITA)
                   </p>
                 </div>
                 <span
@@ -985,11 +985,12 @@ onBeforeUnmount(() => cleanup?.());
                   <div
                     class="mb-2 grid grid-cols-[70px_repeat(9,1fr)] gap-1 text-[10px] text-slate-500"
                   >
-                    <span></span><span class="text-center">08</span
-                    ><span class="text-center">09</span><span class="text-center">10</span
+                    <span></span><span class="text-center">09</span
+                    ><span class="text-center">10</span
                     ><span class="text-center">11</span><span class="text-center">12</span
                     ><span class="text-center">13</span><span class="text-center">14</span
-                    ><span class="text-center">15</span><span class="text-center">16</span>
+                    ><span class="text-center">15</span><span class="text-center">16</span
+                    ><span class="text-center">17</span>
                   </div>
                   <div id="heatmap-grid" class="space-y-1 text-[11px]"></div>
                   <div class="mt-4 flex items-center justify-end gap-2 text-[10px] text-slate-500">
